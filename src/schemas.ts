@@ -1,3 +1,5 @@
+import S from 'fluent-json-schema';
+
 export default {
   $id: 'http://graasp.org/apps/',
   definitions: {
@@ -34,3 +36,22 @@ const generateToken = {
 export {
   generateToken
 };
+
+export const updateSchema = S.object()
+  // TODO: .additionalProperties(false) in schemas don't seem to work properly and
+  // are very counter-intuitive. We should change to JTD format (as soon as it is supported)
+  // .additionalProperties(false)
+  .prop(
+    'app',
+    S.object()
+      // .additionalProperties(false)
+      .prop('url', S.string().format('uri'))
+      .prop('settings', S.object())
+      .required(['url'])
+  )
+  .required(['app']);
+
+export const createSchema = S.object()
+  .prop('type', S.const('app'))
+  .prop('extra', updateSchema)
+  .required(['type', 'extra']);

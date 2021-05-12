@@ -21,7 +21,8 @@
   "homepage": "https://github.com/graasp/graasp-apps#readme",
   "dependencies": {
     "fastify-bearer-auth": "^5.1.0",
-    "fastify-jwt": "^2.4.0"
+    "fastify-jwt": "^2.4.0",
+    "fluent-json-schema": "^3.0.0"
   },
   "devDependencies": {
     "@types/eslint": "^7.2.5",
