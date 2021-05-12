@@ -8,7 +8,7 @@ import { IdParam } from 'graasp';
 // local
 import { AppData } from './interfaces/app-data';
 import { AppIdentification } from './interfaces/app-details';
-import common, { generateToken } from './schemas';
+import common, { generateToken, updateSchema, createSchema } from './schemas';
 import { AuthTokenSubject } from './interfaces/request';
 import { TaskManager } from './task-manager';
 import { AppDataService } from './db-service';
@@ -27,7 +27,7 @@ interface AppsPluginOptions {
 
 const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) => {
   const {
-    items: { dbService: iS },
+    items: { dbService: iS, extendCreateSchema, extendExtrasUpdateSchema },
     itemMemberships: { dbService: iMS },
     taskRunner: runner
   } = fastify;
@@ -36,9 +36,14 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
   const aDS = new AppDataService();
   const taskManager = new TaskManager(aDS, iS, iMS);
 
-  await fastify.register(fastifyJwt, { secret: JWT_SECRET });
+  // "install" custom schema for validating document items creation
+  extendCreateSchema(createSchema);
+  // "install" custom schema for validating document items update
+  extendExtrasUpdateSchema(updateSchema);
 
   fastify.addSchema(common);
+
+  await fastify.register(fastifyJwt, { secret: JWT_SECRET });
 
   // endpoint(s) not accessible to third-parties - graasp session necessary
   fastify.register(async function (fastify) {
