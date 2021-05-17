@@ -5,7 +5,7 @@ import { AppData } from '../interfaces/app-data';
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject } from '../interfaces/request';
-import { TokenItemIdMismatch } from '../util/graasp-app-data-error';
+import { AppDataNotFound, TokenItemIdMismatch } from '../util/graasp-app-data-error';
 
 export class DeleteAppDataTask extends BaseAppDataTask<AppData> {
   get name(): string { return DeleteAppDataTask.name; }
@@ -54,8 +54,7 @@ export class DeleteAppDataTask extends BaseAppDataTask<AppData> {
 
     // delete app data - id of member making the delete needs to match AppData's `member_id`
     const appData = await this.appDataService.delete(this.targetId, handler, memberId);
-    // TODO: should this fail here?
-    // if (!appData) throw new CantDeleteAppData();
+    if (!appData) throw new AppDataNotFound(this.targetId);
 
     this.status = 'OK';
     this._result = appData;

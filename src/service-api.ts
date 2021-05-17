@@ -6,9 +6,17 @@ import fastifyJwt from 'fastify-jwt';
 
 import { IdParam } from 'graasp';
 // local
-import { AppData } from './interfaces/app-data';
+import { AppData, InputAppData } from './interfaces/app-data';
 import { AppIdentification } from './interfaces/app-details';
-import common, { generateToken, updateSchema, createSchema } from './schemas';
+import common, {
+  generateToken,
+  updateSchema,
+  createSchema,
+  create,
+  updateOne,
+  deleteOne,
+  getMany
+} from './schemas';
 import { AuthTokenSubject } from './interfaces/request';
 import { TaskManager } from './task-manager';
 import { AppDataService } from './db-service';
@@ -54,7 +62,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
     // generate api access token for member + (app-)item.
     fastify.post<{ Params: { itemId: string }; Body: { origin: string } & AppIdentification }>(
-      '/:itemId/app-api-access-token', { schema: generateToken }, // TODO: complete schema
+      '/:itemId/app-api-access-token', { schema: generateToken },
       async ({ member, params: { itemId }, body, log }) => {
         const task = taskManager.createGenerateApiAccessTokenSubject(member, itemId, body);
         const authTokenSubject = await runner.runSingle(task, log);
@@ -97,8 +105,8 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
     fastify.register(fastifyBearerAuth, { keys: new Set<string>(), auth: validateApiAccessToken });
 
     // create app data
-    fastify.post<{ Params: { itemId: string }; Body: Partial<AppData> }>(
-      '/:itemId/app-data', // TODO: add schema - { schema: },
+    fastify.post<{ Params: { itemId: string }; Body: Partial<InputAppData> }>(
+      '/:itemId/app-data', { schema: create },
       async ({ authTokenSubject: requestDetails, params: { itemId }, body, log }) => {
         const { member: id } = requestDetails;
         const task = taskManager.createCreateTask({ id }, body, itemId, requestDetails);
@@ -108,7 +116,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
     // update app data
     fastify.patch<{ Params: { itemId: string } & IdParam; Body: Partial<AppData> }>(
-      '/:itemId/app-data/:id', // TODO: add schema - { schema: },
+      '/:itemId/app-data/:id', { schema: updateOne },
       async ({ authTokenSubject: requestDetails, params: { itemId, id: appDataId }, body, log }) => {
         const { member: id } = requestDetails;
         const task = taskManager.createUpdateTask({ id }, appDataId, body, itemId, requestDetails);
@@ -118,7 +126,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
     // delete app data
     fastify.delete<{ Params: { itemId: string } & IdParam }>(
-      '/:itemId/app-data/:id', // TODO: add schema - { schema: },
+      '/:itemId/app-data/:id', { schema: deleteOne },
       async ({ authTokenSubject: requestDetails, params: { itemId, id: appDataId }, log }) => {
         const { member: id } = requestDetails;
         const task = taskManager.createDeleteTask({ id }, appDataId, itemId, requestDetails);
@@ -128,7 +136,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
     // get app data
     fastify.get<{ Params: { itemId: string } }>( // TODO: think about all the possible parameter options
-      '/:itemId/app-data', // TODO: add schema - { schema: },
+      '/:itemId/app-data', { schema: getMany },
       async ({ authTokenSubject: requestDetails, params: { itemId }, log }) => {
         const { member: id } = requestDetails;
         const task = taskManager.createGetTask({ id }, itemId, requestDetails);

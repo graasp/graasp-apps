@@ -1,15 +1,16 @@
 import { Anything } from 'graasp';
 
-export interface AppData {
-  id: string;
-  memberId: string;
-  itemId: string;
+export interface InputAppData {
   data: { [key: string]: Anything };
   type: string;
   ownership: 'member' | 'item' | 'app' | 'publisher';
   visibility: 'member' | 'item' | 'app' | 'publisher';
-  // appId: string;
-  // publisherId: string;
+}
+
+export interface AppData extends InputAppData {
+  id: string;
+  memberId: string;
+  itemId: string;
   createdAt: string;
   updatedAt: string;
 }

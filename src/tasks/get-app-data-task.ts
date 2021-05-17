@@ -36,7 +36,7 @@ export class GetAppDataTask extends BaseAppDataTask<readonly AppData[]> {
     if (this.targetId !== tokenItemId) throw new TokenItemIdMismatch();
 
     // check if appId matches origin (?) - is this really necessary?; because when the token was generated it was true.
-    // atmost the token can be valid until its expiration, even if the app/origin are no londer valid (removed from db)  
+    // atmost the token can be valid until its expiration, even if the app/origin are no londer valid (removed from db)
 
     // do we need these checks? maybe not for now because the get is linked to the member
 
@@ -51,8 +51,6 @@ export class GetAppDataTask extends BaseAppDataTask<readonly AppData[]> {
 
     // get all app data for item+member
     const appDatas = await this.appDataService.getAll(this.targetId, handler, memberId);
-    // TODO: should this fail here?
-    // if (!appData) throw new CantUpdateAppData();
 
     this.status = 'OK';
     this._result = appDatas;

@@ -5,7 +5,7 @@ import { AppData } from '../interfaces/app-data';
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject } from '../interfaces/request';
-import { TokenItemIdMismatch } from '../util/graasp-app-data-error';
+import { AppDataNotFound, TokenItemIdMismatch } from '../util/graasp-app-data-error';
 
 export class UpdateAppDataTask extends BaseAppDataTask<AppData> {
   get name(): string { return UpdateAppDataTask.name; }
@@ -60,8 +60,7 @@ export class UpdateAppDataTask extends BaseAppDataTask<AppData> {
 
     // update app data - id of member making the update needs to match AppData's `member_id`
     const appData = await this.appDataService.update(this.targetId, { data }, handler, memberId);
-    // TODO: should this fail here?
-    // if (!appData) throw new CantUpdateAppData(); // or throw new AppDataNotFound();
+    if (!appData) throw new AppDataNotFound(this.targetId);
 
     this.status = 'OK';
     this._result = appData;

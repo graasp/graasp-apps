@@ -47,3 +47,9 @@ export class TokenItemIdMismatch extends GraaspAppDataError {
     super({ code: 'GADERR005', statusCode: 401, message: 'Auth token does not match targeted item' }, data);
   }
 }
+
+export class AppDataNotFound extends GraaspAppDataError {
+  constructor(data?: unknown) {
+    super({ code: 'GADERR006', statusCode: 404, message: 'App data not found' }, data);
+  }
+}

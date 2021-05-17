@@ -15,7 +15,6 @@ export class CreateAppDataTask extends BaseAppDataTask<AppData> {
     requestDetails: AuthTokenSubject, appDataService: AppDataService,
     itemService: ItemService, itemMembershipService: ItemMembershipService) {
     super(actor, appDataService, itemService, itemMembershipService);
-    // super(actor, requestDetails, appDataService);
     this.requestDetails = requestDetails;
     this.data = data;
     // Item to which the created AppData will be related to

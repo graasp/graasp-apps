@@ -11,32 +11,111 @@ export default {
       }
     },
 
-    // TODO:
-    appItemExtra: {
+    appData: {
       type: 'object',
       properties: {
-        extra: {
-          type: 'object',
-          required: ['url'],
-          properties: {
-            url: { type: 'string', format: 'uri', pattern: '^https?:\/\/' },
-            settings: {}
-          },
-          additionalProperties: false
-        }
+        id: { type: 'string' },
+        memberId: { type: 'string' },
+        itemId: { type: 'string' },
+        data: {},
+        type: { type: 'string' },
+        // ownership: { type: 'string' },
+        // visibility: { type: 'string' },
+        createdAt: { type: 'string' },
+        updatedAt: { type: 'string' }
       }
     }
   }
 };
 
 const generateToken = {
-  params: { $ref: 'http://graasp.org/apps/#/definitions/itemIdParam' }
+  params: { $ref: 'http://graasp.org/apps/#/definitions/itemIdParam' },
+  body: {
+    type: 'object',
+    required: ['app', 'origin'],
+    properties: {
+      app: { $ref: 'http://graasp.org/#/definitions/uuid' },
+      origin: { type: 'string', format: 'url' }
+    },
+    additionalProperties: false
+  },
+  response: {
+    200: {
+      type: 'object',
+      properties: { token: { type: 'string' } }
+    }
+  }
+};
+
+const create = {
+  params: { $ref: 'http://graasp.org/apps/#/definitions/itemIdParam' },
+  body: {
+    type: 'object',
+    required: ['data', 'type'],
+    properties: {
+      data: { type: 'object', additionalProperties: true },
+      type: { type: 'string', minLength: 3, maxLength: 25 },
+      visibility: { type: 'string', enum: ['member', 'item', 'app', 'publisher'] },
+      ownership: { type: 'string', enum: ['member', 'item', 'app', 'publisher'] }
+    }
+  },
+  response: {
+    200: { $ref: 'http://graasp.org/apps/#/definitions/appData' }
+  }
+};
+
+const updateOne = {
+  params: {
+    allOf: [
+      { $ref: 'http://graasp.org/apps/#/definitions/itemIdParam' },
+      { $ref: 'http://graasp.org/#/definitions/idParam' }
+    ]
+  },
+  body: {
+    type: 'object',
+    required: ['data'],
+    properties: {
+      data: { type: 'object', additionalProperties: true }
+    }
+  },
+  response: {
+    200: { $ref: 'http://graasp.org/apps/#/definitions/appData' }
+  }
+};
+
+const deleteOne = {
+  params: {
+    allOf: [
+      { $ref: 'http://graasp.org/apps/#/definitions/itemIdParam' },
+      { $ref: 'http://graasp.org/#/definitions/idParam' }
+    ]
+  },
+  response: {
+    200: { $ref: 'http://graasp.org/apps/#/definitions/appData' }
+  }
+};
+
+const getMany = {
+  params: { $ref: 'http://graasp.org/apps/#/definitions/itemIdParam' },
+  response: {
+    200: {
+      type: 'array',
+      items: { $ref: 'http://graasp.org/apps/#/definitions/appData' }
+    }
+  }
 };
 
 export {
-  generateToken
+  generateToken,
+  create,
+  updateOne,
+  deleteOne,
+  getMany
 };
 
+/**
+ * Fluent schema definitions to extend core schemas
+ */
 export const updateSchema = S.object()
   .prop(
     'app',
@@ -54,7 +133,7 @@ const extraCreate = S.object()
     'app',
     S.object()
       // .additionalProperties(false)
-      .prop('url', S.string().format('uri'))
+      .prop('url', S.string().format('url'))
       .prop('settings', S.object())
       .required(['url'])
   )
