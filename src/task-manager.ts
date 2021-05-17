@@ -3,7 +3,7 @@ import { ItemService, ItemMembershipService, Actor } from 'graasp';
 // local
 import { AppDataService } from './db-service';
 import { AppData } from './interfaces/app-data';
-import { AuthTokenSubject } from './interfaces/request';
+import { AuthTokenSubject, GetFilter } from './interfaces/request';
 import { CreateAppDataTask } from './tasks/create-app-data-task';
 import { DeleteAppDataTask } from './tasks/delete-app-data-task';
 import { GenerateApiAccessTokenSuject } from './tasks/generate-api-access-token-subject';
@@ -54,11 +54,12 @@ export class TaskManager {
    * @param actor Object containing an id matching the member that made the request - a copy of `requestDetails.member`.
    * @param appDataId Id of AppData to delete.
    * @param itemId Id of item (AppItem) to which the new AppData will be bond to.
+   * @param filter Filter object based on the query parameters
    * @param requestDetails All the metadata contained in the jwt auth token.
    * @returns DeleteAppDataTask
    */
-   createGetTask(actor: Actor, itemId: string, requestDetails: AuthTokenSubject): GetAppDataTask {
-    return new GetAppDataTask(actor, itemId, requestDetails,
+   createGetTask(actor: Actor, itemId: string, filter: GetFilter, requestDetails: AuthTokenSubject): GetAppDataTask {
+    return new GetAppDataTask(actor, itemId, filter, requestDetails,
       this.appDataService, this.itemService, this.itemMembershipService);
   }
 

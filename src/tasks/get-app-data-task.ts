@@ -4,12 +4,13 @@ import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService }
 import { AppData } from '../interfaces/app-data';
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
-import { AuthTokenSubject } from '../interfaces/request';
+import { AuthTokenSubject, GetFilter } from '../interfaces/request';
 import { TokenItemIdMismatch } from '../util/graasp-app-data-error';
 
 export class GetAppDataTask extends BaseAppDataTask<readonly AppData[]> {
   get name(): string { return GetAppDataTask.name; }
   private requestDetails: AuthTokenSubject;
+  private filter: GetFilter;
 
   /**
    * GetAppDataTask constructor
@@ -17,13 +18,14 @@ export class GetAppDataTask extends BaseAppDataTask<readonly AppData[]> {
    * @param itemId Id of Item to which all the AppDatas belong
    * @param requestDetails Information contained in the auth token
    */
-  constructor(actor: Actor, itemId: string,
+  constructor(actor: Actor, itemId: string, filter: GetFilter,
     requestDetails: AuthTokenSubject, appDataService: AppDataService,
     itemService: ItemService, itemMembershipService: ItemMembershipService) {
     super(actor, appDataService, itemService, itemMembershipService);
 
     this.requestDetails = requestDetails;
     this.targetId = itemId;
+    this.filter = filter;
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
@@ -49,8 +51,10 @@ export class GetAppDataTask extends BaseAppDataTask<readonly AppData[]> {
     // const canRead = await this.itemMembershipService.canRead(memberId, item, handler);
     // if (!canRead) throw new MemberCannotReadItem(appItemId);
 
+    const { visibility } = this.filter;
+
     // get all app data for item+member
-    const appDatas = await this.appDataService.getAll(this.targetId, handler, memberId);
+    const appDatas = await this.appDataService.getAll(this.targetId, { memberId, visibility }, handler);
 
     this.status = 'OK';
     this._result = appDatas;

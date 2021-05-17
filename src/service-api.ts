@@ -17,7 +17,7 @@ import common, {
   deleteOne,
   getMany
 } from './schemas';
-import { AuthTokenSubject } from './interfaces/request';
+import { AuthTokenSubject, GetFilter } from './interfaces/request';
 import { TaskManager } from './task-manager';
 import { AppDataService } from './db-service';
 
@@ -135,11 +135,11 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
     );
 
     // get app data
-    fastify.get<{ Params: { itemId: string } }>( // TODO: think about all the possible parameter options
+    fastify.get<{ Params: { itemId: string }, Querystring: GetFilter }>( // TODO: think about all the possible parameter options
       '/:itemId/app-data', { schema: getMany },
-      async ({ authTokenSubject: requestDetails, params: { itemId }, log }) => {
+      async ({ authTokenSubject: requestDetails, params: { itemId }, query: filter, log }) => {
         const { member: id } = requestDetails;
-        const task = taskManager.createGetTask({ id }, itemId, requestDetails);
+        const task = taskManager.createGetTask({ id }, itemId, filter, requestDetails);
         return runner.runSingle(task, log);
       }
     );

@@ -1,7 +1,7 @@
 // global
 import { sql, DatabaseTransactionConnectionType as TrxHandler } from 'slonik';
 // local
-import { AppData } from './interfaces/app-data';
+import { AppData, AppDataScope } from './interfaces/app-data';
 
 /**
  * Database's first layer of abstraction for App Data and (exceptionally) for App, Publisher
@@ -68,7 +68,7 @@ export class AppDataService {
   /**
    * Update AppData.
    * @param id AppData id
-   * @param data Partial AppData (only property `data` is considered) 
+   * @param data Partial AppData (only property `data` is considered)
    * @param transactionHandler Database transaction handler
    * @param memberId Id of member to whom the AppData should be linked to
    */
@@ -103,14 +103,25 @@ export class AppDataService {
   /**
    * Get item's app data.
    * @param itemId Item id
+   * @param filter Filter
    * @param transactionHandler Database transaction handler
-   * @param memberId Id of member to whom the AppDatas should be linked to
    */
-  async getAll(itemId: string, transactionHandler: TrxHandler, memberId?: string): Promise<readonly AppData[]> {
+  async getAll(itemId: string, filter: { memberId: string, visibility?: AppDataScope },
+    transactionHandler: TrxHandler): Promise<readonly AppData[]> {
+    const { memberId, visibility } = filter;
+
+    let whereStatement = sql`item_id = ${itemId}`;
+
+    if (visibility) {
+      whereStatement = sql`${whereStatement} AND visibility = ${visibility}`;
+      // whereStatement = sql`${whereStatement} AND visibility IN (${sql.join(visibility, sql`, `)})`;
+    } else {
+      whereStatement = sql`${whereStatement} AND member_id = ${memberId}`;
+    }
+
     return transactionHandler.query<AppData>(sql`
         SELECT ${AppDataService.allColumns} FROM app_data
-        WHERE item_id = ${itemId}
-          ${memberId ? sql`AND member_id = ${memberId}` : sql``}
+        WHERE ${whereStatement}
       `)
       .then(({ rows }) => rows);
   }

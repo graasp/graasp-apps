@@ -97,6 +97,13 @@ const deleteOne = {
 
 const getMany = {
   params: { $ref: 'http://graasp.org/apps/#/definitions/itemIdParam' },
+  querystring: {
+    type: 'object',
+    properties: {
+      visibility: { type: 'string', enum: ['member', 'item'] }, // 'app', 'publisher'
+    },
+    additionalProperties: false
+  },
   response: {
     200: {
       type: 'array',
