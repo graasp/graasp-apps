@@ -19,8 +19,8 @@ export default {
         itemId: { type: 'string' },
         data: {},
         type: { type: 'string' },
-        // ownership: { type: 'string' },
-        // visibility: { type: 'string' },
+        ownership: { type: 'string' },
+        visibility: { type: 'string' },
         createdAt: { type: 'string' },
         updatedAt: { type: 'string' }
       }
