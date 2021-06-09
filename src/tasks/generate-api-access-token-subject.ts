@@ -10,8 +10,8 @@ import {
 } from '../util/graasp-app-data-error';
 import { AppDataService } from '../db-service';
 
-export class GenerateApiAccessTokenSuject extends BaseAppDataTask<AuthTokenSubject> {
-  get name(): string { return GenerateApiAccessTokenSuject.name; }
+export class GenerateApiAccessTokenSujectTask extends BaseAppDataTask<AuthTokenSubject> {
+  get name(): string { return GenerateApiAccessTokenSujectTask.name; }
   private appId: string;
   private appOrigin: string;
 

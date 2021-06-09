@@ -3,11 +3,13 @@ import { ItemService, ItemMembershipService, Actor } from 'graasp';
 // local
 import { AppDataService } from './db-service';
 import { AppData } from './interfaces/app-data';
-import { AuthTokenSubject, GetFilter } from './interfaces/request';
+import { AuthTokenSubject, ManyItemsGetFilter, SingleItemGetFilter } from './interfaces/request';
 import { CreateAppDataTask } from './tasks/create-app-data-task';
 import { DeleteAppDataTask } from './tasks/delete-app-data-task';
-import { GenerateApiAccessTokenSuject } from './tasks/generate-api-access-token-subject';
+import { GenerateApiAccessTokenSujectTask } from './tasks/generate-api-access-token-subject';
 import { GetAppDataTask } from './tasks/get-app-data-task';
+import { GetContextTask } from './tasks/get-context-task';
+import { GetItemsAppDataTask } from './tasks/get-items-app-data-task';
 import { UpdateAppDataTask } from './tasks/update-app-data-task';
 
 export class TaskManager {
@@ -20,8 +22,8 @@ export class TaskManager {
     itemService: ItemService,
     itemMembershipService: ItemMembershipService
   ) {
-    this.appDataService = appDataService,
-      this.itemService = itemService;
+    this.appDataService = appDataService;
+    this.itemService = itemService;
     this.itemMembershipService = itemMembershipService;
   }
 
@@ -30,7 +32,8 @@ export class TaskManager {
   getUpdateTaskName(): string { return UpdateAppDataTask.name; }
   getDeleteTaskName(): string { return DeleteAppDataTask.name; }
 
-  getGenerateApiAccessTokenSujectName(): string { return GenerateApiAccessTokenSuject.name; }
+  getGenerateApiAccessTokenSujectTaskName(): string { return GenerateApiAccessTokenSujectTask.name; }
+  getGetItemsAppDataTaskName(): string { return GetItemsAppDataTask.name; }
 
   // CRUD
 
@@ -38,9 +41,7 @@ export class TaskManager {
    * Create a new AppData CreateTask
    * @param actor Object containing an id matching the member that made the request - a copy of `requestDetails.member`.
    * @param data AppData (partial) object to create.
-   * - `data.memberId` can be different from `actor.id` - admin member creating AppData for another member.
-   * - `data.itemId` ignored - will be overwritten by `itemId`.
-   * @param itemId Id of item (AppItem) to which the new AppData will be bond to.
+   * @param itemId Id of item (app item) to which the new AppData will be bond to.
    * @param requestDetails All the metadata contained in the jwt auth token.
    * @returns CreateAppDataTask
    */
@@ -52,13 +53,12 @@ export class TaskManager {
   /**
    * Create a new AppData GetTask
    * @param actor Object containing an id matching the member that made the request - a copy of `requestDetails.member`.
-   * @param appDataId Id of AppData to delete.
-   * @param itemId Id of item (AppItem) to which the new AppData will be bond to.
+   * @param itemId Id of item (app item) to which the new AppData will be bond to.
    * @param filter Filter object based on the query parameters
    * @param requestDetails All the metadata contained in the jwt auth token.
    * @returns DeleteAppDataTask
    */
-   createGetTask(actor: Actor, itemId: string, filter: GetFilter, requestDetails: AuthTokenSubject): GetAppDataTask {
+  createGetTask(actor: Actor, itemId: string, filter: SingleItemGetFilter, requestDetails: AuthTokenSubject): GetAppDataTask {
     return new GetAppDataTask(actor, itemId, filter, requestDetails,
       this.appDataService, this.itemService, this.itemMembershipService);
   }
@@ -68,7 +68,7 @@ export class TaskManager {
    * @param actor Object containing an id matching the member that made the request - a copy of `requestDetails.member`.
    * @param appDataId Id of AppData to update.
    * @param data AppData (partial) object with property `data` - the only property that can be updated.
-   * @param itemId Id of item (AppItem) to which the new AppData will be bond to.
+   * @param itemId Id of item (app item) to which the new AppData will be bond to.
    * @param requestDetails All the metadata contained in the jwt auth token.
    * @returns UpdateAppDataTask
    */
@@ -81,7 +81,7 @@ export class TaskManager {
    * Create a new AppData DeleteTask
    * @param actor Object containing an id matching the member that made the request - a copy of `requestDetails.member`.
    * @param appDataId Id of AppData to delete.
-   * @param itemId Id of item (AppItem) to which the new AppData will be bond to.
+   * @param itemId Id of item (app item) to which the new AppData will be bond to.
    * @param requestDetails All the metadata contained in the jwt auth token.
    * @returns DeleteAppDataTask
    */
@@ -91,9 +91,19 @@ export class TaskManager {
   }
 
   // Other
-  createGenerateApiAccessTokenSubject(actor: Actor, itemId: string,
-    appDetails: { origin: string, app: string }): GenerateApiAccessTokenSuject {
-    return new GenerateApiAccessTokenSuject(actor, itemId, appDetails,
+  createGetItemsAppDataTask(actor: Actor, filter: ManyItemsGetFilter, requestDetails: AuthTokenSubject): GetItemsAppDataTask {
+    return new GetItemsAppDataTask(actor, filter, requestDetails,
+      this.appDataService, this.itemService, this.itemMembershipService);
+  }
+
+  createGetContextTask(actor: Actor, itemId: string, requestDetails: AuthTokenSubject): GetContextTask {
+    return new GetContextTask(actor, itemId, requestDetails,
+      this.appDataService, this.itemService, this.itemMembershipService);
+  }
+
+  createGenerateApiAccessTokenSubjectTask(actor: Actor, itemId: string,
+    appDetails: { origin: string, app: string }): GenerateApiAccessTokenSujectTask {
+    return new GenerateApiAccessTokenSujectTask(actor, itemId, appDetails,
       this.appDataService, this.itemService, this.itemMembershipService);
   }
 }

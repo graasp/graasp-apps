@@ -1,7 +1,8 @@
 // global
+import { Item, Member } from 'graasp';
 import { sql, DatabaseTransactionConnectionType as TrxHandler } from 'slonik';
 // local
-import { AppData, AppDataScope } from './interfaces/app-data';
+import { AppData, AppDataVisibility } from './interfaces/app-data';
 
 /**
  * Database's first layer of abstraction for App Data and (exceptionally) for App, Publisher
@@ -15,9 +16,6 @@ export class AppDataService {
       ['item_id', 'itemId'],
       'data',
       'type',
-      'ownership',
-      // ['app_id', 'appId'],
-      // ['publisher_id', 'publisherId'],
       'visibility',
       ['created_at', 'createdAt'],
       ['updated_at', 'updatedAt']
@@ -29,12 +27,25 @@ export class AppDataService {
     sql`, `
   );
 
+  private static allColumnsForJoins = sql.join(
+    [
+      [['app_data', 'id'], ['id']],
+      [['app_data', 'member_id'], ['memberId']],
+      [['app_data', 'item_id'], ['itemId']],
+      [['app_data', 'data'], ['data']],
+      [['app_data', 'type'], ['type']],
+      [['app_data', 'visibility'], ['visibility']],
+      [['app_data', 'creator'], ['creator']],
+      [['app_data', 'created_at'], ['createdAt']],
+      [['app_data', 'updated_at'], ['updatedAt']],
+    ].map(c => sql.join(c.map(cwa => sql.identifier(cwa)), sql` AS `)),
+    sql`, `
+  );
+
   private objectPropertiesToDBColumnsMapping = (k: keyof AppData) => {
     switch (k) {
       case 'memberId': return 'member_id';
       case 'itemId': return 'item_id';
-      // case 'appId': return 'app_id';
-      // case 'publisherId': return 'publisher_id';
       default: return k;
     }
   };
@@ -103,20 +114,24 @@ export class AppDataService {
   /**
    * Get item's app data.
    * @param itemId Item id
-   * @param filter Filter
+   * @param filter Filter. `op` default to `AND`
    * @param transactionHandler Database transaction handler
    */
-  async getAll(itemId: string, filter: { memberId: string, visibility?: AppDataScope },
+  async getForItem(itemId: string,
+    filter: { memberId?: string, visibility?: AppDataVisibility, op?: 'AND' | 'OR' },
     transactionHandler: TrxHandler): Promise<readonly AppData[]> {
-    const { memberId, visibility } = filter;
+    const { memberId, visibility, op = 'AND' } = filter;
 
     let whereStatement = sql`item_id = ${itemId}`;
 
-    if (visibility) {
-      whereStatement = sql`${whereStatement} AND visibility = ${visibility}`;
-      // whereStatement = sql`${whereStatement} AND visibility IN (${sql.join(visibility, sql`, `)})`;
-    } else {
-      whereStatement = sql`${whereStatement} AND member_id = ${memberId}`;
+    if (memberId || visibility) {
+      const filterStatement = [];
+      const sqlOp = op === 'OR' ? sql` OR ` : sql` AND `;
+
+      if (memberId) filterStatement.push(sql`member_id = ${memberId}`);
+      if (visibility) filterStatement.push(sql`visibility = ${visibility}`);
+
+      whereStatement = sql`${whereStatement} AND (${sql.join(filterStatement, sqlOp)})`;
     }
 
     return transactionHandler.query<AppData>(sql`
@@ -124,6 +139,83 @@ export class AppDataService {
         WHERE ${whereStatement}
       `)
       .then(({ rows }) => rows);
+  }
+
+  /**
+   * Get AppData of the items w/ `itemIds` if they have the `item`'s parent as ancestor, i.e.,
+   * from items (w/ `itemIds`) in the `item`'s parent subtree.
+   * @param itemIds Ids of `item`'s siblings (or descendents of those siblings)
+   * @param item Item whose parent is also an ancestor of the items w/ `itemIds`
+   * @param filter Filter
+   * @param transactionHandler Database transaction handler
+   */
+  async getForItems(itemIds: string[], item: Item,
+    filter: { memberId?: string, visibility?: AppDataVisibility, op?: 'AND' | 'OR' },
+    transactionHandler: TrxHandler): Promise<readonly AppData[]> {
+    const { memberId, visibility, op = 'AND' } = filter;
+
+    let filterStatement = sql``;
+
+    if (memberId || visibility) {
+      const filters = [];
+      const sqlOp = op === 'OR' ? sql` OR ` : sql` AND `;
+
+      if (memberId) filters.push(sql`member_id = ${memberId}`);
+      if (visibility) filters.push(sql`visibility = ${visibility}`);
+
+      filterStatement = sql`AND (${sql.join(filters, sqlOp)})`;
+    }
+
+    return transactionHandler.query<AppData>(sql`
+        SELECT ${AppDataService.allColumnsForJoins}
+          FROM app_data
+        INNER JOIN item
+          ON app_data.item_id = item.id
+        WHERE app_data.item_id IN (${sql.join(itemIds, sql`, `)})
+          ${filterStatement}
+          AND subpath(${item.path}, 0, -1) @> item.path
+      `)
+      .then(({ rows }) => rows);
+  }
+
+  /**
+   * Get folder and app items in `item`'s parent subtree sorted by (ascending) item path
+   * @param item Item
+   * @param transactionHandler Database transaction handler
+   */
+  async getFoldersAndAppsFromParent(item: Item, transactionHandler: TrxHandler): Promise<Partial<Item>[]> {
+    const { path: itemPath } = item;
+
+    if (!itemPath.includes('.')) return [];
+
+    return transactionHandler.query<Partial<Item>>(sql`
+        SELECT id, name, path, description, type, extra
+          FROM item
+        WHERE subpath(${itemPath}, 0, -1) @> path
+          AND type IN ('folder', 'app')
+        ORDER BY path ASC
+      `)
+      .then(({ rows }) => rows.slice(0));
+  }
+
+  /**
+   * Get info from members who can access the `item`'s parent
+   * @param item Item
+   * @param transactionHandler Database transaction handler
+   */
+  async getParentItemMembers(item: Item, transactionHandler: TrxHandler): Promise<Partial<Member>[]> {
+    const { path: itemPath } = item;
+
+    if (!itemPath.includes('.')) return [];
+
+    return transactionHandler.query<Partial<Member>>(sql`
+        SELECT member.id AS id, name, CASE WHEN extra ? 'itemLogin' THEN email ELSE NULL END AS email
+          FROM member
+        INNER JOIN item_membership
+          ON member.id = item_membership.member_id
+        WHERE item_membership.item_path @> subpath(${itemPath}, 0, -1)
+      `)
+      .then(({ rows }) => rows.slice(0));
   }
 
   // App and Publisher

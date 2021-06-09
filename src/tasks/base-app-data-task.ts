@@ -9,6 +9,7 @@ import {
 // other services
 // local
 import { AppDataService } from '../db-service';
+import { TokenItemIdMismatch } from '../util/graasp-app-data-error';
 
 export abstract class BaseAppDataTask<R> implements Task<Actor, R> {
   protected itemService: ItemService;
@@ -22,16 +23,10 @@ export abstract class BaseAppDataTask<R> implements Task<Actor, R> {
   status: TaskStatus;
   targetId: string;
   data: Partial<IndividualResultType<R>>;
-  // preHookHandler: PreHookHandlerType<R>;
-  // postHookHandler: PostHookHandlerType<R>;
 
-  // requestDetails: RequestDetails;
-
-  constructor(actor: Actor, // requestDetails: RequestDetails,
-    // itemService: ItemService, itemMembershipService: ItemMembershipService,
+  constructor(actor: Actor,
     appDataService: AppDataService, itemService: ItemService, itemMembershipService: ItemMembershipService) {
     this.actor = actor;
-    // this.requestDetails = requestDetails;
     this.appDataService = appDataService;
     this.itemService = itemService;
     this.itemMembershipService = itemMembershipService;
@@ -42,33 +37,13 @@ export abstract class BaseAppDataTask<R> implements Task<Actor, R> {
   get result(): R { return this._result; }
   get message(): string { return this._message; }
 
-  // protected async validateRequest(appData: Partial<AppData>, handler: DatabaseTransactionHandler): Promise<Partial<AppData>> {
-  //   const {
-  //     member: memberId, item: tokenItemId,
-  //     app: appId, origin
-  //   } = this.requestDetails;
-
-  //   // TODO: when this.targetId !== tokenItemId it means AppX is trying to create AppData for AppY. Allow or block?
-
-  //   const { ownership: o, visibility: v } = appData;
-  //   if (o === 'app' || o === 'publisher' || v === 'app' || v === 'publisher') {
-  //     if (!appId || !origin) throw new Error();
-
-  //     // check if there's an app w/ the given `appId` which belongs to a publisher that owns `origin`
-  //   }
-
-  //   // get item
-  //   const item = await this.itemService.get<AppItemExtra>(this.targetId, handler);
-  //   if (!item) throw new ItemNotFound(this.targetId);
-
-  //   // verify membership rights over item
-  //   const hasRights = await this.itemMembershipService.canRead(this.actor.id, item, handler);
-  //   if (!hasRights) throw new UserCannotReadItem(this.targetId);
-
-  //   const { itemId, data, type, ownership, visibility } = this.data;
-
-  //   return { itemId, data, type, ownership, visibility };
-  // }
+  /**
+   * Throw `TokenItemIdMismatch` if they don't match
+   * @param tokenItemId Target item's id
+   */
+  protected checkTargetItemAndTokenItemMatch(tokenItemId: string): void {
+    if (this.targetId !== tokenItemId) throw new TokenItemIdMismatch();
+  }
 
   abstract run(handler: DatabaseTransactionHandler, log?: FastifyLoggerInstance): Promise<void | BaseAppDataTask<R>[]>;
 }

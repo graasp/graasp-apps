@@ -53,3 +53,9 @@ export class AppDataNotFound extends GraaspAppDataError {
     super({ code: 'GADERR006', statusCode: 404, message: 'App data not found' }, data);
   }
 }
+
+export class AppDataNotAccessible extends GraaspAppDataError {
+  constructor(data?: unknown) {
+    super({ code: 'GADERR007', statusCode: 403, message: 'Member cannot request this app data' }, data);
+  }
+}

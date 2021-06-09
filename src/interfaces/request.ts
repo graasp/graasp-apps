@@ -1,4 +1,4 @@
-import { AppDataScope } from './app-data';
+import { AppDataVisibility } from './app-data';
 import { AppIdentification } from './app-details';
 
 export type AuthTokenSubject =
@@ -6,6 +6,11 @@ export type AuthTokenSubject =
   AppIdentification; // from the app itself
 
 
-export interface GetFilter {
-  visibility?: AppDataScope;
+export interface SingleItemGetFilter {
+  memberId?: string;
+  visibility?: AppDataVisibility;
+}
+
+export interface ManyItemsGetFilter extends SingleItemGetFilter {
+  itemId: string[];
 }

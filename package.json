@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/graasp/graasp-apps#readme",
   "dependencies": {
+    "fastify-auth": "^1.1.0",
     "fastify-bearer-auth": "^5.1.0",
     "fastify-jwt": "^2.4.0",
     "fluent-json-schema": "^3.0.0"
