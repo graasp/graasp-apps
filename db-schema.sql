@@ -9,7 +9,7 @@ CREATE TABLE "publisher" (
 CREATE TABLE "app" (
   "id" uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
   "name" character varying(250) NOT NULL,
-  "publisher_id" uuid REFERENCES "publisher" ("id"),
+  "publisher_id" uuid REFERENCES "publisher" ("id") ON DELETE CASCADE NOT NULL,
   "created_at" timestamp NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc')
 );
 
@@ -25,11 +25,11 @@ CREATE TABLE "app" (
  *
  * an item admin overrides all of the above - can see/modify everything.
  */
-CREATE TYPE "app_data_ownership_enum" AS ENUM ('member', 'item', 'app', 'publisher');
+-- CREATE TYPE "app_data_ownership_enum" AS ENUM ('member', 'item', 'app', 'publisher');
 /**
  * the same as above
  */
-CREATE TYPE "app_data_visibility_enum" AS ENUM ('member', 'item', 'app', 'publisher');
+CREATE TYPE "app_data_visibility_enum" AS ENUM ('member', 'item'); --, 'app', 'publisher');
 
 CREATE TABLE "app_data" (
   "id" uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -44,7 +44,10 @@ CREATE TABLE "app_data" (
   "data" jsonb NOT NULL DEFAULT '{}'::jsonb,
   "type" character varying(25),
 
-  "ownership" app_data_ownership_enum DEFAULT 'member' NOT NULL,
+  -- don't remove - set creator to NULL
+  "creator" uuid REFERENCES "member" ("id") ON DELETE SET NULL,
+
+  -- "ownership" app_data_ownership_enum DEFAULT 'member' NOT NULL,
   "visibility" app_data_visibility_enum DEFAULT 'member' NOT NULL,
 
   -- TODO: I think this is to discard; maybe item should keep a reference to the appId in its settings?

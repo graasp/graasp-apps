@@ -5,7 +5,7 @@ import { AppData } from '../interfaces/app-data';
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject } from '../interfaces/request';
-import { ItemNotFound, MemberCannotReadItem, TokenItemIdMismatch } from '../util/graasp-app-data-error';
+import { ItemNotFound, MemberCannotReadItem } from '../util/graasp-app-data-error';
 
 export class CreateAppDataTask extends BaseAppDataTask<AppData> {
   get name(): string { return CreateAppDataTask.name; }
@@ -25,10 +25,9 @@ export class CreateAppDataTask extends BaseAppDataTask<AppData> {
     this.status = 'RUNNING';
 
     const { id: memberId } = this.actor; // extracted from token on task creation - see create endpoint
-    const { item: tokenItemId /* app: appId, origin */ } = this.requestDetails;
+    const { item: tokenItemId } = this.requestDetails;
 
-    // TODO: when this.targetId !== tokenItemId it means AppX is trying to create AppData for AppY. Allow or block?
-    if (this.targetId !== tokenItemId) throw new TokenItemIdMismatch();
+    this.checkTargetItemAndTokenItemMatch(tokenItemId);
 
     // check if appId matches origin (?) - is this really necessary?; because when the token was generated it was true.
     // atmost the token can be valid until its expiration even if the app/origin are no londer valid (removed from db)
@@ -40,18 +39,19 @@ export class CreateAppDataTask extends BaseAppDataTask<AppData> {
     const item = await this.itemService.get(appItemId, handler);
     if (!item) throw new ItemNotFound(appItemId);
 
-    // verify if member can read item (token might still be valid but member can no longer read item)
-    // TODO: is this check really necessary?
-    const canRead = await this.itemMembershipService.canRead(memberId, item, handler);
-    if (!canRead) throw new MemberCannotReadItem(appItemId);
+    // get member's permission over item
+    // TODO: is there a better way to do this?
+    const permission = await this.itemMembershipService.getPermissionLevel(memberId, item, handler);
+    if (!permission) throw new MemberCannotReadItem(appItemId);
 
-    // const { ownership: o, visibility: v } = this.data;
-    // if (o === 'app' || o === 'publisher' || v === 'app' || v === 'publisher') {
-    //   if (!appId || !origin) throw new Error();
-    //   // check if there's an app w/ the given `appId` which belongs to a publisher that owns `origin`
-    // }
+    let data: Partial<AppData>;
 
-    const data = Object.assign({}, this.data, { memberId, itemId: appItemId });
+    if (permission === 'admin') {
+      const appDataMemberId = this.data.memberId ?? memberId;
+      data = Object.assign({}, this.data, { memberId: appDataMemberId, creator: memberId, itemId: appItemId });
+    } else {
+      data = Object.assign({}, this.data, { memberId: memberId, creator: memberId, itemId: appItemId });
+    }
 
     // create app data
     const appData = await this.appDataService.create(data, handler);

@@ -19,10 +19,25 @@ export default {
         itemId: { type: 'string' },
         data: {},
         type: { type: 'string' },
-        ownership: { type: 'string' },
-        visibility: { type: 'string' },
+        // ownership: { type: 'string' }, // TODO: should we always return this
+        visibility: { type: 'string' }, // TODO: should we always return this
+        creator: { type: 'string' },
         createdAt: { type: 'string' },
         updatedAt: { type: 'string' }
+      }
+    },
+
+    appContext: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        name: { type: 'string' },
+        path: { type: 'string' },
+        description: { type: 'string' },
+        type: { type: 'string' },
+        extra: {},
+        children: { type: 'array' },
+        members: { type: 'array' }
       }
     }
   }
@@ -55,8 +70,8 @@ const create = {
     properties: {
       data: { type: 'object', additionalProperties: true },
       type: { type: 'string', minLength: 3, maxLength: 25 },
-      visibility: { type: 'string', enum: ['member', 'item', 'app', 'publisher'] },
-      ownership: { type: 'string', enum: ['member', 'item', 'app', 'publisher'] }
+      visibility: { type: 'string', enum: ['member', 'item'] },
+      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' }
     }
   },
   response: {
@@ -95,12 +110,13 @@ const deleteOne = {
   }
 };
 
-const getMany = {
+const getForOne = {
   params: { $ref: 'http://graasp.org/apps/#/definitions/itemIdParam' },
   querystring: {
     type: 'object',
     properties: {
-      visibility: { type: 'string', enum: ['member', 'item'] }, // 'app', 'publisher'
+      visibility: { type: 'string', enum: ['member', 'item'] },
+      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' }
     },
     additionalProperties: false
   },
@@ -112,12 +128,44 @@ const getMany = {
   }
 };
 
+const getForMany = {
+  querystring: {
+    type: 'object',
+    required: ['itemId'],
+    properties: {
+      itemId: {
+        type: 'array',
+        items: { $ref: 'http://graasp.org/#/definitions/uuid' },
+        uniqueItems: true
+      },
+      visibility: { type: 'string', enum: ['member', 'item'] },
+      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' }
+    },
+    additionalProperties: false
+  },
+  response: {
+    200: {
+      type: 'array',
+      items: { $ref: 'http://graasp.org/apps/#/definitions/appData' }
+    }
+  }
+};
+
+const getContext = {
+  params: { $ref: 'http://graasp.org/apps/#/definitions/itemIdParam' },
+  response: {
+    200: { $ref: 'http://graasp.org/apps/#/definitions/appContext' }
+  }
+};
+
 export {
   generateToken,
   create,
   updateOne,
   deleteOne,
-  getMany
+  getForOne,
+  getForMany,
+  getContext
 };
 
 /**

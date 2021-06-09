@@ -3,6 +3,7 @@ import { FastifyPluginAsync, FastifyRequest } from 'fastify';
 import fastifyBearerAuth from 'fastify-bearer-auth';
 import { promisify } from 'util';
 import fastifyJwt from 'fastify-jwt';
+import fastifyAuth from 'fastify-auth';
 
 import { IdParam } from 'graasp';
 // local
@@ -15,9 +16,11 @@ import common, {
   create,
   updateOne,
   deleteOne,
-  getMany
+  getForOne,
+  getForMany,
+  getContext
 } from './schemas';
-import { AuthTokenSubject, GetFilter } from './interfaces/request';
+import { AuthTokenSubject, ManyItemsGetFilter, SingleItemGetFilter } from './interfaces/request';
 import { TaskManager } from './task-manager';
 import { AppDataService } from './db-service';
 
@@ -64,7 +67,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
     fastify.post<{ Params: { itemId: string }; Body: { origin: string } & AppIdentification }>(
       '/:itemId/app-api-access-token', { schema: generateToken },
       async ({ member, params: { itemId }, body, log }) => {
-        const task = taskManager.createGenerateApiAccessTokenSubject(member, itemId, body);
+        const task = taskManager.createGenerateApiAccessTokenSubjectTask(member, itemId, body);
         const authTokenSubject = await runner.runSingle(task, log);
         const token = await promisifiedJwtSign({ sub: authTokenSubject }, { expiresIn: `${JWT_EXPIRATION}m` });
         return { token };
@@ -76,30 +79,30 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
   // (!) not very doable because there's no item context at all to check permission or
   // to know where ("under" what)to save the app data
 
+  const promisifiedJwtVerify = promisify<string, { sub: AuthTokenSubject }>(fastify.jwt.verify);
+
+  async function validateApiAccessToken(jwtToken: string, request: FastifyRequest) {
+    try {
+      // verify and extract token's data
+      const { sub } = await promisifiedJwtVerify(jwtToken);
+
+      // TODO: check if origin in token matches request's origin ? (Origin header is only present in CORS request: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin)
+
+      request.authTokenSubject = sub;
+      return true;
+    } catch (error) {
+      const { log } = request;
+      log.warn('Invalid api access token');
+      return false;
+    }
+  }
+
   // endpoints accessible to third parties
   fastify.register(async function (fastify) {
     // TODO: allow CORS but only the origins in the table from approved publishers - get all
     // origins from the publishers table an build a rule with that.
 
     fastify.decorateRequest('authTokenSubject', null);
-
-    const promisifiedJwtVerify = promisify<string, { sub: AuthTokenSubject }>(fastify.jwt.verify);
-
-    async function validateApiAccessToken(jwtToken: string, request: FastifyRequest) {
-      try {
-        // verify and extract token's data
-        const { sub } = await promisifiedJwtVerify(jwtToken);
-
-        // TODO: check if origin in token matches request's origin ? (Origin header is only present in CORS request: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin)
-
-        request.authTokenSubject = sub;
-        return true;
-      } catch (error) {
-        const { log } = request;
-        log.warn('Invalid api access token');
-        return false;
-      }
-    }
 
     // requires valid api access token
     fastify.register(fastifyBearerAuth, { keys: new Set<string>(), auth: validateApiAccessToken });
@@ -135,11 +138,44 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
     );
 
     // get app data
-    fastify.get<{ Params: { itemId: string }, Querystring: GetFilter }>( // TODO: think about all the possible parameter options
-      '/:itemId/app-data', { schema: getMany },
+    fastify.get<{ Params: { itemId: string }, Querystring: SingleItemGetFilter }>(
+      '/:itemId/app-data', { schema: getForOne },
       async ({ authTokenSubject: requestDetails, params: { itemId }, query: filter, log }) => {
         const { member: id } = requestDetails;
         const task = taskManager.createGetTask({ id }, itemId, filter, requestDetails);
+        return runner.runSingle(task, log);
+      }
+    );
+
+    // get app data from multiple items
+    fastify.get<{ Querystring: ManyItemsGetFilter }>(
+      '/app-data', { schema: getForMany },
+      async ({ authTokenSubject: requestDetails, query: filter, log }) => {
+        const { member: id } = requestDetails;
+        const task = taskManager.createGetItemsAppDataTask({ id }, filter, requestDetails);
+        return runner.runSingle(task, log);
+      }
+    );
+  });
+
+  fastify.register(async function (fastify) {
+    await fastify
+      .register(fastifyAuth)
+      .decorateRequest('authTokenSubject', null)
+      .register(fastifyBearerAuth,
+        { addHook: false, keys: new Set<string>(), auth: validateApiAccessToken });
+
+    // get app item context
+    fastify.get<{ Params: { itemId: string } }>(
+      '/:itemId/context',
+      {
+        schema: getContext,
+        // endpoint accessible with cookie or bearer token
+        preHandler: fastify.auth([fastify.validateSession, fastify.verifyBearerAuth])
+      },
+      async ({ member, authTokenSubject: requestDetails, params: { itemId }, log }) => {
+        const memberId = member ? member.id : requestDetails.member;
+        const task = taskManager.createGetContextTask({ id: memberId }, itemId, requestDetails);
         return runner.runSingle(task, log);
       }
     );
