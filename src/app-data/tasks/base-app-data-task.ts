@@ -9,7 +9,7 @@ import {
 // other services
 // local
 import { AppDataService } from '../db-service';
-import { TokenItemIdMismatch } from '../util/graasp-app-data-error';
+import { TokenItemIdMismatch } from '../../util/graasp-apps-error';
 
 export abstract class BaseAppDataTask<R> implements Task<Actor, R> {
   protected itemService: ItemService;

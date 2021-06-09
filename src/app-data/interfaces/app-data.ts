@@ -1,11 +1,10 @@
 import { Anything } from 'graasp';
-
-export type AppDataVisibility = 'member' | 'item';
+import { RecordVisibility } from '../../interfaces/app-details';
 
 export interface InputAppData {
   data: { [key: string]: Anything };
   type: string;
-  visibility: AppDataVisibility;
+  visibility: RecordVisibility;
 }
 
 export interface AppData extends InputAppData {

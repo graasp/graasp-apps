@@ -4,8 +4,8 @@ import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService }
 import { AppData } from '../interfaces/app-data';
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
-import { AuthTokenSubject } from '../interfaces/request';
-import { ItemNotFound, MemberCannotReadItem } from '../util/graasp-app-data-error';
+import { AuthTokenSubject } from '../../interfaces/request';
+import { ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
 
 export class CreateAppDataTask extends BaseAppDataTask<AppData> {
   get name(): string { return CreateAppDataTask.name; }
