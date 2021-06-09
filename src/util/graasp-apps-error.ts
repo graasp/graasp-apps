@@ -1,6 +1,6 @@
 import { GraaspErrorDetails, GraaspError } from 'graasp';
 
-export class GraaspAppDataError implements GraaspError {
+export class GraaspAppsError implements GraaspError {
   name: string;
   code: string
   message: string;
@@ -18,43 +18,43 @@ export class GraaspAppDataError implements GraaspError {
   }
 }
 
-export class ItemNotFound extends GraaspAppDataError {
+export class ItemNotFound extends GraaspAppsError {
   constructor(data?: unknown) {
     super({ code: 'GADERR001', statusCode: 404, message: 'Item not found' }, data);
   }
 }
 
-export class NotAnAppItem extends GraaspAppDataError {
+export class NotAnAppItem extends GraaspAppsError {
   constructor(data?: unknown) {
     super({ code: 'GADERR002', statusCode: 400, message: 'Targeted item is not an application item' }, data);
   }
 }
 
-export class InvalidApplicationOrigin extends GraaspAppDataError {
+export class InvalidApplicationOrigin extends GraaspAppsError {
   constructor(data?: unknown) {
     super({ code: 'GADERR003', statusCode: 403, message: 'Invalid application, origin pair' }, data);
   }
 }
 
-export class MemberCannotReadItem extends GraaspAppDataError {
+export class MemberCannotReadItem extends GraaspAppsError {
   constructor(data?: unknown) {
     super({ code: 'GADERR004', statusCode: 403, message: 'Member cannot read item' }, data);
   }
 }
 
-export class TokenItemIdMismatch extends GraaspAppDataError {
+export class TokenItemIdMismatch extends GraaspAppsError {
   constructor(data?: unknown) {
     super({ code: 'GADERR005', statusCode: 401, message: 'Auth token does not match targeted item' }, data);
   }
 }
 
-export class AppDataNotFound extends GraaspAppDataError {
+export class AppDataNotFound extends GraaspAppsError {
   constructor(data?: unknown) {
     super({ code: 'GADERR006', statusCode: 404, message: 'App data not found' }, data);
   }
 }
 
-export class AppDataNotAccessible extends GraaspAppDataError {
+export class AppDataNotAccessible extends GraaspAppsError {
   constructor(data?: unknown) {
     super({ code: 'GADERR007', statusCode: 403, message: 'Member cannot request this app data' }, data);
   }

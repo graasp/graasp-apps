@@ -1,8 +1,10 @@
 // global
 import { Item, Member } from 'graasp';
 import { sql, DatabaseTransactionConnectionType as TrxHandler } from 'slonik';
+
+import { RecordVisibility } from '../interfaces/app-details';
 // local
-import { AppData, AppDataVisibility } from './interfaces/app-data';
+import { AppData } from './interfaces/app-data';
 
 /**
  * Database's first layer of abstraction for App Data and (exceptionally) for App, Publisher
@@ -17,6 +19,7 @@ export class AppDataService {
       'data',
       'type',
       'visibility',
+      'creator',
       ['created_at', 'createdAt'],
       ['updated_at', 'updatedAt']
     ].map(c =>
@@ -118,7 +121,7 @@ export class AppDataService {
    * @param transactionHandler Database transaction handler
    */
   async getForItem(itemId: string,
-    filter: { memberId?: string, visibility?: AppDataVisibility, op?: 'AND' | 'OR' },
+    filter: { memberId?: string, visibility?: RecordVisibility, op?: 'AND' | 'OR' },
     transactionHandler: TrxHandler): Promise<readonly AppData[]> {
     const { memberId, visibility, op = 'AND' } = filter;
 
@@ -150,7 +153,7 @@ export class AppDataService {
    * @param transactionHandler Database transaction handler
    */
   async getForItems(itemIds: string[], item: Item,
-    filter: { memberId?: string, visibility?: AppDataVisibility, op?: 'AND' | 'OR' },
+    filter: { memberId?: string, visibility?: RecordVisibility, op?: 'AND' | 'OR' },
     transactionHandler: TrxHandler): Promise<readonly AppData[]> {
     const { memberId, visibility, op = 'AND' } = filter;
 

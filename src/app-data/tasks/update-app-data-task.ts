@@ -4,27 +4,29 @@ import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService }
 import { AppData } from '../interfaces/app-data';
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
-import { AuthTokenSubject } from '../interfaces/request';
-import { AppDataNotFound, ItemNotFound, MemberCannotReadItem } from '../util/graasp-app-data-error';
+import { AuthTokenSubject } from '../../interfaces/request';
+import { AppDataNotFound, ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
 
-export class DeleteAppDataTask extends BaseAppDataTask<AppData> {
-  get name(): string { return DeleteAppDataTask.name; }
+export class UpdateAppDataTask extends BaseAppDataTask<AppData> {
+  get name(): string { return UpdateAppDataTask.name; }
   private requestDetails: AuthTokenSubject;
   private itemId: string;
 
   /**
-   * DeleteAppDataTask constructor
+   * UpdateAppDataTask constructor
    * @param actor Actor
-   * @param appDataId Id of AppData record to delete
+   * @param appDataId Id of AppData record to update
+   * @param data Changes to the AppData
    * @param itemId Id of Item to which AppData belongs
    * @param requestDetails Information contained in the auth token
    */
-  constructor(actor: Actor, appDataId: string, itemId: string,
+  constructor(actor: Actor, appDataId: string, data: Partial<AppData>, itemId: string,
     requestDetails: AuthTokenSubject, appDataService: AppDataService,
     itemService: ItemService, itemMembershipService: ItemMembershipService) {
     super(actor, appDataService, itemService, itemMembershipService);
 
     this.requestDetails = requestDetails;
+    this.data = data;
     this.targetId = appDataId;
     this.itemId = itemId;
   }
@@ -50,15 +52,18 @@ export class DeleteAppDataTask extends BaseAppDataTask<AppData> {
     const permission = await this.itemMembershipService.getPermissionLevel(memberId, item, handler);
     if (!permission) throw new MemberCannotReadItem(appItemId);
 
-    // delete app data
+    // discard everything except AppData's `data`
+    const { data } = this.data;
+
+    // update app data
     let appData;
 
     if (permission === 'admin') {
-      // deleting other member's AppData
-      appData = await this.appDataService.delete(this.targetId, handler);
+      // updating other member's AppData
+      appData = await this.appDataService.update(this.targetId, { data }, handler);
     } else {
-      // deleting own AppData
-      appData = await this.appDataService.delete(this.targetId, handler, memberId);
+      // updating own AppData
+      appData = await this.appDataService.update(this.targetId, { data }, handler, memberId);
     }
 
     if (!appData) throw new AppDataNotFound(this.targetId);

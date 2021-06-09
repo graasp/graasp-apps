@@ -3,12 +3,10 @@ import { ItemService, ItemMembershipService, Actor } from 'graasp';
 // local
 import { AppDataService } from './db-service';
 import { AppData } from './interfaces/app-data';
-import { AuthTokenSubject, ManyItemsGetFilter, SingleItemGetFilter } from './interfaces/request';
+import { AuthTokenSubject, ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
 import { CreateAppDataTask } from './tasks/create-app-data-task';
 import { DeleteAppDataTask } from './tasks/delete-app-data-task';
-import { GenerateApiAccessTokenSujectTask } from './tasks/generate-api-access-token-subject';
 import { GetAppDataTask } from './tasks/get-app-data-task';
-import { GetContextTask } from './tasks/get-context-task';
 import { GetItemsAppDataTask } from './tasks/get-items-app-data-task';
 import { UpdateAppDataTask } from './tasks/update-app-data-task';
 
@@ -32,7 +30,6 @@ export class TaskManager {
   getUpdateTaskName(): string { return UpdateAppDataTask.name; }
   getDeleteTaskName(): string { return DeleteAppDataTask.name; }
 
-  getGenerateApiAccessTokenSujectTaskName(): string { return GenerateApiAccessTokenSujectTask.name; }
   getGetItemsAppDataTaskName(): string { return GetItemsAppDataTask.name; }
 
   // CRUD
@@ -93,17 +90,6 @@ export class TaskManager {
   // Other
   createGetItemsAppDataTask(actor: Actor, filter: ManyItemsGetFilter, requestDetails: AuthTokenSubject): GetItemsAppDataTask {
     return new GetItemsAppDataTask(actor, filter, requestDetails,
-      this.appDataService, this.itemService, this.itemMembershipService);
-  }
-
-  createGetContextTask(actor: Actor, itemId: string, requestDetails: AuthTokenSubject): GetContextTask {
-    return new GetContextTask(actor, itemId, requestDetails,
-      this.appDataService, this.itemService, this.itemMembershipService);
-  }
-
-  createGenerateApiAccessTokenSubjectTask(actor: Actor, itemId: string,
-    appDetails: { origin: string, app: string }): GenerateApiAccessTokenSujectTask {
-    return new GenerateApiAccessTokenSujectTask(actor, itemId, appDetails,
       this.appDataService, this.itemService, this.itemMembershipService);
   }
 }

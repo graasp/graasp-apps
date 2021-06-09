@@ -2,12 +2,12 @@
 import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
 // local
 import { BaseAppDataTask } from './base-app-data-task';
-import { AuthTokenSubject } from '../interfaces/request';
-import { AppItemExtra, APP_ITEM_TYPE } from '../interfaces/app-item';
+import { AuthTokenSubject } from '../../interfaces/request';
+import { AppItemExtra, APP_ITEM_TYPE } from '../../interfaces/app-item';
 import {
   InvalidApplicationOrigin, ItemNotFound,
   MemberCannotReadItem, NotAnAppItem
-} from '../util/graasp-app-data-error';
+} from '../../util/graasp-apps-error';
 import { AppDataService } from '../db-service';
 
 export class GenerateApiAccessTokenSujectTask extends BaseAppDataTask<AuthTokenSubject> {

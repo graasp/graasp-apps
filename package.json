@@ -2,7 +2,7 @@
   "name": "graasp-apps",
   "version": "0.1.0",
   "description": "",
-  "main": "dist/service-api.js",
+  "main": "dist/plugin.js",
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
