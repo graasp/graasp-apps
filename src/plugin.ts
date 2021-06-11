@@ -5,18 +5,21 @@ import fastifyJwt from 'fastify-jwt';
 import fastifyAuth from 'fastify-auth';
 
 import appDataPlugin from './app-data/service-api';
+import appActionPlugin from './app-actions/service-api';
 
 import { AuthTokenSubject } from './interfaces/request';
 import { createSchema, updateSchema } from './fluent-schema';
 import common, { generateToken, getContext } from './schemas';
 import { AppIdentification } from './interfaces/app-details';
 import { AppDataService } from './app-data/db-service';
+import { AppActionService } from './app-actions/db-service';
 import { GenerateApiAccessTokenSujectTask } from './app-data/tasks/generate-api-access-token-subject';
 import { GetContextTask } from './app-data/tasks/get-context-task';
 
 declare module 'fastify' {
   interface FastifyInstance {
-    appDataService: AppDataService
+    appDataService: AppDataService,
+    appActionService: AppActionService
   }
   interface FastifyRequest {
     authTokenSubject: AuthTokenSubject;
@@ -45,6 +48,9 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
   const aDS = new AppDataService();
   fastify.decorate('appDataService', aDS);
+  const aAS = new AppActionService();
+  fastify.decorate('appActionService', aAS);
+
   fastify.addSchema(common);
 
   // register auth plugin
@@ -114,6 +120,9 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
   // register app data plugin
   fastify.register(appDataPlugin);
+
+  // register app action plugin
+  fastify.register(appActionPlugin);
 };
 
 export default plugin;
