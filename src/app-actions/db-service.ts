@@ -17,8 +17,7 @@ export class AppActionService {
       ['item_id', 'itemId'],
       'data',
       'type',
-      ['created_at', 'createdAt'],
-      ['updated_at', 'updatedAt']
+      ['created_at', 'createdAt']
     ].map(c =>
       !Array.isArray(c) ?
         sql.identifier([c]) :
@@ -34,8 +33,7 @@ export class AppActionService {
       [['app_action', 'item_id'], ['itemId']],
       [['app_action', 'data'], ['data']],
       [['app_action', 'type'], ['type']],
-      [['app_action', 'created_at'], ['createdAt']],
-      [['app_action', 'updated_at'], ['updatedAt']],
+      [['app_action', 'created_at'], ['createdAt']]
     ].map(c => sql.join(c.map(cwa => sql.identifier(cwa)), sql` AS `)),
     sql`, `
   );

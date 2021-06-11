@@ -9,8 +9,7 @@ export default {
         itemId: { type: 'string' },
         data: {},
         type: { type: 'string' },
-        createdAt: { type: 'string' },
-        updatedAt: { type: 'string' }
+        createdAt: { type: 'string' }
       }
     }
   }

@@ -10,5 +10,4 @@ export interface AppAction extends InputAppAction {
   memberId: string;
   itemId: string;
   createdAt: string;
-  updatedAt: string;
 }
