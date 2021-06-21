@@ -12,14 +12,12 @@ import { createSchema, updateSchema } from './fluent-schema';
 import common, { generateToken, getContext } from './schemas';
 import { AppIdentification } from './interfaces/app-details';
 import { AppDataService } from './app-data/db-service';
-import { AppActionService } from './app-actions/db-service';
 import { GenerateApiAccessTokenSujectTask } from './app-data/tasks/generate-api-access-token-subject';
 import { GetContextTask } from './app-data/tasks/get-context-task';
 
 declare module 'fastify' {
   interface FastifyInstance {
-    appDataService: AppDataService,
-    appActionService: AppActionService
+    appDataService: AppDataService
   }
   interface FastifyRequest {
     authTokenSubject: AuthTokenSubject;
@@ -48,8 +46,6 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
   const aDS = new AppDataService();
   fastify.decorate('appDataService', aDS);
-  const aAS = new AppActionService();
-  fastify.decorate('appActionService', aAS);
 
   fastify.addSchema(common);
 

@@ -10,14 +10,22 @@ import common, {
 } from './schemas';
 import { ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
 import { TaskManager } from './task-manager';
+import {AppActionService} from './db-service';
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    appActionService: AppActionService
+  }
+}
 
 const plugin: FastifyPluginAsync = async (fastify) => {
   const {
     items: { dbService: iS },
     itemMemberships: { dbService: iMS },
-    taskRunner: runner,
-    appActionService: aAS
+    taskRunner: runner
   } = fastify;
+
+  const aAS = new AppActionService();
 
   const taskManager = new TaskManager(aAS, iS, iMS);
 
