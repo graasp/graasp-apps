@@ -5,6 +5,7 @@ import fastifyJwt from 'fastify-jwt';
 import fastifyAuth from 'fastify-auth';
 
 import appDataPlugin from './app-data/service-api';
+import appActionPlugin from './app-actions/service-api';
 
 import { AuthTokenSubject } from './interfaces/request';
 import { createSchema, updateSchema } from './fluent-schema';
@@ -45,6 +46,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
   const aDS = new AppDataService();
   fastify.decorate('appDataService', aDS);
+
   fastify.addSchema(common);
 
   // register auth plugin
@@ -115,6 +117,9 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
   // register app data plugin
   fastify.register(appDataPlugin);
+
+  // register app action plugin
+  fastify.register(appActionPlugin);
 };
 
 export default plugin;

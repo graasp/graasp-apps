@@ -59,3 +59,9 @@ export class AppDataNotAccessible extends GraaspAppsError {
     super({ code: 'GAERR007', statusCode: 403, message: 'Member cannot request this app data' }, data);
   }
 }
+
+export class AppActionNotAccessible extends GraaspAppsError {
+  constructor(data?: unknown) {
+    super({ code: 'GAERR008', statusCode: 403, message: 'Member cannot request this app action' }, data);
+  }
+}
