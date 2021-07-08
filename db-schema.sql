@@ -29,6 +29,8 @@ CREATE TABLE "app" (
 /**
  * the same as above
  */
+CREATE TYPE "app_data_visibility_enum" AS ENUM ('member', 'item'); --, 'app', 'publisher');
+
 CREATE TABLE "app_data" (
   "id" uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
 
