@@ -5,7 +5,7 @@ import { AppData } from '../interfaces/app-data';
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject } from '../../interfaces/request';
-import { AppDataNotFound, ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
+import { AppDataNotFound, ItemNotFound, MemberCannotReadItem, TokenItemIdMismatch } from '../../util/graasp-apps-error';
 
 export class DeleteAppDataTask extends BaseAppDataTask<AppData> {
   get name(): string { return DeleteAppDataTask.name; }
@@ -35,20 +35,18 @@ export class DeleteAppDataTask extends BaseAppDataTask<AppData> {
     const { id: memberId } = this.actor; // extracted from token on task creation - see endpoint
     const { item: tokenItemId } = this.requestDetails;
 
-    this.checkTargetItemAndTokenItemMatch(tokenItemId);
+    this.checkTargetItemAndTokenItemMatch(this.itemId, tokenItemId);
 
     // check if appId matches origin (?) - is this really necessary?; because when the token was generated it was true.
     // atmost the token can be valid until its expiration, even if the app/origin are no londer valid (removed from db)
 
-    const appItemId = this.targetId;
-
     // get item (token might still be valid but item no longer exists)
-    const item = await this.itemService.get(appItemId, handler);
-    if (!item) throw new ItemNotFound(appItemId);
+    const item = await this.itemService.get(this.itemId, handler);
+    if (!item) throw new ItemNotFound(this.itemId);
 
     // get member's permission over item
     const permission = await this.itemMembershipService.getPermissionLevel(memberId, item, handler);
-    if (!permission) throw new MemberCannotReadItem(appItemId);
+    if (!permission) throw new MemberCannotReadItem(this.itemId);
 
     // delete app data
     let appData;

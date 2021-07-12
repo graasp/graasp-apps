@@ -4,11 +4,12 @@ import { Actor, DatabaseTransactionHandler, Item, ItemMembershipService, ItemSer
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject } from '../../interfaces/request';
-import { ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
+import { ItemNotFound, MemberCannotReadItem, TokenItemIdMismatch } from '../../util/graasp-apps-error';
 
 export class GetContextTask extends BaseAppDataTask<Partial<Item>> {
   get name(): string { return GetContextTask.name; }
   private requestDetails: AuthTokenSubject;
+  private itemId: string;
 
   /**
    * GetAppDataTask constructor
@@ -22,7 +23,7 @@ export class GetContextTask extends BaseAppDataTask<Partial<Item>> {
     super(actor, appDataService, itemService, itemMembershipService);
 
     this.requestDetails = requestDetails;
-    this.targetId = itemId;
+    this.itemId = itemId;
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
@@ -30,19 +31,17 @@ export class GetContextTask extends BaseAppDataTask<Partial<Item>> {
 
     if (this.requestDetails) {
       const { item: tokenItemId } = this.requestDetails;
-      this.checkTargetItemAndTokenItemMatch(tokenItemId);
+      this.checkTargetItemAndTokenItemMatch(this.itemId, tokenItemId);
     }
 
-    const { id: memberId } = this.actor;
-    const appItemId = this.targetId;
-
     // get item
-    const item = await this.itemService.get(appItemId, handler);
-    if (!item) throw new ItemNotFound(appItemId);
+    const item = await this.itemService.get(this.targetId, handler);
+    if (!item) throw new ItemNotFound(this.targetId);
 
     // get member's permission over item
+    const { id: memberId } = this.actor;
     const canRead = await this.itemMembershipService.canRead(memberId, item, handler);
-    if (!canRead) throw new MemberCannotReadItem(appItemId);
+    if (!canRead) throw new MemberCannotReadItem(this.targetId);
 
     const p1 = this.appDataService.getFoldersAndAppsFromParent(item, handler);
     const p2 = this.appDataService.getParentItemMembers(item, handler);

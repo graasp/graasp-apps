@@ -39,10 +39,11 @@ export abstract class BaseAppDataTask<R> implements Task<Actor, R> {
 
   /**
    * Throw `TokenItemIdMismatch` if they don't match
-   * @param tokenItemId Target item's id
+   * @param itemId1 itemId in the request's path
+   * @param itemId2 itemId in the auth token
    */
-  protected checkTargetItemAndTokenItemMatch(tokenItemId: string): void {
-    if (this.targetId !== tokenItemId) throw new TokenItemIdMismatch();
+  protected checkTargetItemAndTokenItemMatch(itemId1: string, itemId2: string): void {
+    if (itemId1 !== itemId2) throw new TokenItemIdMismatch();
   }
 
   abstract run(handler: DatabaseTransactionHandler, log?: FastifyLoggerInstance): Promise<void | BaseAppDataTask<R>[]>;

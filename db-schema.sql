@@ -57,7 +57,7 @@ CREATE TABLE "app_data" (
   "created_at" timestamp NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
   "updated_at" timestamp NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc')
 );
-CREATE INDEX "app_data_item_id" ON app_data("item_id");
+CREATE INDEX "app_data_item_id_idx" ON app_data("item_id");
 
 CREATE TRIGGER "app_data_set_timestamp"
 BEFORE UPDATE ON "app_data"
@@ -78,4 +78,4 @@ CREATE TABLE "app_action" (
 
   "created_at" timestamp NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc')
 );
-CREATE INDEX "app_action_item_id" ON app_action("item_id");
+CREATE INDEX "app_action_item_id_idx" ON app_action("item_id");

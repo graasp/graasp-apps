@@ -5,12 +5,13 @@ import { AppData } from '../interfaces/app-data';
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject, SingleItemGetFilter } from '../../interfaces/request';
-import { AppDataNotAccessible, ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
+import { AppDataNotAccessible, ItemNotFound, MemberCannotReadItem, TokenItemIdMismatch } from '../../util/graasp-apps-error';
 
 export class GetAppDataTask extends BaseAppDataTask<readonly AppData[]> {
   get name(): string { return GetAppDataTask.name; }
   private requestDetails: AuthTokenSubject;
   private filter: SingleItemGetFilter;
+  private itemId: string;
 
   /**
    * GetAppDataTask constructor
@@ -24,7 +25,7 @@ export class GetAppDataTask extends BaseAppDataTask<readonly AppData[]> {
     super(actor, appDataService, itemService, itemMembershipService);
 
     this.requestDetails = requestDetails;
-    this.targetId = itemId;
+    this.itemId = itemId;
     this.filter = filter;
   }
 
@@ -34,20 +35,18 @@ export class GetAppDataTask extends BaseAppDataTask<readonly AppData[]> {
     const { id: memberId } = this.actor;
     const { item: tokenItemId } = this.requestDetails;
 
-    this.checkTargetItemAndTokenItemMatch(tokenItemId);
+    this.checkTargetItemAndTokenItemMatch(this.itemId, tokenItemId);
 
     // check if appId matches origin (?) - is this really necessary?; because when the token was generated it was true.
     // atmost the token can be valid until its expiration, even if the app/origin are no londer valid (removed from db)
 
-    const appItemId = this.targetId;
-
     // get item (token might still be valid but item no longer exists)
-    const item = await this.itemService.get(appItemId, handler);
-    if (!item) throw new ItemNotFound(appItemId);
+    const item = await this.itemService.get(this.itemId, handler);
+    if (!item) throw new ItemNotFound(this.itemId);
 
     // get member's permission over item
     const permission = await this.itemMembershipService.getPermissionLevel(memberId, item, handler);
-    if (!permission) throw new MemberCannotReadItem(appItemId);
+    if (!permission) throw new MemberCannotReadItem(this.itemId);
 
     let { visibility: fVisibility, memberId: fMemberId } = this.filter;
     let appDatas: readonly AppData[];
@@ -55,7 +54,7 @@ export class GetAppDataTask extends BaseAppDataTask<readonly AppData[]> {
     if (permission === 'admin') {
       // get item's AppData w/ no restrictions
       appDatas = await this.appDataService
-        .getForItem(this.targetId, { memberId: fMemberId, visibility: fVisibility }, handler);
+        .getForItem(this.itemId, { memberId: fMemberId, visibility: fVisibility }, handler);
     } else {
       // get member's AppData or others' AppData w/ visibility 'item'
       let op;
@@ -76,7 +75,7 @@ export class GetAppDataTask extends BaseAppDataTask<readonly AppData[]> {
       }
 
       appDatas = await this.appDataService
-        .getForItem(this.targetId, { memberId: fMemberId, visibility: fVisibility, op }, handler);
+        .getForItem(this.itemId, { memberId: fMemberId, visibility: fVisibility, op }, handler);
     }
 
     this.status = 'OK';
