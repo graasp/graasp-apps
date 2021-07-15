@@ -107,7 +107,7 @@ export class AppActionService {
   async getForItems(itemIds: string[], item: Item,
                     filter: { memberId?: string},
                     transactionHandler: TrxHandler): Promise<readonly AppAction[]> {
-    const { memberId} = filter;
+    const { memberId } = filter;
 
     let filterStatement = sql``;
 

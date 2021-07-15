@@ -12,8 +12,8 @@ export class CreateAppActionTask extends BaseAppActionTask<AppAction> {
   private requestDetails: AuthTokenSubject;
 
   constructor(actor: Actor, data: Partial<AppAction>, itemId: string,
-              requestDetails: AuthTokenSubject, appActionService: AppActionService,
-              itemService: ItemService, itemMembershipService: ItemMembershipService) {
+    requestDetails: AuthTokenSubject, appActionService: AppActionService,
+    itemService: ItemService, itemMembershipService: ItemMembershipService) {
     super(actor, appActionService, itemService, itemMembershipService);
     this.requestDetails = requestDetails;
     this.data = data;

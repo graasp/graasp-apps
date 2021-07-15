@@ -202,21 +202,24 @@ export class AppDataService {
   }
 
   /**
-   * Get info from members who can access the `item`'s parent
+   * Get info of members who can access the `item`'s parent or, if there's no parent,
+   * members who can access the member
    * @param item Item
    * @param transactionHandler Database transaction handler
    */
   async getParentItemMembers(item: Item, transactionHandler: TrxHandler): Promise<Partial<Member>[]> {
     const { path: itemPath } = item;
 
-    if (!itemPath.includes('.')) return [];
+    const itemPathCondition = itemPath.includes('.') ?
+      sql`@> subpath(${itemPath}, 0, -1)` :
+      sql`= ${itemPath}`;
 
     return transactionHandler.query<Partial<Member>>(sql`
         SELECT member.id AS id, name, CASE WHEN extra ? 'itemLogin' THEN email ELSE NULL END AS email
           FROM member
         INNER JOIN item_membership
           ON member.id = item_membership.member_id
-        WHERE item_membership.item_path @> subpath(${itemPath}, 0, -1)
+        WHERE item_membership.item_path ${itemPathCondition}
       `)
       .then(({ rows }) => rows.slice(0));
   }

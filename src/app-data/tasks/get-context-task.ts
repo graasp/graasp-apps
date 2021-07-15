@@ -4,7 +4,7 @@ import { Actor, DatabaseTransactionHandler, Item, ItemMembershipService, ItemSer
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject } from '../../interfaces/request';
-import { ItemNotFound, MemberCannotReadItem, TokenItemIdMismatch } from '../../util/graasp-apps-error';
+import { ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
 
 export class GetContextTask extends BaseAppDataTask<Partial<Item>> {
   get name(): string { return GetContextTask.name; }
@@ -48,7 +48,9 @@ export class GetContextTask extends BaseAppDataTask<Partial<Item>> {
 
     const [foldersAndAppItems, members] = await Promise.all([p1, p2]);
     const parent: Partial<Item> & { children?: Partial<Item>[], members?: Partial<Member>[] } =
-      this.sortedListToTree(foldersAndAppItems[0], foldersAndAppItems, 1);
+      foldersAndAppItems.length ?
+        this.sortedListToTree(foldersAndAppItems[0], foldersAndAppItems, 1) : {};
+
     parent.members = members;
 
     this.status = 'OK';

@@ -5,7 +5,7 @@ import { AppData } from '../interfaces/app-data';
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject, SingleItemGetFilter } from '../../interfaces/request';
-import { AppDataNotAccessible, ItemNotFound, MemberCannotReadItem, TokenItemIdMismatch } from '../../util/graasp-apps-error';
+import { AppDataNotAccessible, ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
 
 export class GetAppDataTask extends BaseAppDataTask<readonly AppData[]> {
   get name(): string { return GetAppDataTask.name; }

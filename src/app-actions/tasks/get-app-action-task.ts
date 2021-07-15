@@ -19,8 +19,8 @@ export class GetAppActionTask extends BaseAppActionTask<readonly AppAction[]> {
    * @param requestDetails Information contained in the auth token
    */
   constructor(actor: Actor, itemId: string, filter: SingleItemGetFilter,
-              requestDetails: AuthTokenSubject, appActionService: AppActionService,
-              itemService: ItemService, itemMembershipService: ItemMembershipService) {
+    requestDetails: AuthTokenSubject, appActionService: AppActionService,
+    itemService: ItemService, itemMembershipService: ItemMembershipService) {
     super(actor, appActionService, itemService, itemMembershipService);
 
     this.requestDetails = requestDetails;
@@ -49,16 +49,15 @@ export class GetAppActionTask extends BaseAppActionTask<readonly AppAction[]> {
     let { memberId: fMemberId } = this.filter;
 
     if (permission !== 'admin') {
-      if(!fMemberId){
+      if (!fMemberId) {
         fMemberId = memberId;
-      }
-      else if(fMemberId !== memberId){
+      } else if (fMemberId !== memberId) {
         throw new AppActionNotAccessible();
       }
     }
 
     const appActions = await this.appActionService
-      .getForItem(this.targetId, { memberId: fMemberId}, handler);
+      .getForItem(this.targetId, { memberId: fMemberId }, handler);
 
     this.status = 'OK';
     this._result = appActions;
