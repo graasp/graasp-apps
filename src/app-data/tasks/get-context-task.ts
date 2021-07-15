@@ -35,13 +35,13 @@ export class GetContextTask extends BaseAppDataTask<Partial<Item>> {
     }
 
     // get item
-    const item = await this.itemService.get(this.targetId, handler);
-    if (!item) throw new ItemNotFound(this.targetId);
+    const item = await this.itemService.get(this.itemId, handler);
+    if (!item) throw new ItemNotFound(this.itemId);
 
     // get member's permission over item
     const { id: memberId } = this.actor;
     const canRead = await this.itemMembershipService.canRead(memberId, item, handler);
-    if (!canRead) throw new MemberCannotReadItem(this.targetId);
+    if (!canRead) throw new MemberCannotReadItem(this.itemId);
 
     const p1 = this.appDataService.getFoldersAndAppsFromParent(item, handler);
     const p2 = this.appDataService.getParentItemMembers(item, handler);
