@@ -237,4 +237,13 @@ export class AppDataService {
       `)
       .then(count => parseInt(count, 10) === 1);
   }
+
+  async getAllValidAppOrigins(transactionHandler: TrxHandler): Promise<string[]> {
+    return transactionHandler
+      .query<string>(sql`
+        SELECT DISTINCT unnest(origins)
+          FROM publisher
+      `)
+      .then(({ rows }) => rows.slice(0));
+  }
 }
