@@ -8,9 +8,15 @@ CREATE TABLE "publisher" (
 
 CREATE TABLE "app" (
   "id" uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+
   "name" character varying(250) NOT NULL,
+  "description" character varying(250) NOT NULL,
+
+  "url" character varying(250) NOT NULL,
   "publisher_id" uuid REFERENCES "publisher" ("id") ON DELETE CASCADE NOT NULL,
-  "created_at" timestamp NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc')
+  "created_at" timestamp NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+
+  "extra" jsonb NOT NULL DEFAULT '{}'::jsonb,
 );
 
 /**
