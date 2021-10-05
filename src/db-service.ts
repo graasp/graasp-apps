@@ -24,18 +24,6 @@ export class AppService {
     sql`, `
   );
 
-  private static allColumnsForJoins = sql.join(
-    [
-      [['app_action', 'id'], ['id']],
-      [['app_action', 'member_id'], ['memberId']],
-      [['app_action', 'item_id'], ['itemId']],
-      [['app_action', 'data'], ['data']],
-      [['app_action', 'type'], ['type']],
-      [['app_action', 'created_at'], ['createdAt']]
-    ].map(c => sql.join(c.map(cwa => sql.identifier(cwa)), sql` AS `)),
-    sql`, `
-  );
-
   /**
    * Get item's app action.
    * @param itemId Item id
@@ -44,9 +32,6 @@ export class AppService {
    */
   public async getAppsList(transactionHandler: TrxHandler): Promise<readonly App[]> {
     return transactionHandler.query<App>(sql`SELECT ${AppService.allColumns} FROM app`)
-      .then(({ rows }) => {
-        console.log('TEST' + rows)
-        return rows;
-      });
+      .then(({ rows }) => rows);
   }
 }
