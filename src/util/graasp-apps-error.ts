@@ -65,4 +65,3 @@ export class AppActionNotAccessible extends GraaspAppsError {
     super({ code: 'GAERR008', statusCode: 403, message: 'Member cannot request this app action' }, data);
   }
 }
-export const GRAASP_ACTOR = { id: '12345678-1234-1234-1234-123456789012' }

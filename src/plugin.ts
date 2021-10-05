@@ -17,7 +17,6 @@ import { GenerateApiAccessTokenSujectTask } from './app-data/tasks/generate-api-
 import { GetContextTask } from './app-data/tasks/get-context-task';
 import { AppService } from './db-service';
 import { GetAppListTask } from './tasks/get-app-list-task';
-import { GRAASP_ACTOR } from './util/graasp-apps-error';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -97,20 +96,18 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
         Object.assign({}, corsPluginOptions, { origin: graaspAndAppsOrigins }));
     }
 
-    fastify.register(async (fastify) => {
-        const aS = new AppService();
-        fastify.decorate('appService', aS);
-
-        fastify.get('/list', { schema: getMany }, async () => {
-          const task = new GetAppListTask(GRAASP_ACTOR, aS);
-          return await runner.runSingle(task);
-        });
-    });
-
     fastify.register(async function (fastify) {
       // requires authenticated member using web client (session cookie)
       // or using mobile app client (auth token)
       fastify.addHook('preHandler', fastify.verifyAuthentication);
+
+      const aS = new AppService();
+      fastify.decorate('appService', aS);
+
+      fastify.get('/list', { schema: getMany }, async ({ member }) => {
+        const task = new GetAppListTask(member, aS);
+        return await runner.runSingle(task);
+      });
 
       const promisifiedJwtSign = promisify<{ sub: AuthTokenSubject }, { expiresIn: string }, string>(fastify.jwt.sign);
 
