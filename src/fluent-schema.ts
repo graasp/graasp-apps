@@ -1,5 +1,18 @@
 import S from 'fluent-json-schema';
 
+export const appSchema = S.object()
+  .additionalProperties(false) 
+  .prop('name', S.string())
+  .prop('description', S.string())
+  .prop('url', S.string())
+  .prop('extra', S.object().additionalProperties(true));
+
+export const getMany = {
+    response: {
+      200: S.array().items(appSchema),
+    },
+  };
+
 /**
  * Fluent schema definitions to extend core schemas
  */

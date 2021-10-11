@@ -9,12 +9,14 @@ import appDataPlugin from './app-data/service-api';
 import appActionPlugin from './app-actions/service-api';
 
 import { AuthTokenSubject } from './interfaces/request';
-import { createSchema, updateSchema } from './fluent-schema';
+import { getMany, createSchema, updateSchema } from './fluent-schema';
 import common, { generateToken, getContext } from './schemas';
 import { AppIdentification } from './interfaces/app-details';
 import { AppDataService } from './app-data/db-service';
 import { GenerateApiAccessTokenSujectTask } from './app-data/tasks/generate-api-access-token-subject';
 import { GetContextTask } from './app-data/tasks/get-context-task';
+import { AppService } from './db-service';
+import { GetAppListTask } from './tasks/get-app-list-task';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -98,6 +100,14 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
       // requires authenticated member using web client (session cookie)
       // or using mobile app client (auth token)
       fastify.addHook('preHandler', fastify.verifyAuthentication);
+
+      const aS = new AppService();
+      fastify.decorate('appService', aS);
+
+      fastify.get('/list', { schema: getMany }, async ({ member }) => {
+        const task = new GetAppListTask(member, aS);
+        return await runner.runSingle(task);
+      });
 
       const promisifiedJwtSign = promisify<{ sub: AuthTokenSubject }, { expiresIn: string }, string>(fastify.jwt.sign);
 
