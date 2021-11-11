@@ -4,6 +4,7 @@ import { promisify } from 'util';
 import fastifyJwt from 'fastify-jwt';
 import fastifyAuth from 'fastify-auth';
 import fastifyCors from 'fastify-cors';
+import { GraaspFileItemOptions } from 'graasp-plugin-file-item';
 
 import appDataPlugin from './app-data/service-api';
 import appActionPlugin from './app-actions/service-api';
@@ -20,17 +21,21 @@ import { GetAppListTask } from './tasks/get-app-list-task';
 
 declare module 'fastify' {
   interface FastifyInstance {
-    appDataService: AppDataService
+    appDataService: AppDataService;
+    // s3FileItemPluginOptions?: GraaspS3FileItemOptions;
+    fileItemPluginOptions?: GraaspFileItemOptions;
   }
-  interface FastifyRequest {
+  /*interface FastifyRequest {
     authTokenSubject: AuthTokenSubject;
-  }
+  }*/
 }
 
 interface AppsPluginOptions {
   jwtSecret: string;
   /** In minutes. Defaults to 30 (minutes) */
   jwtExpiration?: number;
+
+  enableS3FileItemPlugin?: boolean;
 }
 
 const ROUTES_PREFIX = '/app-items';
@@ -146,7 +151,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
     });
 
     // register app data plugin
-    fastify.register(appDataPlugin);
+    fastify.register(appDataPlugin, {});
 
     // register app action plugin
     fastify.register(appActionPlugin);

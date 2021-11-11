@@ -16,7 +16,7 @@ CREATE TABLE "app" (
   "publisher_id" uuid REFERENCES "publisher" ("id") ON DELETE CASCADE NOT NULL,
   "created_at" timestamp NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
 
-  "extra" jsonb NOT NULL DEFAULT '{}'::jsonb,
+  "extra" jsonb NOT NULL DEFAULT '{}'::jsonb
 );
 
 /**

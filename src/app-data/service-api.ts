@@ -1,6 +1,7 @@
 // global
 import { FastifyPluginAsync } from 'fastify';
 import { IdParam } from 'graasp';
+import FileItemPlugin from 'graasp-plugin-file-item';
 
 // local
 import { AppData, InputAppData } from './interfaces/app-data';
@@ -14,7 +15,11 @@ import common, {
 import { ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
 import { TaskManager } from './task-manager';
 
-const plugin: FastifyPluginAsync = async (fastify) => {
+interface AppsDataPluginOptions {
+  enableS3FileItemPlugin?: boolean;
+}
+
+const plugin: FastifyPluginAsync<AppsDataPluginOptions> = async (fastify, options) => {
   const {
     items: { dbService: iS },
     itemMemberships: { dbService: iMS },
@@ -32,6 +37,15 @@ const plugin: FastifyPluginAsync = async (fastify) => {
     // origins from the publishers table an build a rule with that.
 
     fastify.addHook('preHandler', fastify.verifyBearerAuth);
+
+    if(!options.enableS3FileItemPlugin){
+
+      await fastify.register(FileItemPlugin, {
+        storageRootPath: '/apps',
+        onFileUploaded: async (parent, data, { token }) => [taskManager.createCreateTask({ id: token.member}, data, parent, token)],
+        downloadValidation: async (id, { token }) => [],
+      });
+    }
 
     // create app data
     fastify.post<{ Params: { itemId: string }; Body: Partial<InputAppData> }>(
