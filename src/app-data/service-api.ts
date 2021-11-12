@@ -53,7 +53,7 @@ const plugin: FastifyPluginAsync<AppsDataPluginOptions> = async (fastify, option
           token
         )],
         downloadValidation: async (id, { token }) => [
-          taskManager.createGetItemsAppDataTask({ id: token.member }, {itemId: [ id ] }, token)
+          taskManager.createGetTask({ id: token.member }, id, { memberId: token.member }, token)
         ],
       });
     }
