@@ -4,6 +4,7 @@ import { promisify } from 'util';
 import fastifyJwt from 'fastify-jwt';
 import fastifyAuth from 'fastify-auth';
 import fastifyCors from 'fastify-cors';
+import graaspPluginThumbnails from 'graasp-plugin-thumbnails';
 
 import appDataPlugin from './app-data/service-api';
 import appActionPlugin from './app-actions/service-api';
@@ -31,12 +32,13 @@ interface AppsPluginOptions {
   jwtSecret: string;
   /** In minutes. Defaults to 30 (minutes) */
   jwtExpiration?: number;
+  enableS3FileItemPlugin?: boolean
 }
 
 const ROUTES_PREFIX = '/app-items';
 
 const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) => {
-  const { jwtSecret, jwtExpiration = 30 } = options;
+  const { jwtSecret, jwtExpiration = 30, enableS3FileItemPlugin } = options;
 
   const {
     items: { dbService: iS, extendCreateSchema, extendExtrasUpdateSchema },
@@ -150,6 +152,21 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
     // register app action plugin
     fastify.register(appActionPlugin);
+
+    // register thumbnails for app templates and allow thumbnail generation when creating a new app 
+    await fastify.register(graaspPluginThumbnails, {
+      enableS3FileItemPlugin,
+      enableAppsHooks: true,
+      pluginStoragePrefix: 'thumbnails/items',
+      uploadValidation: async () => {
+        throw new Error('Uploading a thumbnail for apps is not implemented.');
+      },
+      downloadValidation: async () => {
+        throw new Error('Downloading a thumbnail for apps is not implemented.');
+      },
+      // endpoint
+      prefix: '/thumbnails',
+    });
 
   }, { prefix: ROUTES_PREFIX });
 };
