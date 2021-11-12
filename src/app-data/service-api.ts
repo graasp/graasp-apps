@@ -42,8 +42,19 @@ const plugin: FastifyPluginAsync<AppsDataPluginOptions> = async (fastify, option
 
       await fastify.register(FileItemPlugin, {
         storageRootPath: '/apps',
-        onFileUploaded: async (parent, data, { token }) => [taskManager.createCreateTask({ id: token.member}, data, parent, token)],
-        downloadValidation: async (id, { token }) => [],
+        onFileUploaded: async (parent, data, { token }) => [taskManager.createCreateTask({ id: token.member }, {
+          data: {
+            ...data
+          },
+          type: 'file',
+          visibility: 'member',
+          },
+          parent,
+          token
+        )],
+        downloadValidation: async (id, { token }) => [
+          taskManager.createGetItemsAppDataTask({ id: token.member }, {itemId: [ id ] }, token)
+        ],
       });
     }
 
