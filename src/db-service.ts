@@ -1,6 +1,6 @@
 import { sql, DatabaseTransactionConnectionType as TrxHandler } from 'slonik';
 
-import { App } from './interfaces/app-item';
+import { App, AppItemExtra } from './interfaces/app-item';
 
 /**
  * Database's first layer of abstraction for App Action
@@ -35,12 +35,12 @@ export class AppService {
       .then(({ rows }) => rows);
   }
 
-  async getAppIdForUrl(url: string, transactionHandler: TrxHandler): Promise<string> {
+  async getAppIdForUrl(extra: AppItemExtra, transactionHandler: TrxHandler): Promise<string> {
     return transactionHandler
       .query<string>(sql`
         SELECT id 
           FROM app 
-        WHERE url = ${url}
+        WHERE url = ${extra.app.url}
       `)
       .then(({ rows }) => rows[0]);
   }
