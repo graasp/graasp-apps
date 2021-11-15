@@ -146,8 +146,9 @@ export class AppDataService {
 
   async getForId(id: string, transactionHandler: TrxHandler) : Promise<AppData>{
     return transactionHandler.one<AppData>(sql`
-      SELECT ${AppDataService.allColumnsForJoins}
-      where id = ${id}
+      SELECT ${AppDataService.allColumnsForJoins} 
+      FROM app_data 
+      WHERE id = ${id}
     `);
   }
 

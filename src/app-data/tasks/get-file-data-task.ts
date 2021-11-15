@@ -1,5 +1,5 @@
 // global
-import { Actor, DatabaseTransactionHandler, Item, ItemMembershipService, ItemService, PermissionLevel } from 'graasp';
+import { Actor, DatabaseTransactionHandler, Item, ItemMembershipService, ItemService } from 'graasp';
 // local
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
@@ -48,7 +48,7 @@ export class GetFileDataTask extends BaseAppDataTask<Item<FileItemExtra>> {
     const permission = await this.itemMembershipService.getPermissionLevel(memberId, item, handler);
     if (!permission) throw new MemberCannotReadItem(appData.itemId);
 
-    if (permission !== PermissionLevel.Admin) {
+    if (permission !== 'admin') {
       // members are only allowed to download their items
       if(appData.memberId !== memberId && appData.visibility === 'member'){
         throw new AppDataNotAccessible();
