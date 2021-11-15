@@ -144,6 +144,13 @@ export class AppDataService {
       .then(({ rows }) => rows);
   }
 
+  async getForId(id: string, transactionHandler: TrxHandler) : Promise<AppData>{
+    return transactionHandler.one<AppData>(sql`
+      SELECT ${AppDataService.allColumnsForJoins}
+      where id = ${id}
+    `);
+  }
+
   /**
    * Get AppData of the items w/ `itemIds` if they have the `item`'s parent as ancestor, i.e.,
    * from items (w/ `itemIds`) in the `item`'s parent subtree.
