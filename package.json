@@ -25,7 +25,8 @@
     "fastify-cors": "^6.0.2",
     "fastify-jwt": "^2.4.0",
     "fluent-json-schema": "^3.0.0",
-    "graasp-plugin-file-item": "github:graasp/graasp-plugin-file-item#14/appsFiles"
+    "graasp-plugin-file-item": "github:graasp/graasp-plugin-file-item#14/appsFiles",
+    "graasp-plugin-s3-file-item": "github:graasp/graasp-plugin-s3-file-item#14/appFiles"
   },
   "devDependencies": {
     "@types/eslint": "^7.2.5",

@@ -18,16 +18,14 @@ import { GenerateApiAccessTokenSujectTask } from './app-data/tasks/generate-api-
 import { GetContextTask } from './app-data/tasks/get-context-task';
 import { AppService } from './db-service';
 import { GetAppListTask } from './tasks/get-app-list-task';
+import { GraaspS3FileItemOptions } from 'graasp-plugin-s3-file-item';
 
 declare module 'fastify' {
   interface FastifyInstance {
     appDataService: AppDataService;
-    // s3FileItemPluginOptions?: GraaspS3FileItemOptions;
+    s3FileItemPluginOptions?: GraaspS3FileItemOptions;
     fileItemPluginOptions?: GraaspFileItemOptions;
   }
-  /*interface FastifyRequest {
-    authTokenSubject: AuthTokenSubject;
-  }*/
 }
 
 interface AppsPluginOptions {
@@ -151,7 +149,10 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
     });
 
     // register app data plugin
-    fastify.register(appDataPlugin, {});
+    fastify.register(appDataPlugin, {
+      s3FileItemPluginOptions: fastify.s3FileItemPluginOptions,
+      enableS3FileItemPlugin: options.enableS3FileItemPlugin
+    });
 
     // register app action plugin
     fastify.register(appActionPlugin);

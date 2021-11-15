@@ -2,6 +2,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { IdParam } from 'graasp';
 import FileItemPlugin from 'graasp-plugin-file-item';
+import s3FileItemPlugin, { GraaspS3FileItemOptions } from 'graasp-plugin-s3-file-item';
 
 // local
 import { AppData, InputAppData } from './interfaces/app-data';
@@ -17,6 +18,7 @@ import { TaskManager } from './task-manager';
 
 interface AppsDataPluginOptions {
   enableS3FileItemPlugin?: boolean;
+  s3FileItemPluginOptions?: GraaspS3FileItemOptions;
 }
 
 const plugin: FastifyPluginAsync<AppsDataPluginOptions> = async (fastify, options) => {
@@ -38,8 +40,24 @@ const plugin: FastifyPluginAsync<AppsDataPluginOptions> = async (fastify, option
 
     fastify.addHook('preHandler', fastify.verifyBearerAuth);
 
-    if(!options.enableS3FileItemPlugin){
-
+    if(options.enableS3FileItemPlugin){
+      await fastify.register(s3FileItemPlugin, {
+        ...options.s3FileItemPluginOptions,
+        onFileUploaded: async (parent, data, { token }) => [taskManager.createCreateTask({ id: token.member }, {
+          data: {
+            ...data
+          },
+          type: 'file',
+          visibility: 'member',
+          },
+          parent,
+          token
+        )],
+        downloadValidation: async (id, { token }) => [
+          taskManager.createGetFileTask({ id: token.member }, id, token)
+        ],
+      });
+    }else{
       await fastify.register(FileItemPlugin, {
         storageRootPath: '/apps',
         onFileUploaded: async (parent, data, { token }) => [taskManager.createCreateTask({ id: token.member }, {
