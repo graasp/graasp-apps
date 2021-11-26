@@ -34,4 +34,14 @@ export class AppService {
     return transactionHandler.query<App>(sql`SELECT ${AppService.allColumns} FROM app`)
       .then(({ rows }) => rows);
   }
+
+  public async getAppIdForUrl(url: string, transactionHandler: TrxHandler): Promise<string> {
+    return transactionHandler
+      .query<string>(sql`
+        SELECT id
+          FROM app
+        WHERE url = ${url}
+      `)
+      .then(({ rows }) => rows[0]);
+  }
 }

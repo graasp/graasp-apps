@@ -4,10 +4,11 @@ import { promisify } from 'util';
 import fastifyJwt from 'fastify-jwt';
 import fastifyAuth from 'fastify-auth';
 import fastifyCors from 'fastify-cors';
+import ThumbnailsPlugin from 'graasp-plugin-thumbnails';
+import { ServiceMethod, GraaspLocalFileItemOptions, GraaspS3FileItemOptions } from 'graasp-plugin-file';
 
 import appDataPlugin from './app-data/service-api';
 import appActionPlugin from './app-actions/service-api';
-
 import { AuthTokenSubject } from './interfaces/request';
 import { getMany, createSchema, updateSchema } from './fluent-schema';
 import common, { generateToken, getContext } from './schemas';
@@ -20,23 +21,27 @@ import { GetAppListTask } from './tasks/get-app-list-task';
 
 declare module 'fastify' {
   interface FastifyInstance {
-    appDataService: AppDataService
+    appDataService: AppDataService;
+    s3FileItemPluginOptions?: GraaspS3FileItemOptions;
+    fileItemPluginOptions?: GraaspLocalFileItemOptions;
   }
-  interface FastifyRequest {
-    authTokenSubject: AuthTokenSubject;
-  }
+  // interface FastifyRequest {
+  //   authTokenSubject: AuthTokenSubject;
+  // }
 }
 
 interface AppsPluginOptions {
   jwtSecret: string;
   /** In minutes. Defaults to 30 (minutes) */
   jwtExpiration?: number;
+
+  enableS3: boolean;
 }
 
 const ROUTES_PREFIX = '/app-items';
 
 const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) => {
-  const { jwtSecret, jwtExpiration = 30 } = options;
+  const { jwtSecret, jwtExpiration = 30, enableS3 } = options;
 
   const {
     items: { dbService: iS, extendCreateSchema, extendExtrasUpdateSchema },
@@ -125,6 +130,28 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
     fastify.register(async function (fastify) {
       await fastify.register(fastifyAuth);
+
+      const pathPrefix = '/apps/templates';
+
+      fastify.register(ThumbnailsPlugin, {
+        serviceMethod: options.enableS3 ? ServiceMethod.S3 : ServiceMethod.LOCAL,
+        serviceOptions: {
+          s3: fastify.s3FileItemPluginOptions,
+          local: fastify.fileItemPluginOptions,
+        },
+        pathPrefix: pathPrefix,
+        enableAppsHooks: {
+          appsTemplateRoot: pathPrefix,
+        },
+        uploadPreHookTasks: async (id, { member }) => {
+          throw new Error('Not Implemented');
+        },
+        downloadPreHookTasks: async ({ itemId: id, filename }, { member }) => {
+          throw new Error('Not Implemented');
+        },
+
+        prefix: '/thumbnails'
+      });
 
       // get app item context
       fastify.get<{ Params: { itemId: string } }>(

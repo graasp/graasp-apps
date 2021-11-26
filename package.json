@@ -25,7 +25,9 @@
     "fastify-bearer-auth": "^6.0.0",
     "fastify-cors": "^6.0.2",
     "fastify-jwt": "^2.4.0",
-    "fluent-json-schema": "^3.0.0"
+    "fluent-json-schema": "^3.0.0",
+    "graasp-plugin-file": "github:graasp/graasp-plugin-file#1/init",
+    "graasp-plugin-thumbnails": "github:graasp/graasp-plugin-thumbnails#9/newFilePlugin"
   },
   "devDependencies": {
     "@types/eslint": "^7.2.5",
