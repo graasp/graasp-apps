@@ -1664,7 +1664,7 @@ __metadata:
 
 "graasp-plugin-thumbnails@github:graasp/graasp-plugin-thumbnails#9/newFilePlugin":
   version: 0.1.0
-  resolution: "graasp-plugin-thumbnails@https://github.com/graasp/graasp-plugin-thumbnails.git#commit=1d808bb7e393034dc77d6abbff18646d494c387a"
+  resolution: "graasp-plugin-thumbnails@https://github.com/graasp/graasp-plugin-thumbnails.git#commit=3a976e67fb2a00030b74c59c5665dcd4291a07c9"
   dependencies:
     graasp-plugin-file: "github:graasp/graasp-plugin-file#1/init"
     sharp: 0.29.1
