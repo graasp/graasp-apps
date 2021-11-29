@@ -131,10 +131,10 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
     fastify.register(async function (fastify) {
       await fastify.register(fastifyAuth);
 
-      const pathPrefix = '/apps/templates';
+      const pathPrefix = '/apps/templates/';
 
       fastify.register(ThumbnailsPlugin, {
-        serviceMethod: options.enableS3 ? ServiceMethod.S3 : ServiceMethod.LOCAL,
+        serviceMethod: enableS3 ? ServiceMethod.S3 : ServiceMethod.LOCAL,
         serviceOptions: {
           s3: fastify.s3FileItemPluginOptions,
           local: fastify.fileItemPluginOptions,
@@ -173,7 +173,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
     });
 
     // register app data plugin
-    fastify.register(appDataPlugin);
+    fastify.register(appDataPlugin, { enableS3 });
 
     // register app action plugin
     fastify.register(appActionPlugin);

@@ -9,6 +9,7 @@ import { DeleteAppDataTask } from './tasks/delete-app-data-task';
 import { GetAppDataTask } from './tasks/get-app-data-task';
 import { GetItemsAppDataTask } from './tasks/get-items-app-data-task';
 import { UpdateAppDataTask } from './tasks/update-app-data-task';
+import { GetFileDataInputType, GetFileDataTask } from './tasks/get-file-data-task';
 
 export class TaskManager {
   private appDataService: AppDataService;
@@ -91,5 +92,12 @@ export class TaskManager {
   createGetItemsAppDataTask(actor: Actor, filter: ManyItemsGetFilter, requestDetails: AuthTokenSubject): GetItemsAppDataTask {
     return new GetItemsAppDataTask(actor, filter, requestDetails,
       this.appDataService, this.itemService, this.itemMembershipService);
+  }
+
+  createGetFileTask(actor: Actor, input: GetFileDataInputType, requestDetails: AuthTokenSubject): GetFileDataTask {
+    const task = new GetFileDataTask(actor, input, requestDetails,
+      this.appDataService, this.itemService, this.itemMembershipService);
+    task.getResult = () => { return task.result; };
+    return task;
   }
 }
