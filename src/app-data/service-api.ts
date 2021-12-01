@@ -61,7 +61,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
       },
       buildFilePath: buildFilePath,
 
-      uploadPreHookTasks: async (itemId, { token }) => {
+      uploadPreHookTasks: async ({ parentId: itemId }, { token }) => {
         const { member: id } = token;
         return [ taskManager.createGetTask({ id }, itemId, { visibility: 'member'}, token) ];
       },
