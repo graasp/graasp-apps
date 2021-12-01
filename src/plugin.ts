@@ -126,10 +126,6 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
           return { token };
         }
       );
-    });
-
-    fastify.register(async function (fastify) {
-      await fastify.register(fastifyAuth);
 
       const pathPrefix = '/apps/templates/';
 
@@ -142,6 +138,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
         pathPrefix: pathPrefix,
         enableAppsHooks: {
           appsTemplateRoot: pathPrefix,
+          itemsRoot: 'items/',
         },
         uploadPreHookTasks: async (id, { member }) => {
           throw new Error('Not Implemented');
@@ -152,6 +149,10 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
         prefix: '/thumbnails'
       });
+    });
+
+    fastify.register(async function (fastify) {
+      await fastify.register(fastifyAuth);
 
       // get app item context
       fastify.get<{ Params: { itemId: string } }>(
