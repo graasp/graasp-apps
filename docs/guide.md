@@ -4,7 +4,7 @@ Graasp can embed web applications as a resource. They should be added as an item
 
 ## Introduction
 
-When an app is added as a resource, it is linked to an item. Therefore, two added apps will corredpond to two different items, which leads them to have different item ids, and different app data.
+When an app is added as a resource, it is linked to an item. Therefore, two added apps will correspond to two different items, which leads them to have different item ids, and different app data.
 
 ## App Authentication
 

@@ -1,6 +1,6 @@
 # API
 
-All following requests need an authentication token receive as describe in the [guide](./guide.md). 
+All following requests need an authentication token received as described in the [guide](./guide.md). 
 
 Therefore, don't forget to use `Authorization: Bearer <token>` in your request's headers.
 
@@ -39,7 +39,7 @@ App actions are analytic traces the app might save. They have the following stru
 `POST <apiHost>/app-items/<item-id>/app-action`
 
 - body: `{ data: { ... }, type, [memberId], [visibility] }`
-- returned value: added app data
+- returned value: created app action
 
 
 ****
@@ -74,7 +74,7 @@ App data are all data the app might save. They have the following structure:
 `POST <apiHost>/app-items/<item-id>/app-data`
 
 - body: `{ data: { ... }, type, [memberId], [visibility] }`
-- returned value: added app data
+- returned value: created app data
 
 ### PATCH App Data
 
