@@ -5,12 +5,12 @@ import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject } from '../../interfaces/request';
 import { AppDataNotAccessible, ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
-import { LocalFileItemExtra, S3FileItemExtra } from 'graasp-plugin-file';
+import { LocalFileItemExtra, S3FileItemExtra, ServiceMethod } from 'graasp-plugin-file';
 
 
 export type GetFileDataInputType = {
   appDataId?: string;
-  enableS3?: boolean;
+  serviceMethod?: ServiceMethod;
 };
 
 export class GetFileDataTask extends BaseAppDataTask<{filepath: string, mimetype: string}> {
@@ -37,7 +37,7 @@ export class GetFileDataTask extends BaseAppDataTask<{filepath: string, mimetype
   async run(handler: DatabaseTransactionHandler): Promise<void> {
     this.status = 'RUNNING';
 
-    const { appDataId, enableS3 } = this.input;
+    const { appDataId, serviceMethod } = this.input;
     const { id: memberId } = this.actor;
     const { item: tokenItemId } = this.requestDetails;
 
@@ -71,7 +71,7 @@ export class GetFileDataTask extends BaseAppDataTask<{filepath: string, mimetype
       size: string;
       mimetype: string;
     } => {
-      if(enableS3)
+      if(serviceMethod === ServiceMethod.S3)
           return (extra as S3FileItemExtra).s3File;
         else
           return (extra as LocalFileItemExtra).file;

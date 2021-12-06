@@ -16,7 +16,7 @@ import { ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
 import { TaskManager } from './task-manager';
 
 interface PluginOptions {
-  enableS3: boolean;
+  serviceMethod: ServiceMethod;
 }
 
 const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
@@ -27,7 +27,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
     appDataService: aDS
   } = fastify;
 
-  const { enableS3 } = options;
+  const { serviceMethod } = options;
 
   const taskManager = new TaskManager(aDS, iS, iMS);
 
@@ -45,7 +45,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
       S3: 's3File',
       LOCAL: 'file',
     };
-    const SERVICE_ITEM_TYPE = enableS3 ? FILE_ITEM_TYPES.S3 : FILE_ITEM_TYPES.LOCAL;
+    const SERVICE_ITEM_TYPE = serviceMethod === ServiceMethod.S3 ? FILE_ITEM_TYPES.S3 : FILE_ITEM_TYPES.LOCAL;
 
     const randomHexOf4 = () => ((Math.random() * (1 << 16)) | 0).toString(16).padStart(4, '0');
     const buildFilePath = () => {
@@ -54,7 +54,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
     };
 
     fastify.register(GraaspFilePlugin, {
-      serviceMethod: enableS3 ? ServiceMethod.S3 : ServiceMethod.LOCAL,
+      serviceMethod: serviceMethod,
       serviceOptions: {
         s3: fastify.s3FileItemPluginOptions,
         local: fastify.fileItemPluginOptions,
@@ -99,7 +99,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
       },
 
       downloadPreHookTasks: async ({ itemId }, { token }) => {
-        return [ taskManager.createGetFileTask({ id: token.member }, { appDataId: itemId, enableS3 }, token) ];
+        return [ taskManager.createGetFileTask({ id: token.member }, { appDataId: itemId, serviceMethod }, token) ];
       },
     });
 

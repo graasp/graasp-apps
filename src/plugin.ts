@@ -35,13 +35,14 @@ interface AppsPluginOptions {
   /** In minutes. Defaults to 30 (minutes) */
   jwtExpiration?: number;
 
-  enableS3: boolean;
+  serviceMethod: ServiceMethod;
 }
 
+const PATH_PREFIX = '/apps/templates/';
 const ROUTES_PREFIX = '/app-items';
 
 const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) => {
-  const { jwtSecret, jwtExpiration = 30, enableS3 } = options;
+  const { jwtSecret, jwtExpiration = 30, serviceMethod } = options;
 
   const {
     items: { dbService: iS, extendCreateSchema, extendExtrasUpdateSchema },
@@ -127,17 +128,17 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
         }
       );
 
-      const pathPrefix = '/apps/templates/';
+
 
       fastify.register(ThumbnailsPlugin, {
-        serviceMethod: enableS3 ? ServiceMethod.S3 : ServiceMethod.LOCAL,
+        serviceMethod: serviceMethod,
         serviceOptions: {
           s3: fastify.s3FileItemPluginOptions,
           local: fastify.fileItemPluginOptions,
         },
-        pathPrefix: pathPrefix,
+        pathPrefix: PATH_PREFIX,
         enableAppsHooks: {
-          appsTemplateRoot: pathPrefix,
+          appsTemplateRoot: PATH_PREFIX,
           itemsRoot: 'items/',
         },
         uploadPreHookTasks: async (id, { member }) => {
@@ -174,7 +175,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
     });
 
     // register app data plugin
-    fastify.register(appDataPlugin, { enableS3 });
+    fastify.register(appDataPlugin, { serviceMethod });
 
     // register app action plugin
     fastify.register(appActionPlugin);
