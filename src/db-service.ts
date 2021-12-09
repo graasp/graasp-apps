@@ -35,7 +35,7 @@ export class AppService {
       .then(({ rows }) => rows);
   }
 
-  public async getAppIdForUrl(url: string, transactionHandler: TrxHandler): Promise<string> {
+  public async getAppIdByUrl(url: string, transactionHandler: TrxHandler): Promise<string> {
     return transactionHandler
       .query<string>(sql`
         SELECT id

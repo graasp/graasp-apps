@@ -97,6 +97,8 @@ export class TaskManager {
   createGetFileTask(actor: Actor, input: GetFileDataInputType, requestDetails: AuthTokenSubject): GetFileDataTask {
     const task = new GetFileDataTask(actor, input, requestDetails,
       this.appDataService, this.itemService, this.itemMembershipService);
+
+    // This is necessary because the graasp-plugin-file use the getResult and by default getResult is undefined
     task.getResult = () => { return task.result; };
     return task;
   }

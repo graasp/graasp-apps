@@ -5,7 +5,8 @@ import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject } from '../../interfaces/request';
 import { AppDataNotAccessible, ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
-import { LocalFileItemExtra, S3FileItemExtra, ServiceMethod } from 'graasp-plugin-file';
+import { FileItemExtra, ServiceMethod } from 'graasp-plugin-file';
+import { getFileExtra } from 'graasp-plugin-file-item';
 
 
 export type GetFileDataInputType = {
@@ -41,7 +42,7 @@ export class GetFileDataTask extends BaseAppDataTask<{filepath: string, mimetype
     const { id: memberId } = this.actor;
     const { item: tokenItemId } = this.requestDetails;
 
-    const appData = await this.appDataService.getForId(appDataId, handler);
+    const appData = await this.appDataService.getById(appDataId, handler);
 
     this.checkTargetItemAndTokenItemMatch(appData.itemId, tokenItemId);
 
@@ -62,27 +63,12 @@ export class GetFileDataTask extends BaseAppDataTask<{filepath: string, mimetype
         throw new AppDataNotAccessible();
       }
     }
+    const extra = getFileExtra(serviceMethod, appData.data.extra as FileItemExtra);
 
-    const getFileExtra = (
-      extra: LocalFileItemExtra | S3FileItemExtra
-    ): {
-      name: string;
-      path: string;
-      size: string;
-      mimetype: string;
-    } => {
-      if(serviceMethod === ServiceMethod.S3)
-          return (extra as S3FileItemExtra).s3File;
-        else
-          return (extra as LocalFileItemExtra).file;
-    };
-
-    const extra = getFileExtra(appData.data.extra as LocalFileItemExtra);
-
-    this.status = 'OK';
     this._result = {
       filepath: extra.path,
       mimetype: extra.mimetype
     };
+    this.status = 'OK';
   }
 }

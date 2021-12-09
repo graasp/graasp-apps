@@ -247,7 +247,7 @@ export class AppDataService {
       .then(({ rows }) => rows.slice(0));
   }
 
-  async getForId(id: string, transactionHandler: TrxHandler) : Promise<AppData>{
+  async getById(id: string, transactionHandler: TrxHandler) : Promise<AppData>{
     return transactionHandler.one<AppData>(sql`
       SELECT ${AppDataService.allColumnsForJoins}
       FROM app_data

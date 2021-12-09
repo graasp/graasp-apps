@@ -25,9 +25,6 @@ declare module 'fastify' {
     s3FileItemPluginOptions?: GraaspS3FileItemOptions;
     fileItemPluginOptions?: GraaspLocalFileItemOptions;
   }
-  // interface FastifyRequest {
-  //   authTokenSubject: AuthTokenSubject;
-  // }
 }
 
 interface AppsPluginOptions {
@@ -38,7 +35,7 @@ interface AppsPluginOptions {
   serviceMethod: ServiceMethod;
 }
 
-const PATH_PREFIX = '/apps/templates/';
+const PATH_PREFIX = 'apps/templates/';
 const ROUTES_PREFIX = '/app-items';
 
 const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) => {
@@ -142,10 +139,10 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
           itemsRoot: 'items/',
         },
         uploadPreHookTasks: async (id, { member }) => {
-          throw new Error('Not Implemented');
+          throw new Error('The upload endpoint is not implemented');
         },
         downloadPreHookTasks: async ({ itemId: id, filename }, { member }) => {
-          throw new Error('Not Implemented');
+          throw new Error('The download endpoint is not implemented');
         },
 
         prefix: '/thumbnails'

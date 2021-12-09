@@ -2,6 +2,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { IdParam } from 'graasp';
 import GraaspFilePlugin, { ServiceMethod } from 'graasp-plugin-file';
+import { randomHexOf4, ORIGINAL_FILENAME_TRUNCATE_LIMIT } from 'graasp-plugin-file-item';
 
 // local
 import { AppData, InputAppData } from './interfaces/app-data';
@@ -14,6 +15,7 @@ import common, {
 } from './schemas';
 import { ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
 import { TaskManager } from './task-manager';
+import path from 'path';
 
 interface PluginOptions {
   serviceMethod: ServiceMethod;
@@ -47,10 +49,9 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
     };
     const SERVICE_ITEM_TYPE = serviceMethod === ServiceMethod.S3 ? FILE_ITEM_TYPES.S3 : FILE_ITEM_TYPES.LOCAL;
 
-    const randomHexOf4 = () => ((Math.random() * (1 << 16)) | 0).toString(16).padStart(4, '0');
     const buildFilePath = () => {
       const filepath = `${randomHexOf4()}/${randomHexOf4()}/${randomHexOf4()}-${Date.now()}`;
-      return `apps/${filepath}`;
+      return path.join('apps', filepath);
     };
 
     fastify.register(GraaspFilePlugin, {
@@ -71,7 +72,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
       ) => {
         const { member: id } = token;
 
-        const name = filename.substring(0, 100);
+        const name = filename.substring(0, ORIGINAL_FILENAME_TRUNCATE_LIMIT);
         const data = {
           name,
           type: SERVICE_ITEM_TYPE,
