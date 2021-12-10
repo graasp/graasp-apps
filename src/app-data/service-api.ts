@@ -2,7 +2,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { IdParam } from 'graasp';
 import GraaspFilePlugin, { ServiceMethod } from 'graasp-plugin-file';
-import { randomHexOf4, ORIGINAL_FILENAME_TRUNCATE_LIMIT } from 'graasp-plugin-file-item';
+import { randomHexOf4, ORIGINAL_FILENAME_TRUNCATE_LIMIT, FILE_ITEM_TYPES } from 'graasp-plugin-file-item';
 
 // local
 import { AppData, InputAppData } from './interfaces/app-data';
@@ -20,6 +20,8 @@ import path from 'path';
 interface PluginOptions {
   serviceMethod: ServiceMethod;
 }
+
+const PATH_PREFIX = 'apps/';
 
 const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
   const {
@@ -42,16 +44,11 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
 
     fastify.addHook('preHandler', fastify.verifyBearerAuth);
 
-    // Files
-    const FILE_ITEM_TYPES = {
-      S3: 's3File',
-      LOCAL: 'file',
-    };
     const SERVICE_ITEM_TYPE = serviceMethod === ServiceMethod.S3 ? FILE_ITEM_TYPES.S3 : FILE_ITEM_TYPES.LOCAL;
 
     const buildFilePath = () => {
       const filepath = `${randomHexOf4()}/${randomHexOf4()}/${randomHexOf4()}-${Date.now()}`;
-      return path.join('apps', filepath);
+      return path.join(PATH_PREFIX, filepath);
     };
 
     fastify.register(GraaspFilePlugin, {

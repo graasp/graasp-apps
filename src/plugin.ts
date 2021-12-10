@@ -33,13 +33,15 @@ interface AppsPluginOptions {
   jwtExpiration?: number;
 
   serviceMethod: ServiceMethod;
+  thumbnailsPrefix: string;
 }
 
 const PATH_PREFIX = 'apps/templates/';
 const ROUTES_PREFIX = '/app-items';
+const THUMBNAILS_ROUTE = '/thumbnails';
 
 const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) => {
-  const { jwtSecret, jwtExpiration = 30, serviceMethod } = options;
+  const { jwtSecret, jwtExpiration = 30, serviceMethod, thumbnailsPrefix } = options;
 
   const {
     items: { dbService: iS, extendCreateSchema, extendExtrasUpdateSchema },
@@ -125,8 +127,6 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
         }
       );
 
-
-
       fastify.register(ThumbnailsPlugin, {
         serviceMethod: serviceMethod,
         serviceOptions: {
@@ -136,7 +136,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
         pathPrefix: PATH_PREFIX,
         enableAppsHooks: {
           appsTemplateRoot: PATH_PREFIX,
-          itemsRoot: 'items/',
+          itemsRoot: thumbnailsPrefix,
         },
         uploadPreHookTasks: async (id, { member }) => {
           throw new Error('The upload endpoint is not implemented');
@@ -145,7 +145,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
           throw new Error('The download endpoint is not implemented');
         },
 
-        prefix: '/thumbnails'
+        prefix: THUMBNAILS_ROUTE,
       });
     });
 
