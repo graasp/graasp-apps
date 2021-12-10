@@ -1,6 +1,8 @@
 // global
 import { FastifyPluginAsync } from 'fastify';
 import { IdParam } from 'graasp';
+import GraaspFilePlugin, { ServiceMethod } from 'graasp-plugin-file';
+import { randomHexOf4, ORIGINAL_FILENAME_TRUNCATE_LIMIT, FILE_ITEM_TYPES } from 'graasp-plugin-file-item';
 
 // local
 import { AppData, InputAppData } from './interfaces/app-data';
@@ -13,14 +15,23 @@ import common, {
 } from './schemas';
 import { ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
 import { TaskManager } from './task-manager';
+import path from 'path';
 
-const plugin: FastifyPluginAsync = async (fastify) => {
+interface PluginOptions {
+  serviceMethod: ServiceMethod;
+}
+
+const PATH_PREFIX = 'apps/';
+
+const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
   const {
     items: { dbService: iS },
     itemMemberships: { dbService: iMS },
     taskRunner: runner,
     appDataService: aDS
   } = fastify;
+
+  const { serviceMethod } = options;
 
   const taskManager = new TaskManager(aDS, iS, iMS);
 
@@ -32,6 +43,63 @@ const plugin: FastifyPluginAsync = async (fastify) => {
     // origins from the publishers table an build a rule with that.
 
     fastify.addHook('preHandler', fastify.verifyBearerAuth);
+
+    const SERVICE_ITEM_TYPE = serviceMethod === ServiceMethod.S3 ? FILE_ITEM_TYPES.S3 : FILE_ITEM_TYPES.LOCAL;
+
+    const buildFilePath = () => {
+      const filepath = `${randomHexOf4()}/${randomHexOf4()}/${randomHexOf4()}-${Date.now()}`;
+      return path.join(PATH_PREFIX, filepath);
+    };
+
+    fastify.register(GraaspFilePlugin, {
+      serviceMethod: serviceMethod,
+      serviceOptions: {
+        s3: fastify.s3FileItemPluginOptions,
+        local: fastify.fileItemPluginOptions,
+      },
+      buildFilePath: buildFilePath,
+
+      uploadPreHookTasks: async ({ parentId: itemId }, { token }) => {
+        const { member: id } = token;
+        return [ taskManager.createGetTask({ id }, itemId, { visibility: 'member'}, token) ];
+      },
+      uploadPostHookTasks: async (
+        { filename, itemId, filepath, size, mimetype },
+        { token }
+      ) => {
+        const { member: id } = token;
+
+        const name = filename.substring(0, ORIGINAL_FILENAME_TRUNCATE_LIMIT);
+        const data = {
+          name,
+          type: SERVICE_ITEM_TYPE,
+          extra: {
+            [SERVICE_ITEM_TYPE]: {
+              name: filename,
+              path: filepath,
+              size,
+              mimetype,
+            },
+          },
+        };
+
+        const tasks = taskManager.createCreateTask({ id },  {
+          data: {
+            ...data
+          },
+          type: 'file',
+          visibility: 'member',
+        },
+        itemId,
+        token);
+
+        return [ tasks ];
+      },
+
+      downloadPreHookTasks: async ({ itemId }, { token }) => {
+        return [ taskManager.createGetFileTask({ id: token.member }, { appDataId: itemId, serviceMethod }, token) ];
+      },
+    });
 
     // create app data
     fastify.post<{ Params: { itemId: string }; Body: Partial<InputAppData> }>(

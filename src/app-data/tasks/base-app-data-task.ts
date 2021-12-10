@@ -24,6 +24,8 @@ export abstract class BaseAppDataTask<R> implements Task<Actor, R> {
   targetId: string;
   data: Partial<IndividualResultType<R>>;
 
+  getResult?: () => unknown;
+
   constructor(actor: Actor,
     appDataService: AppDataService, itemService: ItemService, itemMembershipService: ItemMembershipService) {
     this.actor = actor;

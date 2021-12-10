@@ -246,4 +246,12 @@ export class AppDataService {
       `)
       .then(({ rows }) => rows.slice(0));
   }
+
+  async getById(id: string, transactionHandler: TrxHandler) : Promise<AppData>{
+    return transactionHandler.one<AppData>(sql`
+      SELECT ${AppDataService.allColumnsForJoins}
+      FROM app_data
+      WHERE id = ${id}
+    `);
+  }
 }

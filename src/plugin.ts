@@ -4,10 +4,11 @@ import { promisify } from 'util';
 import fastifyJwt from 'fastify-jwt';
 import fastifyAuth from 'fastify-auth';
 import fastifyCors from 'fastify-cors';
+import ThumbnailsPlugin from 'graasp-plugin-thumbnails';
+import { ServiceMethod, GraaspLocalFileItemOptions, GraaspS3FileItemOptions } from 'graasp-plugin-file';
 
 import appDataPlugin from './app-data/service-api';
 import appActionPlugin from './app-actions/service-api';
-
 import { AuthTokenSubject } from './interfaces/request';
 import { getMany, createSchema, updateSchema } from './fluent-schema';
 import common, { generateToken, getContext } from './schemas';
@@ -20,10 +21,9 @@ import { GetAppListTask } from './tasks/get-app-list-task';
 
 declare module 'fastify' {
   interface FastifyInstance {
-    appDataService: AppDataService
-  }
-  interface FastifyRequest {
-    authTokenSubject: AuthTokenSubject;
+    appDataService: AppDataService;
+    s3FileItemPluginOptions?: GraaspS3FileItemOptions;
+    fileItemPluginOptions?: GraaspLocalFileItemOptions;
   }
 }
 
@@ -31,12 +31,17 @@ interface AppsPluginOptions {
   jwtSecret: string;
   /** In minutes. Defaults to 30 (minutes) */
   jwtExpiration?: number;
+
+  serviceMethod: ServiceMethod;
+  thumbnailsPrefix: string;
 }
 
+const PATH_PREFIX = 'apps/templates/';
 const ROUTES_PREFIX = '/app-items';
+const THUMBNAILS_ROUTE = '/thumbnails';
 
 const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) => {
-  const { jwtSecret, jwtExpiration = 30 } = options;
+  const { jwtSecret, jwtExpiration = 30, serviceMethod, thumbnailsPrefix } = options;
 
   const {
     items: { dbService: iS, extendCreateSchema, extendExtrasUpdateSchema },
@@ -121,6 +126,27 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
           return { token };
         }
       );
+
+      fastify.register(ThumbnailsPlugin, {
+        serviceMethod: serviceMethod,
+        serviceOptions: {
+          s3: fastify.s3FileItemPluginOptions,
+          local: fastify.fileItemPluginOptions,
+        },
+        pathPrefix: PATH_PREFIX,
+        enableAppsHooks: {
+          appsTemplateRoot: PATH_PREFIX,
+          itemsRoot: thumbnailsPrefix,
+        },
+        uploadPreHookTasks: async (id, { member }) => {
+          throw new Error('The upload endpoint is not implemented');
+        },
+        downloadPreHookTasks: async ({ itemId: id, filename }, { member }) => {
+          throw new Error('The download endpoint is not implemented');
+        },
+
+        prefix: THUMBNAILS_ROUTE,
+      });
     });
 
     fastify.register(async function (fastify) {
@@ -146,7 +172,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
     });
 
     // register app data plugin
-    fastify.register(appDataPlugin);
+    fastify.register(appDataPlugin, { serviceMethod });
 
     // register app action plugin
     fastify.register(appActionPlugin);
