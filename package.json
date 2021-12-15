@@ -2,10 +2,13 @@
   "name": "graasp-apps",
   "version": "0.1.0",
   "description": "",
-  "main": "dist/plugin.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "prettier:check": "prettier --check \"{src,test}/**/*.ts\"",
+    "prettier:write": "prettier --write \"{src,test}/**/*.ts\"",
+    "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\"  --fix",
     "prepare": "yarn build",
     "prepack": "yarn build"
   },
@@ -28,6 +31,7 @@
     "fluent-json-schema": "^3.0.0",
     "graasp-plugin-file": "github:graasp/graasp-plugin-file",
     "graasp-plugin-file-item": "github:graasp/graasp-plugin-file-item",
+    "graasp-plugin-public": "github:graasp/graasp-plugin-public",
     "graasp-plugin-thumbnails": "github:graasp/graasp-plugin-thumbnails"
   },
   "devDependencies": {
@@ -38,6 +42,7 @@
     "@typescript-eslint/parser": "^4.7.0",
     "eslint": "^7.13.0",
     "fastify": "^3.8.0",
+    "prettier": "2.5.1",
     "slonik": "^23.0.2",
     "typescript": "^4.0.5"
   },

@@ -1,10 +1,13 @@
 // global
 import { FastifyLoggerInstance } from 'fastify';
 import {
-  Actor, DatabaseTransactionHandler, IndividualResultType,
+  Actor,
+  DatabaseTransactionHandler,
+  IndividualResultType,
   ItemMembershipService,
   ItemService,
-  Task, TaskStatus
+  Task,
+  TaskStatus,
 } from 'graasp';
 // other services
 // local
@@ -24,8 +27,12 @@ export abstract class BaseAppActionTask<R> implements Task<Actor, R> {
   targetId: string;
   data: Partial<IndividualResultType<R>>;
 
-  constructor(actor: Actor,
-              appActionService: AppActionService, itemService: ItemService, itemMembershipService: ItemMembershipService) {
+  constructor(
+    actor: Actor,
+    appActionService: AppActionService,
+    itemService: ItemService,
+    itemMembershipService: ItemMembershipService,
+  ) {
     this.actor = actor;
     this.appActionService = appActionService;
     this.itemService = itemService;
@@ -34,8 +41,12 @@ export abstract class BaseAppActionTask<R> implements Task<Actor, R> {
   }
 
   abstract get name(): string;
-  get result(): R { return this._result; }
-  get message(): string { return this._message; }
+  get result(): R {
+    return this._result;
+  }
+  get message(): string {
+    return this._message;
+  }
 
   /**
    * Throw `TokenItemIdMismatch` if they don't match
@@ -45,5 +56,8 @@ export abstract class BaseAppActionTask<R> implements Task<Actor, R> {
     if (this.targetId !== tokenItemId) throw new TokenItemIdMismatch();
   }
 
-  abstract run(handler: DatabaseTransactionHandler, log?: FastifyLoggerInstance): Promise<void | BaseAppActionTask<R>[]>;
+  abstract run(
+    handler: DatabaseTransactionHandler,
+    log?: FastifyLoggerInstance,
+  ): Promise<void | BaseAppActionTask<R>[]>;
 }

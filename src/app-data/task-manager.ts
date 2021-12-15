@@ -1,5 +1,13 @@
 // other services
-import { ItemService, ItemMembershipService, Actor } from 'graasp';
+import {
+  ItemService,
+  ItemMembershipService,
+  Actor,
+  Task,
+  ItemTaskManager,
+  ItemMembershipTaskManager,
+  Item,
+} from 'graasp';
 // local
 import { AppDataService } from './db-service';
 import { AppData } from './interfaces/app-data';
@@ -15,23 +23,39 @@ export class TaskManager {
   private appDataService: AppDataService;
   private itemService: ItemService;
   private itemMembershipService: ItemMembershipService;
+  private itemTaskManager: ItemTaskManager;
+  private itemMembershipTaskManager: ItemMembershipTaskManager;
 
   constructor(
     appDataService: AppDataService,
     itemService: ItemService,
-    itemMembershipService: ItemMembershipService
+    itemMembershipService: ItemMembershipService,
+    itemTaskManager: ItemTaskManager,
+    itemMembershipTaskManager: ItemMembershipTaskManager,
   ) {
     this.appDataService = appDataService;
     this.itemService = itemService;
     this.itemMembershipService = itemMembershipService;
+    this.itemTaskManager = itemTaskManager;
+    this.itemMembershipTaskManager = itemMembershipTaskManager;
   }
 
-  getCreateTaskName(): string { return CreateAppDataTask.name; }
-  getGetTaskName(): string { return GetAppDataTask.name; }
-  getUpdateTaskName(): string { return UpdateAppDataTask.name; }
-  getDeleteTaskName(): string { return DeleteAppDataTask.name; }
+  getCreateTaskName(): string {
+    return CreateAppDataTask.name;
+  }
+  getGetTaskName(): string {
+    return GetAppDataTask.name;
+  }
+  getUpdateTaskName(): string {
+    return UpdateAppDataTask.name;
+  }
+  getDeleteTaskName(): string {
+    return DeleteAppDataTask.name;
+  }
 
-  getGetItemsAppDataTaskName(): string { return GetItemsAppDataTask.name; }
+  getGetItemsAppDataTaskName(): string {
+    return GetItemsAppDataTask.name;
+  }
 
   // CRUD
 
@@ -43,9 +67,26 @@ export class TaskManager {
    * @param requestDetails All the metadata contained in the jwt auth token.
    * @returns CreateAppDataTask
    */
-  createCreateTask(actor: Actor, data: Partial<AppData>, itemId: string, requestDetails: AuthTokenSubject): CreateAppDataTask {
-    return new CreateAppDataTask(actor, data, itemId, requestDetails,
-      this.appDataService, this.itemService, this.itemMembershipService);
+  createCreateTaskSequence(
+    actor: Actor,
+    data: Partial<AppData>,
+    itemId: string,
+    requestDetails: AuthTokenSubject,
+  ): Task<Actor, unknown>[] {
+    const t1 = this.itemTaskManager.createGetTask(actor, itemId);
+    const t2 = this.itemMembershipTaskManager.createGetMemberItemMembershipTask(actor);
+    t2.getInput = () => ({
+      item: t1.result,
+      validatePermission: 'write',
+    });
+    const t3 = new CreateAppDataTask(
+      actor,
+      this.appDataService,
+      this.itemService,
+      this.itemMembershipService,
+      { data, itemId, requestDetails },
+    );
+    return [t1, t2, t3];
   }
 
   /**
@@ -56,9 +97,47 @@ export class TaskManager {
    * @param requestDetails All the metadata contained in the jwt auth token.
    * @returns DeleteAppDataTask
    */
-  createGetTask(actor: Actor, itemId: string, filter: SingleItemGetFilter, requestDetails: AuthTokenSubject): GetAppDataTask {
-    return new GetAppDataTask(actor, itemId, filter, requestDetails,
-      this.appDataService, this.itemService, this.itemMembershipService);
+  createGetTask(
+    actor: Actor,
+    itemId: string,
+    filter: SingleItemGetFilter,
+    requestDetails: AuthTokenSubject,
+  ): GetAppDataTask {
+    return new GetAppDataTask(
+      actor,
+      this.appDataService,
+      this.itemService,
+      this.itemMembershipService,
+      { itemId, filter, requestDetails },
+    );
+  }
+  createGetTaskSequence(
+    actor: Actor,
+    data: Partial<AppData>,
+    itemId: string,
+    requestDetails: AuthTokenSubject,
+  ): Task<Actor, unknown>[] {
+    // check item exists
+    const t1 = this.itemTaskManager.createGetTaskSequence(actor, itemId);
+
+    // get permission over item
+    const t2 = this.itemMembershipTaskManager.createGetMemberItemMembershipTask(actor);
+    t2.getInput = () => ({
+      item: t1[t1.length - 1].result,
+    });
+
+    // get app data
+    const t3 = new GetAppDataTask(
+      actor,
+      this.appDataService,
+      this.itemService,
+      this.itemMembershipService,
+      { itemId, requestDetails },
+    );
+    t3.getInput = () => ({
+      permission: t2.result.permission,
+    });
+    return [...t1, t2, t3];
   }
 
   /**
@@ -70,9 +149,23 @@ export class TaskManager {
    * @param requestDetails All the metadata contained in the jwt auth token.
    * @returns UpdateAppDataTask
    */
-  createUpdateTask(actor: Actor, appDataId: string, data: Partial<AppData>, itemId: string, requestDetails: AuthTokenSubject): UpdateAppDataTask {
-    return new UpdateAppDataTask(actor, appDataId, data, itemId, requestDetails,
-      this.appDataService, this.itemService, this.itemMembershipService);
+  createUpdateTask(
+    actor: Actor,
+    appDataId: string,
+    data: Partial<AppData>,
+    itemId: string,
+    requestDetails: AuthTokenSubject,
+  ): UpdateAppDataTask {
+    return new UpdateAppDataTask(
+      actor,
+      appDataId,
+      data,
+      itemId,
+      requestDetails,
+      this.appDataService,
+      this.itemService,
+      this.itemMembershipService,
+    );
   }
 
   /**
@@ -83,23 +176,81 @@ export class TaskManager {
    * @param requestDetails All the metadata contained in the jwt auth token.
    * @returns DeleteAppDataTask
    */
-  createDeleteTask(actor: Actor, appDataId: string, itemId: string, requestDetails: AuthTokenSubject): DeleteAppDataTask {
-    return new DeleteAppDataTask(actor, appDataId, itemId, requestDetails,
-      this.appDataService, this.itemService, this.itemMembershipService);
+  createDeleteTask(
+    actor: Actor,
+    appDataId: string,
+    itemId: string,
+    requestDetails: AuthTokenSubject,
+  ): DeleteAppDataTask {
+    return new DeleteAppDataTask(
+      actor,
+      appDataId,
+      itemId,
+      requestDetails,
+      this.appDataService,
+      this.itemService,
+      this.itemMembershipService,
+    );
   }
 
-  // Other
-  createGetItemsAppDataTask(actor: Actor, filter: ManyItemsGetFilter, requestDetails: AuthTokenSubject): GetItemsAppDataTask {
-    return new GetItemsAppDataTask(actor, filter, requestDetails,
-      this.appDataService, this.itemService, this.itemMembershipService);
+  // get app data for many items
+  createGetItemsAppDataTask(
+    actor: Actor,
+    filter: ManyItemsGetFilter,
+    requestDetails: AuthTokenSubject,
+    parentItem?: Item,
+  ): GetItemsAppDataTask {
+    return new GetItemsAppDataTask(
+      actor,
+      this.appDataService,
+      this.itemService,
+      this.itemMembershipService,
+      { filter, requestDetails, parentItem },
+    );
   }
 
-  createGetFileTask(actor: Actor, input: GetFileDataInputType, requestDetails: AuthTokenSubject): GetFileDataTask {
-    const task = new GetFileDataTask(actor, input, requestDetails,
-      this.appDataService, this.itemService, this.itemMembershipService);
+  // get app data for many items
+  createGetItemsAppDataTaskSequence(
+    actor: Actor,
+    filter: ManyItemsGetFilter,
+    requestDetails: AuthTokenSubject,
+  ): Task<Actor, unknown>[] {
+    // get commun parent item
+    const { item: tokenItemId } = requestDetails;
+    const t1 = this.itemTaskManager.createGetTask(actor, tokenItemId);
+
+    const t2 = new GetItemsAppDataTask(
+      actor,
+      this.appDataService,
+      this.itemService,
+      this.itemMembershipService,
+      { filter, requestDetails },
+    );
+    t2.getInput = () => ({
+      parentItem: t1.result,
+    });
+
+    return [t1, t2];
+  }
+
+  createGetFileTask(
+    actor: Actor,
+    input: GetFileDataInputType,
+    requestDetails: AuthTokenSubject,
+  ): GetFileDataTask {
+    const task = new GetFileDataTask(
+      actor,
+      input,
+      requestDetails,
+      this.appDataService,
+      this.itemService,
+      this.itemMembershipService,
+    );
 
     // This is necessary because the graasp-plugin-file use the getResult and by default getResult is undefined
-    task.getResult = () => { return task.result; };
+    task.getResult = () => {
+      return task.result;
+    };
     return task;
   }
 }

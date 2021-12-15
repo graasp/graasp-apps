@@ -5,7 +5,7 @@ import fastifyJwt from 'fastify-jwt';
 import fastifyAuth from 'fastify-auth';
 import fastifyCors from 'fastify-cors';
 import ThumbnailsPlugin from 'graasp-plugin-thumbnails';
-import { ServiceMethod, GraaspLocalFileItemOptions, GraaspS3FileItemOptions } from 'graasp-plugin-file';
+import { GraaspLocalFileItemOptions, GraaspS3FileItemOptions } from 'graasp-plugin-file';
 
 import appDataPlugin from './app-data/service-api';
 import appActionPlugin from './app-actions/service-api';
@@ -18,6 +18,9 @@ import { GenerateApiAccessTokenSujectTask } from './app-data/tasks/generate-api-
 import { GetContextTask } from './app-data/tasks/get-context-task';
 import { AppService } from './db-service';
 import { GetAppListTask } from './tasks/get-app-list-task';
+import { APP_ITEMS_PREFIX, DEFAULT_JWT_EXPIRATION } from './util/constants';
+import { AppsPluginOptions } from './types';
+import { Item } from 'graasp';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -27,26 +30,22 @@ declare module 'fastify' {
   }
 }
 
-interface AppsPluginOptions {
-  jwtSecret: string;
-  /** In minutes. Defaults to 30 (minutes) */
-  jwtExpiration?: number;
-
-  serviceMethod: ServiceMethod;
-  thumbnailsPrefix: string;
-}
-
 const PATH_PREFIX = 'apps/templates/';
-const ROUTES_PREFIX = '/app-items';
 const THUMBNAILS_ROUTE = '/thumbnails';
 
 const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) => {
-  const { jwtSecret, jwtExpiration = 30, serviceMethod, thumbnailsPrefix } = options;
+  const {
+    jwtSecret,
+    jwtExpiration = DEFAULT_JWT_EXPIRATION,
+    serviceMethod,
+    thumbnailsPrefix,
+  } = options;
 
   const {
-    items: { dbService: iS, extendCreateSchema, extendExtrasUpdateSchema },
+    items: { dbService: iS, taskManager: iTM, extendCreateSchema, extendExtrasUpdateSchema },
     itemMemberships: { dbService: iMS },
-    taskRunner: runner, db
+    taskRunner: runner,
+    db,
   } = fastify;
 
   // "install" custom schema for validating document items creation
@@ -82,102 +81,125 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
   // bearer token plugin to read and validate token in Bearer header
   fastify.decorateRequest('authTokenSubject', null);
-  fastify.register(fastifyBearerAuth,
-    { addHook: false, keys: new Set<string>(), auth: validateApiAccessToken });
+  fastify.register(fastifyBearerAuth, {
+    addHook: false,
+    keys: new Set<string>(),
+    auth: validateApiAccessToken,
+  });
 
   // API endpoints
-  fastify.register(async function (fastify) {
-    // add CORS support that allows graasp's origin(s) + app publishers' origins.
-    // TODO: not perfect because it's allowing apps' origins to call "/app-items/<id>/api-access-token",
-    // even though they would not be able to fulfill the request because they need the
-    // proper authentication
-    const { corsPluginOptions } = fastify;
+  fastify.register(
+    async function (fastify) {
+      // add CORS support that allows graasp's origin(s) + app publishers' origins.
+      // TODO: not perfect because it's allowing apps' origins to call "/app-items/<id>/api-access-token",
+      // even though they would not be able to fulfill the request because they need the
+      // proper authentication
+      const { corsPluginOptions } = fastify;
 
-    if (corsPluginOptions) {
-      const allowedOrigins = await aDS.getAllValidAppOrigins(db.pool);
+      if (corsPluginOptions) {
+        const allowedOrigins = await aDS.getAllValidAppOrigins(db.pool);
 
-      const graaspAndAppsOrigins = corsPluginOptions.origin.concat(allowedOrigins);
-      fastify.register(fastifyCors,
-        Object.assign({}, corsPluginOptions, { origin: graaspAndAppsOrigins }));
-    }
+        const graaspAndAppsOrigins = corsPluginOptions.origin.concat(allowedOrigins);
+        fastify.register(
+          fastifyCors,
+          Object.assign({}, corsPluginOptions, { origin: graaspAndAppsOrigins }),
+        );
+      }
 
-    fastify.register(async function (fastify) {
-      // requires authenticated member using web client (session cookie)
-      // or using mobile app client (auth token)
-      fastify.addHook('preHandler', fastify.verifyAuthentication);
+      fastify.register(async function (fastify) {
+        // requires authenticated member using web client (session cookie)
+        // or using mobile app client (auth token)
+        fastify.addHook('preHandler', fastify.verifyAuthentication);
 
-      const aS = new AppService();
-      fastify.decorate('appService', aS);
+        const aS = new AppService();
+        fastify.decorate('appService', aS);
 
-      fastify.get('/list', { schema: getMany }, async ({ member }) => {
-        const task = new GetAppListTask(member, aS);
-        return await runner.runSingle(task);
+        fastify.get('/list', { schema: getMany }, async ({ member }) => {
+          const task = new GetAppListTask(member, aS);
+          return await runner.runSingle(task);
+        });
+
+        const promisifiedJwtSign = promisify<
+          { sub: AuthTokenSubject },
+          { expiresIn: string },
+          string
+        >(fastify.jwt.sign);
+
+        // generate api access token for member + (app-)item.
+        fastify.post<{ Params: { itemId: string }; Body: { origin: string } & AppIdentification }>(
+          '/:itemId/api-access-token',
+          { schema: generateToken },
+          async ({ member, params: { itemId }, body, log }) => {
+            const t1 = iTM.createGetTaskSequence(member, itemId);
+            const t2 = new GenerateApiAccessTokenSujectTask(member, aDS, iS, iMS, {
+              appDetails: body,
+            });
+            t2.getInput = () => ({ item: t1[t1.length - 1].getResult() as Item });
+            const authTokenSubject = (await runner.runSingleSequence(
+              [...t1, t2],
+              log,
+            )) as AuthTokenSubject;
+            const token = await promisifiedJwtSign(
+              { sub: authTokenSubject },
+              { expiresIn: `${jwtExpiration}m` },
+            );
+            return { token };
+          },
+        );
+
+        // register thumbnail plugin for creation hook
+        fastify.register(ThumbnailsPlugin, {
+          serviceMethod: serviceMethod,
+          serviceOptions: {
+            s3: fastify.s3FileItemPluginOptions,
+            local: fastify.fileItemPluginOptions,
+          },
+          pathPrefix: PATH_PREFIX,
+          enableAppsHooks: {
+            appsTemplateRoot: PATH_PREFIX,
+            itemsRoot: thumbnailsPrefix,
+          },
+          uploadPreHookTasks: async (id, { member }) => {
+            throw new Error('The upload endpoint is not implemented');
+          },
+          downloadPreHookTasks: async ({ itemId: id, filename }, { member }) => {
+            throw new Error('The download endpoint is not implemented');
+          },
+
+          prefix: THUMBNAILS_ROUTE,
+        });
       });
 
-      const promisifiedJwtSign = promisify<{ sub: AuthTokenSubject }, { expiresIn: string }, string>(fastify.jwt.sign);
+      fastify.register(async function (fastify) {
+        await fastify.register(fastifyAuth);
 
-      // generate api access token for member + (app-)item.
-      fastify.post<{ Params: { itemId: string }; Body: { origin: string } & AppIdentification }>(
-        '/:itemId/api-access-token', { schema: generateToken },
-        async ({ member, params: { itemId }, body, log }) => {
-          const task = new GenerateApiAccessTokenSujectTask(member, itemId, body, aDS, iS, iMS);
-          const authTokenSubject = await runner.runSingle(task, log);
-          const token = await promisifiedJwtSign({ sub: authTokenSubject }, { expiresIn: `${jwtExpiration}m` });
-          return { token };
-        }
-      );
-
-      fastify.register(ThumbnailsPlugin, {
-        serviceMethod: serviceMethod,
-        serviceOptions: {
-          s3: fastify.s3FileItemPluginOptions,
-          local: fastify.fileItemPluginOptions,
-        },
-        pathPrefix: PATH_PREFIX,
-        enableAppsHooks: {
-          appsTemplateRoot: PATH_PREFIX,
-          itemsRoot: thumbnailsPrefix,
-        },
-        uploadPreHookTasks: async (id, { member }) => {
-          throw new Error('The upload endpoint is not implemented');
-        },
-        downloadPreHookTasks: async ({ itemId: id, filename }, { member }) => {
-          throw new Error('The download endpoint is not implemented');
-        },
-
-        prefix: THUMBNAILS_ROUTE,
+        // get app item context
+        fastify.get<{ Params: { itemId: string } }>(
+          '/:itemId/context',
+          {
+            schema: getContext,
+            // for authenticated member using web client (session cookie),
+            // using mobile app client (auth token),
+            // or for third party app with an api bearer token (previously generated by the "container"
+            // by calling /:itemId/app-api-access-token)
+            preHandler: fastify.auth([fastify.verifyBearerAuth, fastify.verifyAuthentication]),
+          },
+          async ({ member, authTokenSubject: requestDetails, params: { itemId }, log }) => {
+            const memberId = member ? member.id : requestDetails.member;
+            const task = new GetContextTask({ id: memberId }, itemId, requestDetails, aDS, iS, iMS);
+            return runner.runSingle(task, log);
+          },
+        );
       });
-    });
 
-    fastify.register(async function (fastify) {
-      await fastify.register(fastifyAuth);
+      // register app data plugin
+      fastify.register(appDataPlugin, { serviceMethod });
 
-      // get app item context
-      fastify.get<{ Params: { itemId: string } }>(
-        '/:itemId/context',
-        {
-          schema: getContext,
-          // for authenticated member using web client (session cookie),
-          // using mobile app client (auth token),
-          // or for third party app with an api bearer token (previously generated by the "container"
-          // by calling /:itemId/app-api-access-token)
-          preHandler: fastify.auth([fastify.verifyBearerAuth, fastify.verifyAuthentication])
-        },
-        async ({ member, authTokenSubject: requestDetails, params: { itemId }, log }) => {
-          const memberId = member ? member.id : requestDetails.member;
-          const task = new GetContextTask({ id: memberId }, itemId, requestDetails, aDS, iS, iMS);
-          return runner.runSingle(task, log);
-        }
-      );
-    });
-
-    // register app data plugin
-    fastify.register(appDataPlugin, { serviceMethod });
-
-    // register app action plugin
-    fastify.register(appActionPlugin);
-
-  }, { prefix: ROUTES_PREFIX });
+      // register app action plugin
+      fastify.register(appActionPlugin);
+    },
+    { prefix: APP_ITEMS_PREFIX },
+  );
 };
 
 export default plugin;

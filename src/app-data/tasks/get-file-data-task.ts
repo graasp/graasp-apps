@@ -4,18 +4,26 @@ import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService }
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject } from '../../interfaces/request';
-import { AppDataNotAccessible, ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
+import {
+  AppDataNotAccessible,
+  ItemNotFound,
+  MemberCannotReadItem,
+} from '../../util/graasp-apps-error';
 import { FileItemExtra, ServiceMethod } from 'graasp-plugin-file';
 import { getFileExtra } from 'graasp-plugin-file-item';
-
 
 export type GetFileDataInputType = {
   appDataId?: string;
   serviceMethod?: ServiceMethod;
 };
 
-export class GetFileDataTask extends BaseAppDataTask<{filepath: string, mimetype: string}> {
-  get name(): string { return GetFileDataTask.name; }
+export class GetFileDataTask extends BaseAppDataTask<
+  Actor,
+  { filepath: string; mimetype: string }
+> {
+  get name(): string {
+    return GetFileDataTask.name;
+  }
   private requestDetails: AuthTokenSubject;
 
   public input: GetFileDataInputType;
@@ -26,9 +34,14 @@ export class GetFileDataTask extends BaseAppDataTask<{filepath: string, mimetype
    * @param itemId Id of Item to which all the AppDatas belong
    * @param requestDetails Information contained in the auth token
    */
-  constructor(actor: Actor, input: GetFileDataInputType,
-    requestDetails: AuthTokenSubject, appDataService: AppDataService,
-    itemService: ItemService, itemMembershipService: ItemMembershipService) {
+  constructor(
+    actor: Actor,
+    input: GetFileDataInputType,
+    requestDetails: AuthTokenSubject,
+    appDataService: AppDataService,
+    itemService: ItemService,
+    itemMembershipService: ItemMembershipService,
+  ) {
     super(actor, appDataService, itemService, itemMembershipService);
 
     this.requestDetails = requestDetails;
@@ -59,7 +72,7 @@ export class GetFileDataTask extends BaseAppDataTask<{filepath: string, mimetype
 
     if (permission !== 'admin') {
       // members are only allowed to download their items
-      if(appData.memberId !== memberId && appData.visibility === 'member'){
+      if (appData.memberId !== memberId && appData.visibility === 'member') {
         throw new AppDataNotAccessible();
       }
     }
@@ -67,7 +80,7 @@ export class GetFileDataTask extends BaseAppDataTask<{filepath: string, mimetype
 
     this._result = {
       filepath: extra.path,
-      mimetype: extra.mimetype
+      mimetype: extra.mimetype,
     };
     this.status = 'OK';
   }

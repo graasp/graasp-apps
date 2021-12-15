@@ -1,16 +1,30 @@
 // global
-import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
+import {
+  Actor,
+  DatabaseTransactionHandler,
+  Item,
+  ItemMembershipService,
+  ItemService,
+} from 'graasp';
 // local
 import { AppData } from '../interfaces/app-data';
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject, ManyItemsGetFilter } from '../../interfaces/request';
-import { AppDataNotAccessible, ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
+import { AppDataNotAccessible } from '../../util/graasp-apps-error';
 
-export class GetItemsAppDataTask extends BaseAppDataTask<readonly AppData[]> {
-  get name(): string { return GetItemsAppDataTask.name; }
-  private requestDetails: AuthTokenSubject;
-  private filter: ManyItemsGetFilter;
+type InputType = {
+  filter: ManyItemsGetFilter;
+  requestDetails: AuthTokenSubject;
+  permission?: string;
+  parentItem?: Item;
+};
+
+export class GetItemsAppDataTask extends BaseAppDataTask<Actor, readonly AppData[]> {
+  get name(): string {
+    return GetItemsAppDataTask.name;
+  }
+  input: InputType;
 
   /**
    * GetItemsAppDataTask constructor
@@ -18,40 +32,38 @@ export class GetItemsAppDataTask extends BaseAppDataTask<readonly AppData[]> {
    * @param filter Filter
    * @param requestDetails Information contained in the auth token
    */
-  constructor(actor: Actor, filter: ManyItemsGetFilter,
-    requestDetails: AuthTokenSubject, appDataService: AppDataService,
-    itemService: ItemService, itemMembershipService: ItemMembershipService) {
+  constructor(
+    actor: Actor,
+    appDataService: AppDataService,
+    itemService: ItemService,
+    itemMembershipService: ItemMembershipService,
+    input: InputType,
+  ) {
     super(actor, appDataService, itemService, itemMembershipService);
-
-    this.requestDetails = requestDetails;
-    this.filter = filter;
+    this.input = input;
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
     this.status = 'RUNNING';
 
     const { id: memberId } = this.actor;
-    const { item: tokenItemId } = this.requestDetails;
+    const { permission, filter, parentItem } = this.input;
 
     // check if appId matches origin (?) - is this really necessary?; because when the token was generated it was true.
-    // atmost the token can be valid until its expiration, even if the app/origin are no londer valid (removed from db)
+    // at most the token can be valid until its expiration, even if the app/origin are no londer valid (removed from db)
 
-    // get item
-    const item = await this.itemService.get(tokenItemId, handler);
-    if (!item) throw new ItemNotFound(tokenItemId);
-
-    // get member's permission over item
-    const permission = await this.itemMembershipService.getPermissionLevel(memberId, item, handler);
-    if (!permission) throw new MemberCannotReadItem(tokenItemId);
-
-    const { itemId: itemIds } = this.filter;
-    let { visibility: fVisibility, memberId: fMemberId } = this.filter;
+    const { itemId: itemIds } = filter;
+    let { visibility: fVisibility, memberId: fMemberId } = filter;
     let appDatas: readonly AppData[];
 
     if (permission === 'admin') {
-      // get items' AppData w/ no restrictions
-      appDatas = await this.appDataService
-        .getForItems(itemIds, item, { memberId: fMemberId, visibility: fVisibility }, handler);
+      // get items' AppData w/o restrictions
+      appDatas = await this.appDataService.getForItems(
+        itemIds,
+        parentItem,
+        { memberId: fMemberId, visibility: fVisibility },
+        handler,
+      );
     } else {
       // get member's AppData or others' AppData w/ visibility 'item'
       let op;
@@ -59,7 +71,8 @@ export class GetItemsAppDataTask extends BaseAppDataTask<readonly AppData[]> {
       if (!fMemberId) {
         if (fVisibility !== 'item') {
           fMemberId = memberId; // get member's AppData
-          if (!fVisibility) { // + any AppData w/ visibility 'item'
+          if (!fVisibility) {
+            // + any AppData w/ visibility 'item'
             fVisibility = 'item';
             op = 'OR';
           }
@@ -71,8 +84,12 @@ export class GetItemsAppDataTask extends BaseAppDataTask<readonly AppData[]> {
         }
       }
 
-      appDatas = await this.appDataService
-        .getForItems(itemIds, item, { memberId: fMemberId, visibility: fVisibility, op }, handler);
+      appDatas = await this.appDataService.getForItems(
+        itemIds,
+        parentItem,
+        { memberId: fMemberId, visibility: fVisibility, op },
+        handler,
+      );
     }
 
     this.status = 'OK';

@@ -2,7 +2,7 @@ import { GraaspErrorDetails, GraaspError } from 'graasp';
 
 export class GraaspAppsError implements GraaspError {
   name: string;
-  code: string
+  code: string;
   message: string;
   statusCode?: number;
   data?: unknown;
@@ -26,7 +26,10 @@ export class ItemNotFound extends GraaspAppsError {
 
 export class NotAnAppItem extends GraaspAppsError {
   constructor(data?: unknown) {
-    super({ code: 'GAERR002', statusCode: 400, message: 'Targeted item is not an application item' }, data);
+    super(
+      { code: 'GAERR002', statusCode: 400, message: 'Targeted item is not an application item' },
+      data,
+    );
   }
 }
 
@@ -44,7 +47,10 @@ export class MemberCannotReadItem extends GraaspAppsError {
 
 export class TokenItemIdMismatch extends GraaspAppsError {
   constructor(data?: unknown) {
-    super({ code: 'GAERR005', statusCode: 401, message: 'Auth token does not match targeted item' }, data);
+    super(
+      { code: 'GAERR005', statusCode: 401, message: 'Auth token does not match targeted item' },
+      data,
+    );
   }
 }
 
@@ -56,12 +62,18 @@ export class AppDataNotFound extends GraaspAppsError {
 
 export class AppDataNotAccessible extends GraaspAppsError {
   constructor(data?: unknown) {
-    super({ code: 'GAERR007', statusCode: 403, message: 'Member cannot request this app data' }, data);
+    super(
+      { code: 'GAERR007', statusCode: 403, message: 'Member cannot request this app data' },
+      data,
+    );
   }
 }
 
 export class AppActionNotAccessible extends GraaspAppsError {
   constructor(data?: unknown) {
-    super({ code: 'GAERR008', statusCode: 403, message: 'Member cannot request this app action' }, data);
+    super(
+      { code: 'GAERR008', statusCode: 403, message: 'Member cannot request this app action' },
+      data,
+    );
   }
 }

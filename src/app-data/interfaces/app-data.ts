@@ -14,4 +14,5 @@ export interface AppData extends InputAppData {
   creator: string;
   createdAt: string;
   updatedAt: string;
+  type: string;
 }

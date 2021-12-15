@@ -5,8 +5,8 @@ export default {
       type: 'object',
       required: ['itemId'],
       properties: {
-        itemId: { $ref: 'http://graasp.org/#/definitions/uuid' }
-      }
+        itemId: { $ref: 'http://graasp.org/#/definitions/uuid' },
+      },
     },
 
     appContext: {
@@ -19,10 +19,10 @@ export default {
         type: { type: 'string' },
         extra: {},
         children: { type: 'array' },
-        members: { type: 'array' }
-      }
-    }
-  }
+        members: { type: 'array' },
+      },
+    },
+  },
 };
 
 const generateToken = {
@@ -32,26 +32,23 @@ const generateToken = {
     required: ['app', 'origin'],
     properties: {
       app: { $ref: 'http://graasp.org/#/definitions/uuid' },
-      origin: { type: 'string', format: 'url' }
+      origin: { type: 'string', format: 'url' },
     },
-    additionalProperties: false
+    additionalProperties: false,
   },
   response: {
     200: {
       type: 'object',
-      properties: { token: { type: 'string' } }
-    }
-  }
+      properties: { token: { type: 'string' } },
+    },
+  },
 };
 
 const getContext = {
   params: { $ref: 'http://graasp.org/apps/#/definitions/itemIdParam' },
   response: {
-    200: { $ref: 'http://graasp.org/apps/#/definitions/appContext' }
-  }
+    200: { $ref: 'http://graasp.org/apps/#/definitions/appContext' },
+  },
 };
 
-export {
-  generateToken,
-  getContext
-};
+export { generateToken, getContext };

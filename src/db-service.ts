@@ -15,13 +15,16 @@ export class AppService {
       'url',
       'extra',
       ['publisher_id', 'publisherId'],
-      ['created_at', 'createdAt']
-    ].map(c =>
-      !Array.isArray(c) ?
-        sql.identifier([c]) :
-        sql.join(c.map(cwa => sql.identifier([cwa])), sql` AS `)
+      ['created_at', 'createdAt'],
+    ].map((c) =>
+      !Array.isArray(c)
+        ? sql.identifier([c])
+        : sql.join(
+            c.map((cwa) => sql.identifier([cwa])),
+            sql` AS `,
+          ),
     ),
-    sql`, `
+    sql`, `,
   );
 
   /**
@@ -31,17 +34,20 @@ export class AppService {
    * @param transactionHandler Database transaction handler
    */
   public async getAppsList(transactionHandler: TrxHandler): Promise<readonly App[]> {
-    return transactionHandler.query<App>(sql`SELECT ${AppService.allColumns} FROM app`)
+    return transactionHandler
+      .query<App>(sql`SELECT ${AppService.allColumns} FROM app`)
       .then(({ rows }) => rows);
   }
 
   public async getAppIdByUrl(url: string, transactionHandler: TrxHandler): Promise<string> {
     return transactionHandler
-      .query<string>(sql`
+      .query<string>(
+        sql`
         SELECT id
           FROM app
         WHERE url = ${url}
-      `)
+      `,
+      )
       .then(({ rows }) => rows[0]);
   }
 }
