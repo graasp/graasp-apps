@@ -5,10 +5,16 @@ import { AppAction } from '../interfaces/app-action';
 import { AppActionService } from '../db-service';
 import { BaseAppActionTask } from './base-app-action-task';
 import { AuthTokenSubject, SingleItemGetFilter } from '../../interfaces/request';
-import { AppActionNotAccessible, ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
+import {
+  AppActionNotAccessible,
+  ItemNotFound,
+  MemberCannotReadItem,
+} from '../../util/graasp-apps-error';
 
 export class GetAppActionTask extends BaseAppActionTask<readonly AppAction[]> {
-  get name(): string { return GetAppActionTask.name; }
+  get name(): string {
+    return GetAppActionTask.name;
+  }
   private requestDetails: AuthTokenSubject;
   private filter: SingleItemGetFilter;
 
@@ -18,9 +24,15 @@ export class GetAppActionTask extends BaseAppActionTask<readonly AppAction[]> {
    * @param itemId Id of Item to which all the AppActions belong
    * @param requestDetails Information contained in the auth token
    */
-  constructor(actor: Actor, itemId: string, filter: SingleItemGetFilter,
-    requestDetails: AuthTokenSubject, appActionService: AppActionService,
-    itemService: ItemService, itemMembershipService: ItemMembershipService) {
+  constructor(
+    actor: Actor,
+    itemId: string,
+    filter: SingleItemGetFilter,
+    requestDetails: AuthTokenSubject,
+    appActionService: AppActionService,
+    itemService: ItemService,
+    itemMembershipService: ItemMembershipService,
+  ) {
     super(actor, appActionService, itemService, itemMembershipService);
 
     this.requestDetails = requestDetails;
@@ -56,8 +68,11 @@ export class GetAppActionTask extends BaseAppActionTask<readonly AppAction[]> {
       }
     }
 
-    const appActions = await this.appActionService
-      .getForItem(this.targetId, { memberId: fMemberId }, handler);
+    const appActions = await this.appActionService.getForItem(
+      this.targetId,
+      { memberId: fMemberId },
+      handler,
+    );
 
     this.status = 'OK';
     this._result = appActions;

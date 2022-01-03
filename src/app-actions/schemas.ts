@@ -9,10 +9,10 @@ export default {
         itemId: { type: 'string' },
         data: {},
         type: { type: 'string' },
-        createdAt: { type: 'string' }
-      }
-    }
-  }
+        createdAt: { type: 'string' },
+      },
+    },
+  },
 };
 
 const create = {
@@ -23,12 +23,12 @@ const create = {
     properties: {
       data: { type: 'object', additionalProperties: true },
       type: { type: 'string', minLength: 3, maxLength: 25 },
-      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' }
-    }
+      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' },
+    },
   },
   response: {
-    200: { $ref: 'http://graasp.org/apps/app-action/#/definitions/appAction' }
-  }
+    200: { $ref: 'http://graasp.org/apps/app-action/#/definitions/appAction' },
+  },
 };
 
 const getForOne = {
@@ -36,16 +36,16 @@ const getForOne = {
   querystring: {
     type: 'object',
     properties: {
-      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' }
+      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' },
     },
-    additionalProperties: false
+    additionalProperties: false,
   },
   response: {
     200: {
       type: 'array',
-      items: { $ref: 'http://graasp.org/apps/app-action/#/definitions/appAction' }
-    }
-  }
+      items: { $ref: 'http://graasp.org/apps/app-action/#/definitions/appAction' },
+    },
+  },
 };
 
 const getForMany = {
@@ -56,22 +56,18 @@ const getForMany = {
       itemId: {
         type: 'array',
         items: { $ref: 'http://graasp.org/#/definitions/uuid' },
-        uniqueItems: true
+        uniqueItems: true,
       },
-      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' }
+      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' },
     },
-    additionalProperties: false
+    additionalProperties: false,
   },
   response: {
     200: {
       type: 'array',
-      items: { $ref: 'http://graasp.org/apps/app-action/#/definitions/appAction' }
-    }
-  }
+      items: { $ref: 'http://graasp.org/apps/app-action/#/definitions/appAction' },
+    },
+  },
 };
 
-export {
-  create,
-  getForOne,
-  getForMany
-};
+export { create, getForOne, getForMany };

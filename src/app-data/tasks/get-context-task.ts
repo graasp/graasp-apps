@@ -1,13 +1,22 @@
 // global
-import { Actor, DatabaseTransactionHandler, Item, ItemMembershipService, ItemService, Member } from 'graasp';
+import {
+  Actor,
+  DatabaseTransactionHandler,
+  Item,
+  ItemMembershipService,
+  ItemService,
+  Member,
+} from 'graasp';
 // local
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject } from '../../interfaces/request';
 import { ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
 
-export class GetContextTask extends BaseAppDataTask<Partial<Item>> {
-  get name(): string { return GetContextTask.name; }
+export class GetContextTask extends BaseAppDataTask<Actor, Partial<Item>> {
+  get name(): string {
+    return GetContextTask.name;
+  }
   private requestDetails: AuthTokenSubject;
   private itemId: string;
 
@@ -17,9 +26,14 @@ export class GetContextTask extends BaseAppDataTask<Partial<Item>> {
    * @param itemId Id of Item to which all the AppDatas belong
    * @param requestDetails Information contained in the auth token
    */
-  constructor(actor: Actor, itemId: string, requestDetails: AuthTokenSubject,
+  constructor(
+    actor: Actor,
+    itemId: string,
+    requestDetails: AuthTokenSubject,
     appDataService: AppDataService,
-    itemService: ItemService, itemMembershipService: ItemMembershipService) {
+    itemService: ItemService,
+    itemMembershipService: ItemMembershipService,
+  ) {
     super(actor, appDataService, itemService, itemMembershipService);
 
     this.requestDetails = requestDetails;
@@ -47,9 +61,10 @@ export class GetContextTask extends BaseAppDataTask<Partial<Item>> {
     const p2 = this.appDataService.getParentItemMembers(item, handler);
 
     const [foldersAndAppItems, members] = await Promise.all([p1, p2]);
-    const parent: Partial<Item> & { children?: Partial<Item>[], members?: Partial<Member>[] } =
-      foldersAndAppItems.length ?
-        this.sortedListToTree(foldersAndAppItems[0], foldersAndAppItems, 1) : {};
+    const parent: Partial<Item> & { children?: Partial<Item>[]; members?: Partial<Member>[] } =
+      foldersAndAppItems.length
+        ? this.sortedListToTree(foldersAndAppItems[0], foldersAndAppItems, 1)
+        : {};
 
     parent.members = members;
 
@@ -58,7 +73,11 @@ export class GetContextTask extends BaseAppDataTask<Partial<Item>> {
   }
 
   // TODO: doesn't seem the most performant solution
-  private sortedListToTree(item: Partial<Item> & { children?: Partial<Item>[] }, items: Partial<Item>[], startAt: number) {
+  private sortedListToTree(
+    item: Partial<Item> & { children?: Partial<Item>[] },
+    items: Partial<Item>[],
+    startAt: number,
+  ) {
     const { path, type } = item;
     const level = path.split('.').length;
 

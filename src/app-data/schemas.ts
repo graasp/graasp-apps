@@ -13,10 +13,10 @@ export default {
         visibility: { type: 'string' }, // TODO: should we always return this
         creator: { type: 'string' },
         createdAt: { type: 'string' },
-        updatedAt: { type: 'string' }
-      }
-    }
-  }
+        updatedAt: { type: 'string' },
+      },
+    },
+  },
 };
 
 const create = {
@@ -28,43 +28,43 @@ const create = {
       data: { type: 'object', additionalProperties: true },
       type: { type: 'string', minLength: 3, maxLength: 25 },
       visibility: { type: 'string', enum: ['member', 'item'] },
-      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' }
-    }
+      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' },
+    },
   },
   response: {
-    200: { $ref: 'http://graasp.org/apps/app-data/#/definitions/appData' }
-  }
+    200: { $ref: 'http://graasp.org/apps/app-data/#/definitions/appData' },
+  },
 };
 
 const updateOne = {
   params: {
     allOf: [
       { $ref: 'http://graasp.org/apps/#/definitions/itemIdParam' },
-      { $ref: 'http://graasp.org/#/definitions/idParam' }
-    ]
+      { $ref: 'http://graasp.org/#/definitions/idParam' },
+    ],
   },
   body: {
     type: 'object',
     required: ['data'],
     properties: {
-      data: { type: 'object', additionalProperties: true }
-    }
+      data: { type: 'object', additionalProperties: true },
+    },
   },
   response: {
-    200: { $ref: 'http://graasp.org/apps/app-data/#/definitions/appData' }
-  }
+    200: { $ref: 'http://graasp.org/apps/app-data/#/definitions/appData' },
+  },
 };
 
 const deleteOne = {
   params: {
     allOf: [
       { $ref: 'http://graasp.org/apps/#/definitions/itemIdParam' },
-      { $ref: 'http://graasp.org/#/definitions/idParam' }
-    ]
+      { $ref: 'http://graasp.org/#/definitions/idParam' },
+    ],
   },
   response: {
-    200: { $ref: 'http://graasp.org/apps/app-data/#/definitions/appData' }
-  }
+    200: { $ref: 'http://graasp.org/apps/app-data/#/definitions/appData' },
+  },
 };
 
 const getForOne = {
@@ -73,16 +73,16 @@ const getForOne = {
     type: 'object',
     properties: {
       visibility: { type: 'string', enum: ['member', 'item'] },
-      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' }
+      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' },
     },
-    additionalProperties: false
+    additionalProperties: false,
   },
   response: {
     200: {
       type: 'array',
-      items: { $ref: 'http://graasp.org/apps/app-data/#/definitions/appData' }
-    }
-  }
+      items: { $ref: 'http://graasp.org/apps/app-data/#/definitions/appData' },
+    },
+  },
 };
 
 const getForMany = {
@@ -93,25 +93,19 @@ const getForMany = {
       itemId: {
         type: 'array',
         items: { $ref: 'http://graasp.org/#/definitions/uuid' },
-        uniqueItems: true
+        uniqueItems: true,
       },
       visibility: { type: 'string', enum: ['member', 'item'] },
-      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' }
+      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' },
     },
-    additionalProperties: false
+    additionalProperties: false,
   },
   response: {
     200: {
       type: 'array',
-      items: { $ref: 'http://graasp.org/apps/app-data/#/definitions/appData' }
-    }
-  }
+      items: { $ref: 'http://graasp.org/apps/app-data/#/definitions/appData' },
+    },
+  },
 };
 
-export {
-  create,
-  updateOne,
-  deleteOne,
-  getForOne,
-  getForMany
-};
+export { create, updateOne, deleteOne, getForOne, getForMany };

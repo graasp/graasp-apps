@@ -1,28 +1,23 @@
 import S from 'fluent-json-schema';
 
 export const appSchema = S.object()
-  .additionalProperties(false) 
+  .additionalProperties(false)
   .prop('name', S.string())
   .prop('description', S.string())
   .prop('url', S.string())
   .prop('extra', S.object().additionalProperties(true));
 
 export const getMany = {
-    response: {
-      200: S.array().items(appSchema),
-    },
-  };
+  response: {
+    200: S.array().items(appSchema),
+  },
+};
 
 /**
  * Fluent schema definitions to extend core schemas
  */
 export const updateSchema = S.object()
-  .prop(
-    'app',
-    S.object()
-      .prop('settings', S.object())
-      .required(['settings'])
-  )
+  .prop('app', S.object().prop('settings', S.object()).required(['settings']))
   .required(['app']);
 
 const extraCreate = S.object()
@@ -35,7 +30,7 @@ const extraCreate = S.object()
       // .additionalProperties(false)
       .prop('url', S.string().format('url'))
       .prop('settings', S.object())
-      .required(['url'])
+      .required(['url']),
   )
   .required(['app']);
 

@@ -7,8 +7,10 @@ import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject } from '../../interfaces/request';
 import { AppDataNotFound, ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
 
-export class UpdateAppDataTask extends BaseAppDataTask<AppData> {
-  get name(): string { return UpdateAppDataTask.name; }
+export class UpdateAppDataTask extends BaseAppDataTask<Actor, AppData> {
+  get name(): string {
+    return UpdateAppDataTask.name;
+  }
   private requestDetails: AuthTokenSubject;
   private itemId: string;
 
@@ -20,9 +22,16 @@ export class UpdateAppDataTask extends BaseAppDataTask<AppData> {
    * @param itemId Id of Item to which AppData belongs
    * @param requestDetails Information contained in the auth token
    */
-  constructor(actor: Actor, appDataId: string, data: Partial<AppData>, itemId: string,
-    requestDetails: AuthTokenSubject, appDataService: AppDataService,
-    itemService: ItemService, itemMembershipService: ItemMembershipService) {
+  constructor(
+    actor: Actor,
+    appDataId: string,
+    data: Partial<AppData>,
+    itemId: string,
+    requestDetails: AuthTokenSubject,
+    appDataService: AppDataService,
+    itemService: ItemService,
+    itemMembershipService: ItemMembershipService,
+  ) {
     super(actor, appDataService, itemService, itemMembershipService);
 
     this.requestDetails = requestDetails;

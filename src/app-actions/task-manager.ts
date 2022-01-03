@@ -16,17 +16,23 @@ export class TaskManager {
   constructor(
     appActionService: AppActionService,
     itemService: ItemService,
-    itemMembershipService: ItemMembershipService
+    itemMembershipService: ItemMembershipService,
   ) {
     this.appActionService = appActionService;
     this.itemService = itemService;
     this.itemMembershipService = itemMembershipService;
   }
 
-  getCreateTaskName(): string { return CreateAppActionTask.name; }
-  getGetTaskName(): string { return GetAppActionTask.name; }
+  getCreateTaskName(): string {
+    return CreateAppActionTask.name;
+  }
+  getGetTaskName(): string {
+    return GetAppActionTask.name;
+  }
 
-  getGetItemsAppActionTaskName(): string { return GetItemsAppActionTask.name; }
+  getGetItemsAppActionTaskName(): string {
+    return GetItemsAppActionTask.name;
+  }
 
   /**
    * Create a new AppAction CreateTask
@@ -36,9 +42,21 @@ export class TaskManager {
    * @param requestDetails All the metadata contained in the jwt auth token.
    * @returns CreateAppActionTask
    */
-  createCreateTask(actor: Actor, data: Partial<AppAction>, itemId: string, requestDetails: AuthTokenSubject): CreateAppActionTask {
-    return new CreateAppActionTask(actor, data, itemId, requestDetails,
-      this.appActionService, this.itemService, this.itemMembershipService);
+  createCreateTask(
+    actor: Actor,
+    data: Partial<AppAction>,
+    itemId: string,
+    requestDetails: AuthTokenSubject,
+  ): CreateAppActionTask {
+    return new CreateAppActionTask(
+      actor,
+      data,
+      itemId,
+      requestDetails,
+      this.appActionService,
+      this.itemService,
+      this.itemMembershipService,
+    );
   }
 
   /**
@@ -49,13 +67,35 @@ export class TaskManager {
    * @param requestDetails All the metadata contained in the jwt auth token.
    * @returns DeleteAppActionTask
    */
-  createGetTask(actor: Actor, itemId: string, filter: SingleItemGetFilter, requestDetails: AuthTokenSubject): GetAppActionTask {
-    return new GetAppActionTask(actor, itemId, filter, requestDetails,
-      this.appActionService, this.itemService, this.itemMembershipService);
+  createGetTask(
+    actor: Actor,
+    itemId: string,
+    filter: SingleItemGetFilter,
+    requestDetails: AuthTokenSubject,
+  ): GetAppActionTask {
+    return new GetAppActionTask(
+      actor,
+      itemId,
+      filter,
+      requestDetails,
+      this.appActionService,
+      this.itemService,
+      this.itemMembershipService,
+    );
   }
 
-  createGetItemsAppActionTask(actor: Actor, filter: ManyItemsGetFilter, requestDetails: AuthTokenSubject): GetItemsAppActionTask {
-    return new GetItemsAppActionTask(actor, filter, requestDetails,
-      this.appActionService, this.itemService, this.itemMembershipService);
+  createGetItemsAppActionTask(
+    actor: Actor,
+    filter: ManyItemsGetFilter,
+    requestDetails: AuthTokenSubject,
+  ): GetItemsAppActionTask {
+    return new GetItemsAppActionTask(
+      actor,
+      filter,
+      requestDetails,
+      this.appActionService,
+      this.itemService,
+      this.itemMembershipService,
+    );
   }
 }

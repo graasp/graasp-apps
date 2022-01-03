@@ -21,13 +21,16 @@ export class AppDataService {
       'visibility',
       'creator',
       ['created_at', 'createdAt'],
-      ['updated_at', 'updatedAt']
-    ].map(c =>
-      !Array.isArray(c) ?
-        sql.identifier([c]) :
-        sql.join(c.map(cwa => sql.identifier([cwa])), sql` AS `)
+      ['updated_at', 'updatedAt'],
+    ].map((c) =>
+      !Array.isArray(c)
+        ? sql.identifier([c])
+        : sql.join(
+            c.map((cwa) => sql.identifier([cwa])),
+            sql` AS `,
+          ),
     ),
-    sql`, `
+    sql`, `,
   );
 
   private static allColumnsForJoins = sql.join(
@@ -41,15 +44,23 @@ export class AppDataService {
       [['app_data', 'creator'], ['creator']],
       [['app_data', 'created_at'], ['createdAt']],
       [['app_data', 'updated_at'], ['updatedAt']],
-    ].map(c => sql.join(c.map(cwa => sql.identifier(cwa)), sql` AS `)),
-    sql`, `
+    ].map((c) =>
+      sql.join(
+        c.map((cwa) => sql.identifier(cwa)),
+        sql` AS `,
+      ),
+    ),
+    sql`, `,
   );
 
   private objectPropertiesToDBColumnsMapping = (k: keyof AppData) => {
     switch (k) {
-      case 'memberId': return 'member_id';
-      case 'itemId': return 'item_id';
-      default: return k;
+      case 'memberId':
+        return 'member_id';
+      case 'itemId':
+        return 'item_id';
+      default:
+        return k;
     }
   };
 
@@ -60,22 +71,23 @@ export class AppDataService {
    */
   async create(appData: Partial<AppData>, transactionHandler: TrxHandler): Promise<AppData> {
     // dynamically build a [{column1, value1}, ...] based on properties present in the Partial obj
-    const columnsAndValues = Object.keys(appData)
-      .map((key: keyof AppData) => {
-        const column = sql.identifier([this.objectPropertiesToDBColumnsMapping(key)]);
-        const value = (key !== 'data') ? sql`${appData[key]}` : sql.json(appData[key]);
-        return { column, value };
-      });
+    const columnsAndValues = Object.keys(appData).map((key: keyof AppData) => {
+      const column = sql.identifier([this.objectPropertiesToDBColumnsMapping(key)]);
+      const value = key !== 'data' ? sql`${appData[key]}` : sql.json(appData[key]);
+      return { column, value };
+    });
 
     const columns = columnsAndValues.map(({ column: c }) => c);
     const values = columnsAndValues.map(({ value: v }) => v);
 
     return transactionHandler
-      .query<AppData>(sql`
+      .query<AppData>(
+        sql`
         INSERT INTO app_data (${sql.join(columns, sql`, `)})
         VALUES (${sql.join(values, sql`, `)})
         RETURNING ${AppDataService.allColumns}
-      `)
+      `,
+      )
       .then(({ rows }) => rows[0]);
   }
 
@@ -86,15 +98,22 @@ export class AppDataService {
    * @param transactionHandler Database transaction handler
    * @param memberId Id of member to whom the AppData should be linked to
    */
-  async update(id: string, { data }: Partial<AppData>, transactionHandler: TrxHandler, memberId?: string): Promise<AppData> {
+  async update(
+    id: string,
+    { data }: Partial<AppData>,
+    transactionHandler: TrxHandler,
+    memberId?: string,
+  ): Promise<AppData> {
     return transactionHandler
-      .query<AppData>(sql`
+      .query<AppData>(
+        sql`
         UPDATE app_data
         SET data = ${sql.json(data)}
         WHERE id = ${id}
           ${memberId ? sql`AND member_id = ${memberId}` : sql``}
         RETURNING ${AppDataService.allColumns}
-      `)
+      `,
+      )
       .then(({ rows }) => rows[0] || null);
   }
 
@@ -105,12 +124,15 @@ export class AppDataService {
    * @param memberId Id of member to whom the AppData should be linked to
    */
   async delete(id: string, transactionHandler: TrxHandler, memberId?: string): Promise<AppData> {
-    return transactionHandler.query<AppData>(sql`
+    return transactionHandler
+      .query<AppData>(
+        sql`
         DELETE FROM app_data
         WHERE id = ${id}
           ${memberId ? sql`AND member_id = ${memberId}` : sql``}
         RETURNING ${AppDataService.allColumns}
-      `)
+      `,
+      )
       .then(({ rows }) => rows[0] || null);
   }
 
@@ -120,9 +142,11 @@ export class AppDataService {
    * @param filter Filter. `op` default to `AND`
    * @param transactionHandler Database transaction handler
    */
-  async getForItem(itemId: string,
-    filter: { memberId?: string, visibility?: RecordVisibility, op?: 'AND' | 'OR' },
-    transactionHandler: TrxHandler): Promise<readonly AppData[]> {
+  async getForItem(
+    itemId: string,
+    filter: { memberId?: string; visibility?: RecordVisibility; op?: 'AND' | 'OR' },
+    transactionHandler: TrxHandler,
+  ): Promise<readonly AppData[]> {
     const { memberId, visibility, op = 'AND' } = filter;
 
     let whereStatement = sql`item_id = ${itemId}`;
@@ -137,10 +161,13 @@ export class AppDataService {
       whereStatement = sql`${whereStatement} AND (${sql.join(filterStatement, sqlOp)})`;
     }
 
-    return transactionHandler.query<AppData>(sql`
+    return transactionHandler
+      .query<AppData>(
+        sql`
         SELECT ${AppDataService.allColumns} FROM app_data
         WHERE ${whereStatement}
-      `)
+      `,
+      )
       .then(({ rows }) => rows);
   }
 
@@ -152,9 +179,12 @@ export class AppDataService {
    * @param filter Filter
    * @param transactionHandler Database transaction handler
    */
-  async getForItems(itemIds: string[], item: Item,
-    filter: { memberId?: string, visibility?: RecordVisibility, op?: 'AND' | 'OR' },
-    transactionHandler: TrxHandler): Promise<readonly AppData[]> {
+  async getForItems(
+    itemIds: string[],
+    item: Item,
+    filter: { memberId?: string; visibility?: RecordVisibility; op?: 'AND' | 'OR' },
+    transactionHandler: TrxHandler,
+  ): Promise<readonly AppData[]> {
     const { memberId, visibility, op = 'AND' } = filter;
 
     let filterStatement = sql``;
@@ -169,7 +199,9 @@ export class AppDataService {
       filterStatement = sql`AND (${sql.join(filters, sqlOp)})`;
     }
 
-    return transactionHandler.query<AppData>(sql`
+    return transactionHandler
+      .query<AppData>(
+        sql`
         SELECT ${AppDataService.allColumnsForJoins}
           FROM app_data
         INNER JOIN item
@@ -177,7 +209,8 @@ export class AppDataService {
         WHERE app_data.item_id IN (${sql.join(itemIds, sql`, `)})
           ${filterStatement}
           AND subpath(${item.path}, 0, -1) @> item.path
-      `)
+      `,
+      )
       .then(({ rows }) => rows);
   }
 
@@ -186,18 +219,24 @@ export class AppDataService {
    * @param item Item
    * @param transactionHandler Database transaction handler
    */
-  async getFoldersAndAppsFromParent(item: Item, transactionHandler: TrxHandler): Promise<Partial<Item>[]> {
+  async getFoldersAndAppsFromParent(
+    item: Item,
+    transactionHandler: TrxHandler,
+  ): Promise<Partial<Item>[]> {
     const { path: itemPath } = item;
 
     if (!itemPath.includes('.')) return [];
 
-    return transactionHandler.query<Partial<Item>>(sql`
+    return transactionHandler
+      .query<Partial<Item>>(
+        sql`
         SELECT id, name, path, description, type, extra
           FROM item
         WHERE subpath(${itemPath}, 0, -1) @> path
           AND type IN ('folder', 'app')
         ORDER BY path ASC
-      `)
+      `,
+      )
       .then(({ rows }) => rows.slice(0));
   }
 
@@ -207,47 +246,61 @@ export class AppDataService {
    * @param item Item
    * @param transactionHandler Database transaction handler
    */
-  async getParentItemMembers(item: Item, transactionHandler: TrxHandler): Promise<Partial<Member>[]> {
+  async getParentItemMembers(
+    item: Item,
+    transactionHandler: TrxHandler,
+  ): Promise<Partial<Member>[]> {
     const { path: itemPath } = item;
 
-    const itemPathCondition = itemPath.includes('.') ?
-      sql`@> subpath(${itemPath}, 0, -1)` :
-      sql`= ${itemPath}`;
+    const itemPathCondition = itemPath.includes('.')
+      ? sql`@> subpath(${itemPath}, 0, -1)`
+      : sql`= ${itemPath}`;
 
-    return transactionHandler.query<Partial<Member>>(sql`
+    return transactionHandler
+      .query<Partial<Member>>(
+        sql`
         SELECT member.id AS id, name, CASE WHEN extra ? 'itemLogin' THEN email ELSE NULL END AS email
           FROM member
         INNER JOIN item_membership
           ON member.id = item_membership.member_id
         WHERE item_membership.item_path ${itemPathCondition}
-      `)
+      `,
+      )
       .then(({ rows }) => rows.slice(0));
   }
 
   // App and Publisher
-  async validAppOrigin(appId: string, appOrigin: string, transactionHandler: TrxHandler): Promise<boolean> {
+  async validAppOrigin(
+    appId: string,
+    appOrigin: string,
+    transactionHandler: TrxHandler,
+  ): Promise<boolean> {
     return transactionHandler
-      .oneFirst<string>(sql`
+      .oneFirst<string>(
+        sql`
         SELECT count(*)
           FROM app
         INNER JOIN publisher
           ON app.publisher_id = publisher.id
         WHERE app.id = ${appId}
           AND ${appOrigin} = ANY(publisher.origins)
-      `)
-      .then(count => parseInt(count, 10) === 1);
+      `,
+      )
+      .then((count) => parseInt(count, 10) === 1);
   }
 
   async getAllValidAppOrigins(transactionHandler: TrxHandler): Promise<string[]> {
     return transactionHandler
-      .query<string>(sql`
+      .query<string>(
+        sql`
         SELECT DISTINCT unnest(origins)
           FROM publisher
-      `)
+      `,
+      )
       .then(({ rows }) => rows.slice(0));
   }
 
-  async getById(id: string, transactionHandler: TrxHandler) : Promise<AppData>{
+  async getById(id: string, transactionHandler: TrxHandler): Promise<AppData> {
     return transactionHandler.one<AppData>(sql`
       SELECT ${AppDataService.allColumnsForJoins}
       FROM app_data

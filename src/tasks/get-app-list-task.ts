@@ -1,11 +1,19 @@
 // global
-import { Actor, DatabaseTransactionHandler, PostHookHandlerType, PreHookHandlerType, Task, TaskStatus } from 'graasp';
+import {
+  Actor,
+  DatabaseTransactionHandler,
+  PostHookHandlerType,
+  PreHookHandlerType,
+  Task,
+  TaskStatus,
+} from 'graasp';
 import { AppService } from '../db-service';
 import { App } from '../interfaces/app-item';
 
-export class GetAppListTask implements Task<Actor,readonly App[]>  {
-
-  get name(): string { return GetAppListTask.name; }
+export class GetAppListTask implements Task<Actor, readonly App[]> {
+  get name(): string {
+    return GetAppListTask.name;
+  }
 
   constructor(actor: Actor, appService: AppService) {
     this.appService = appService;

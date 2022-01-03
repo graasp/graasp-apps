@@ -1,53 +1,64 @@
 // global
-import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
+import {
+  Actor,
+  DatabaseTransactionHandler,
+  Item,
+  ItemMembershipService,
+  ItemService,
+} from 'graasp';
 // local
 import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject } from '../../interfaces/request';
-import { AppItemExtra, APP_ITEM_TYPE } from '../../interfaces/app-item';
-import {
-  InvalidApplicationOrigin, ItemNotFound,
-  MemberCannotReadItem, NotAnAppItem
-} from '../../util/graasp-apps-error';
+import { APP_ITEM_TYPE } from '../../interfaces/app-item';
+import { InvalidApplicationOrigin, NotAnAppItem } from '../../util/graasp-apps-error';
 import { AppDataService } from '../db-service';
 
-export class GenerateApiAccessTokenSujectTask extends BaseAppDataTask<AuthTokenSubject> {
-  get name(): string { return GenerateApiAccessTokenSujectTask.name; }
-  private appId: string;
-  private appOrigin: string;
+type InputType = {
+  item?: Item;
+  appDetails?: { origin: string; app: string };
+};
 
-  constructor(actor: Actor, itemId: string,
-    appDetails: { origin: string, app: string }, appDataService: AppDataService,
-    itemService: ItemService, itemMembershipService: ItemMembershipService) {
+export class GenerateApiAccessTokenSujectTask extends BaseAppDataTask<Actor, AuthTokenSubject> {
+  get name(): string {
+    return GenerateApiAccessTokenSujectTask.name;
+  }
+
+  input?: InputType;
+  getInput?: () => InputType;
+
+  constructor(
+    actor: Actor,
+    appDataService: AppDataService,
+    itemService: ItemService,
+    itemMembershipService: ItemMembershipService,
+    input: InputType,
+  ) {
     super(actor, appDataService, itemService, itemMembershipService);
-    this.appId = appDetails.app;
-    this.appOrigin = appDetails.origin;
-    this.targetId = itemId;
+    this.input = input;
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
     this.status = 'RUNNING';
 
-    // get item
-    const item = await this.itemService.get<AppItemExtra>(this.targetId, handler);
-    if (!item) throw new ItemNotFound(this.targetId);
+    const {
+      item,
+      appDetails: { origin: appOrigin, app: appId },
+    } = this.input;
+    this.targetId = item.id;
 
     // item must be an app item
     if (item.type !== APP_ITEM_TYPE) throw new NotAnAppItem(this.targetId);
 
-    // verify if member can read item
-    const canRead = await this.itemMembershipService.canRead(this.actor.id, item, handler);
-    if (!canRead) throw new MemberCannotReadItem(this.targetId);
-
     // check if app origin is valid (app belongs to a publisher that can use the given origin)
-    const valid = await this.appDataService.validAppOrigin(this.appId, this.appOrigin, handler);
+    const valid = await this.appDataService.validAppOrigin(appId, appOrigin, handler);
     if (!valid) throw new InvalidApplicationOrigin();
 
     this.status = 'OK';
     this._result = {
       member: this.actor.id,
       item: this.targetId,
-      app: this.appId,
-      origin: this.appOrigin
+      app: appId,
+      origin: appOrigin,
     };
   }
 }

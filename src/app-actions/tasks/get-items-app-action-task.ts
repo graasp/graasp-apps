@@ -8,11 +8,13 @@ import { AuthTokenSubject, ManyItemsGetFilter } from '../../interfaces/request';
 import {
   AppActionNotAccessible,
   ItemNotFound,
-  MemberCannotReadItem
+  MemberCannotReadItem,
 } from '../../util/graasp-apps-error';
 
 export class GetItemsAppActionTask extends BaseAppActionTask<readonly AppAction[]> {
-  get name(): string { return GetItemsAppActionTask.name; }
+  get name(): string {
+    return GetItemsAppActionTask.name;
+  }
   private requestDetails: AuthTokenSubject;
   private filter: ManyItemsGetFilter;
 
@@ -22,9 +24,14 @@ export class GetItemsAppActionTask extends BaseAppActionTask<readonly AppAction[
    * @param filter Filter
    * @param requestDetails Information contained in the auth token
    */
-  constructor(actor: Actor, filter: ManyItemsGetFilter,
-    requestDetails: AuthTokenSubject, appActionService: AppActionService,
-    itemService: ItemService, itemMembershipService: ItemMembershipService) {
+  constructor(
+    actor: Actor,
+    filter: ManyItemsGetFilter,
+    requestDetails: AuthTokenSubject,
+    appActionService: AppActionService,
+    itemService: ItemService,
+    itemMembershipService: ItemMembershipService,
+  ) {
     super(actor, appActionService, itemService, itemMembershipService);
 
     this.requestDetails = requestDetails;
@@ -56,8 +63,12 @@ export class GetItemsAppActionTask extends BaseAppActionTask<readonly AppAction[
       }
     }
 
-    const appActions = await this.appActionService
-      .getForItems(itemIds, item, { memberId: fMemberId }, handler);
+    const appActions = await this.appActionService.getForItems(
+      itemIds,
+      item,
+      { memberId: fMemberId },
+      handler,
+    );
 
     this.status = 'OK';
     this._result = appActions;
