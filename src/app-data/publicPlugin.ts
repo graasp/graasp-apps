@@ -6,14 +6,13 @@ import graaspPublicPlugin from 'graasp-plugin-public';
 import common, { getForOne, getForMany } from './schemas';
 import { ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
 import { TaskManager } from './task-manager';
-import { APP_ITEMS_PREFIX } from '../util/constants';
+import { AppDataService } from './db-service';
 
 const plugin: FastifyPluginAsync = async (fastify) => {
   const {
     items: { dbService: iS, taskManager: iTM },
     itemMemberships: { dbService: iMS, taskManager: iMTM },
     taskRunner: runner,
-    appDataService: aDS,
     public: {
       graaspActor,
       items: { taskManager: pITM },
@@ -23,6 +22,9 @@ const plugin: FastifyPluginAsync = async (fastify) => {
   if (!graaspPublicPlugin) {
     throw new Error('Public plugin is not correctly defined');
   }
+
+  const aDS = new AppDataService();
+  fastify.decorate('appDataService', aDS);
 
   const taskManager = new TaskManager(aDS, iS, iMS, iTM, iMTM);
 
@@ -62,7 +64,6 @@ const plugin: FastifyPluginAsync = async (fastify) => {
         },
       );
     },
-    { prefix: APP_ITEMS_PREFIX },
   );
 };
 

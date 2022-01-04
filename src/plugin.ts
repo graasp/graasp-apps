@@ -1,9 +1,10 @@
 import { FastifyPluginAsync, FastifyRequest } from 'fastify';
+import { Item } from 'graasp';
+import fastifyCors from 'fastify-cors';
 import fastifyBearerAuth from 'fastify-bearer-auth';
 import { promisify } from 'util';
 import fastifyJwt from 'fastify-jwt';
 import fastifyAuth from 'fastify-auth';
-import fastifyCors from 'fastify-cors';
 import ThumbnailsPlugin from 'graasp-plugin-thumbnails';
 import { GraaspLocalFileItemOptions, GraaspS3FileItemOptions } from 'graasp-plugin-file';
 
@@ -18,9 +19,8 @@ import { GenerateApiAccessTokenSujectTask } from './app-data/tasks/generate-api-
 import { GetContextTask } from './app-data/tasks/get-context-task';
 import { AppService } from './db-service';
 import { GetAppListTask } from './tasks/get-app-list-task';
-import { APP_ITEMS_PREFIX, DEFAULT_JWT_EXPIRATION } from './util/constants';
+import { APPS_TEMPLATE_PATH_PREFIX, DEFAULT_JWT_EXPIRATION, THUMBNAILS_ROUTE } from './util/constants';
 import { AppsPluginOptions } from './types';
-import { Item } from 'graasp';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -30,8 +30,6 @@ declare module 'fastify' {
   }
 }
 
-const PATH_PREFIX = 'apps/templates/';
-const THUMBNAILS_ROUTE = '/thumbnails';
 
 const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) => {
   const {
@@ -91,11 +89,10 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
   fastify.register(
     async function (fastify) {
       // add CORS support that allows graasp's origin(s) + app publishers' origins.
-      // TODO: not perfect because it's allowing apps' origins to call "/app-items/<id>/api-access-token",
+      // TODO: not perfect because it's allowing apps' origins to call "/<id>/api-access-token",
       // even though they would not be able to fulfill the request because they need the
       // proper authentication
       const { corsPluginOptions } = fastify;
-
       if (corsPluginOptions) {
         const allowedOrigins = await aDS.getAllValidAppOrigins(db.pool);
 
@@ -154,9 +151,9 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
             s3: fastify.s3FileItemPluginOptions,
             local: fastify.fileItemPluginOptions,
           },
-          pathPrefix: PATH_PREFIX,
+          pathPrefix: APPS_TEMPLATE_PATH_PREFIX,
           enableAppsHooks: {
-            appsTemplateRoot: PATH_PREFIX,
+            appsTemplateRoot: APPS_TEMPLATE_PATH_PREFIX,
             itemsRoot: thumbnailsPrefix,
           },
           uploadPreHookTasks: async (id, { member }) => {
@@ -198,7 +195,6 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
       // register app action plugin
       fastify.register(appActionPlugin);
     },
-    { prefix: APP_ITEMS_PREFIX },
   );
 };
 
