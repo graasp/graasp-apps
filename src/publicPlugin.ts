@@ -1,12 +1,11 @@
 // global
 import { FastifyPluginAsync } from 'fastify';
 import fastifyJwt from 'fastify-jwt';
-import graaspPublicPlugin from 'graasp-plugin-public';
 import fastifyCors from 'fastify-cors';
+import graaspPublicPlugin from 'graasp-plugin-public';
 
 // local
 import common, { generateToken } from './schemas';
-import { APP_ITEMS_PREFIX } from './util/constants';
 import publicAppDataPlugin from './app-data/publicPlugin';
 import { AuthTokenSubject } from './interfaces/request';
 import { promisify } from 'util';
@@ -44,13 +43,26 @@ const plugin: FastifyPluginAsync<PublicAppsPluginOptions> = async (fastify, opti
   // jwt plugin to manipulate jwt token
   await fastify.register(fastifyJwt, { secret: jwtSecret });
 
-  fastify.register(publicAppDataPlugin);
-
   // endpoints accessible to third parties with Bearer token
   fastify.register(
     async function (fastify) {
-      // TODO: allow CORS but only the origins in the table from approved publishers - get all
-      // origins from the publishers table an build a rule with that.
+      // add CORS support that allows graasp's origin(s) + app publishers' origins.
+      // TODO: not perfect because it's allowing apps' origins to call "/app-items/<id>/api-access-token",
+      // even though they would not be able to fulfill the request because they need the
+      // proper authentication
+      const { corsPluginOptions } = fastify;
+      if (corsPluginOptions) {
+        const allowedOrigins = await aDS.getAllValidAppOrigins(db.pool);
+
+        const graaspAndAppsOrigins = corsPluginOptions.origin.concat(allowedOrigins);
+        fastify.register(
+          fastifyCors,
+          Object.assign({}, corsPluginOptions, { origin: graaspAndAppsOrigins }),
+        );
+      }
+
+      // register app data plugin
+      fastify.register(publicAppDataPlugin);
 
       const promisifiedJwtSign = promisify<
         { sub: AuthTokenSubject },
@@ -80,7 +92,6 @@ const plugin: FastifyPluginAsync<PublicAppsPluginOptions> = async (fastify, opti
         },
       );
     },
-    { prefix: APP_ITEMS_PREFIX },
   );
 };
 
