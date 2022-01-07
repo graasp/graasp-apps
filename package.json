@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 0",
     "prettier:check": "prettier --check \"{src,test}/**/*.ts\"",
     "prettier:write": "prettier --write \"{src,test}/**/*.ts\"",
-    "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\"  --fix",
+    "lint": "tsc --noEmit && eslint \"src/**/*.ts\"  --fix",
     "prepare": "yarn build",
     "prepack": "yarn build",
     "pre-commit": "yarn prettier:check && yarn lint",
