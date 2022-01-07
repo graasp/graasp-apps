@@ -44,55 +44,51 @@ const plugin: FastifyPluginAsync<PublicAppsPluginOptions> = async (fastify, opti
   await fastify.register(fastifyJwt, { secret: jwtSecret });
 
   // endpoints accessible to third parties with Bearer token
-  fastify.register(
-    async function (fastify) {
-      // add CORS support that allows graasp's origin(s) + app publishers' origins.
-      // TODO: not perfect because it's allowing apps' origins to call "/app-items/<id>/api-access-token",
-      // even though they would not be able to fulfill the request because they need the
-      // proper authentication
-      const { corsPluginOptions } = fastify;
-      if (corsPluginOptions) {
-        const allowedOrigins = await aDS.getAllValidAppOrigins(db.pool);
+  fastify.register(async function (fastify) {
+    // add CORS support that allows graasp's origin(s) + app publishers' origins.
+    // TODO: not perfect because it's allowing apps' origins to call "/app-items/<id>/api-access-token",
+    // even though they would not be able to fulfill the request because they need the
+    // proper authentication
+    const { corsPluginOptions } = fastify;
+    if (corsPluginOptions) {
+      const allowedOrigins = await aDS.getAllValidAppOrigins(db.pool);
 
-        const graaspAndAppsOrigins = corsPluginOptions.origin.concat(allowedOrigins);
-        fastify.register(
-          fastifyCors,
-          Object.assign({}, corsPluginOptions, { origin: graaspAndAppsOrigins }),
-        );
-      }
-
-      // register app data plugin
-      fastify.register(publicAppDataPlugin);
-
-      const promisifiedJwtSign = promisify<
-        { sub: AuthTokenSubject },
-        { expiresIn: string },
-        string
-      >(fastify.jwt.sign);
-
-      // generate api access token for member + (app-)item.
-      fastify.post<{ Params: { itemId: string }; Body: { origin: string } & AppIdentification }>(
-        '/:itemId/api-access-token',
-        { schema: generateToken },
-        async ({ params: { itemId }, body, log }) => {
-          const t1 = pITM.createGetPublicItemTask(graaspActor, { itemId });
-          const t2 = new GenerateApiAccessTokenSujectTask(graaspActor, aDS, iS, iMS, {
-            appDetails: body,
-          });
-          t2.getInput = () => ({ item: t1.result });
-          const authTokenSubject = (await runner.runSingleSequence(
-            [t1, t2],
-            log,
-          )) as AuthTokenSubject;
-          const token = await promisifiedJwtSign(
-            { sub: authTokenSubject },
-            { expiresIn: `${jwtExpiration}m` },
-          );
-          return { token };
-        },
+      const graaspAndAppsOrigins = corsPluginOptions.origin.concat(allowedOrigins);
+      fastify.register(
+        fastifyCors,
+        Object.assign({}, corsPluginOptions, { origin: graaspAndAppsOrigins }),
       );
-    },
-  );
+    }
+
+    // register app data plugin
+    fastify.register(publicAppDataPlugin);
+
+    const promisifiedJwtSign = promisify<{ sub: AuthTokenSubject }, { expiresIn: string }, string>(
+      fastify.jwt.sign,
+    );
+
+    // generate api access token for member + (app-)item.
+    fastify.post<{ Params: { itemId: string }; Body: { origin: string } & AppIdentification }>(
+      '/:itemId/api-access-token',
+      { schema: generateToken },
+      async ({ params: { itemId }, body, log }) => {
+        const t1 = pITM.createGetPublicItemTask(graaspActor, { itemId });
+        const t2 = new GenerateApiAccessTokenSujectTask(graaspActor, aDS, iS, iMS, {
+          appDetails: body,
+        });
+        t2.getInput = () => ({ item: t1.result });
+        const authTokenSubject = (await runner.runSingleSequence(
+          [t1, t2],
+          log,
+        )) as AuthTokenSubject;
+        const token = await promisifiedJwtSign(
+          { sub: authTokenSubject },
+          { expiresIn: `${jwtExpiration}m` },
+        );
+        return { token };
+      },
+    );
+  });
 };
 
 export default plugin;
