@@ -1,6 +1,6 @@
 // global
 import { Item } from 'graasp';
-import { sql, DatabaseTransactionConnectionType as TrxHandler } from 'slonik';
+import { sql, DatabaseTransactionConnection as TrxHandler } from 'slonik';
 
 // local
 import { AppAction } from './interfaces/app-action';

@@ -1,6 +1,6 @@
 // global
 import { Item, Member } from 'graasp';
-import { sql, DatabaseTransactionConnectionType as TrxHandler } from 'slonik';
+import { sql, DatabaseTransactionConnection as TrxHandler } from 'slonik';
 
 import { RecordVisibility } from '../interfaces/app-details';
 // local

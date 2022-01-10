@@ -1,4 +1,4 @@
-import { sql, DatabaseTransactionConnectionType as TrxHandler } from 'slonik';
+import { sql, DatabaseTransactionConnection as TrxHandler } from 'slonik';
 
 import { App } from './interfaces/app-item';
 

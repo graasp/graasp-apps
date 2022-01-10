@@ -48,7 +48,11 @@ export class CreateAppDataTask extends BaseAppDataTask<Actor, AppData> {
 
     if (permission === 'admin') {
       const appDataMemberId = this.data.memberId ?? memberId;
-      completeData = Object.assign({}, data, { memberId: appDataMemberId, creator: memberId, itemId });
+      completeData = Object.assign({}, data, {
+        memberId: appDataMemberId,
+        creator: memberId,
+        itemId,
+      });
     } else {
       completeData = Object.assign({}, data, { memberId: memberId, creator: memberId, itemId });
     }
