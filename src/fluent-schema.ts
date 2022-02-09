@@ -1,5 +1,6 @@
 import S from 'fluent-json-schema';
 
+// we don't want to return the id since it's the key!
 export const appSchema = S.object()
   .additionalProperties(false)
   .prop('name', S.string())
