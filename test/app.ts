@@ -4,12 +4,7 @@ import { TaskRunner } from 'graasp-test';
 import { AuthTokenSubject } from '../src/interfaces/request';
 import plugin from '../src/plugin';
 import { AppsPluginOptions } from '../src/types';
-import {
-  MOCK_LOCAL_OPTIONS,
-  MOCK_S3_OPTIONS,
-  GRAASP_ACTOR,
-  buildMockAuthTokenSubject,
-} from './fixtures';
+import { MOCK_LOCAL_OPTIONS, MOCK_S3_OPTIONS, GRAASP_ACTOR } from './fixtures';
 
 const schemas = {
   $id: 'http://graasp.org/',
@@ -35,7 +30,6 @@ const build = async ({
   itemTaskManager: iTM,
   itemMembershipsService: iMS,
   options,
-  authTokenSubject = buildMockAuthTokenSubject(),
   member = GRAASP_ACTOR,
 }: {
   runner: TaskRunner;
@@ -43,7 +37,6 @@ const build = async ({
   itemTaskManager: ItemTaskManager;
   itemMembershipsService: ItemMembershipService;
   options?: AppsPluginOptions;
-  authTokenSubject?: AuthTokenSubject;
   member?: Actor;
 }) => {
   const app = fastify();

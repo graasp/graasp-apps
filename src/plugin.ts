@@ -6,7 +6,11 @@ import { promisify } from 'util';
 import fastifyJwt from 'fastify-jwt';
 import fastifyAuth from 'fastify-auth';
 import ThumbnailsPlugin from 'graasp-plugin-thumbnails';
-import { GraaspLocalFileItemOptions, GraaspS3FileItemOptions } from 'graasp-plugin-file';
+import {
+  GraaspLocalFileItemOptions,
+  GraaspS3FileItemOptions,
+  ServiceMethod,
+} from 'graasp-plugin-file';
 import { StatusCodes } from 'http-status-codes';
 import appDataPlugin from './app-data/service-api';
 import appActionPlugin from './app-actions/service-api';
@@ -46,7 +50,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
   if (!thumbnailsPrefix) {
     throw new Error('thumbnail prefix is not defined!');
   }
-  if (!serviceMethod) {
+  if (!Object.values(ServiceMethod).includes(serviceMethod)) {
     throw new Error('serviceMethod is not defined!');
   }
   if (!jwtSecret) {

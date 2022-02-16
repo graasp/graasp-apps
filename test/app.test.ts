@@ -22,8 +22,9 @@ import {
   mockRunSingleSequence,
 } from './mock';
 import { AppService } from '../src/db-service';
+import { AppsPluginOptions } from '../src/types';
 
-const defaultOptions = {
+const defaultOptions: AppsPluginOptions = {
   jwtSecret: MOCK_JWT_SECRET,
   serviceMethod: ServiceMethod.LOCAL,
   thumbnailsPrefix: '/',
