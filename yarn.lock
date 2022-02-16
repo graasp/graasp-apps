@@ -3476,7 +3476,7 @@ __metadata:
     graasp-plugin-file-item: "github:graasp/graasp-plugin-file-item"
     graasp-plugin-public: "github:graasp/graasp-plugin-public"
     graasp-plugin-thumbnails: "github:graasp/graasp-plugin-thumbnails"
-    graasp-test: "github:graasp/graasp-test#15/updateTypes"
+    graasp-test: "github:graasp/graasp-test"
     http-status-codes: 2.2.0
     husky: 7.0.4
     jest: 27.5.1
@@ -3553,9 +3553,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graasp-test@github:graasp/graasp-test#15/updateTypes":
+"graasp-test@github:graasp/graasp-test":
   version: 0.1.0
-  resolution: "graasp-test@https://github.com/graasp/graasp-test.git#commit=c26c5de6da4477064e9bcd6b898dc38d0ac039b5"
+  resolution: "graasp-test@https://github.com/graasp/graasp-test.git#commit=7c4c28e79b0dae2f4133a29bc61df79e469c71db"
   checksum: 8927ab8697cbcd697208ac4eafcb5fea01dd03a598d426e3c49ea0371b5f5733461bd2f6dad9cee26821e0ff64746ccf1e7913e7c0b325a1d5ad83edbc535ed3
   languageName: node
   linkType: hard
