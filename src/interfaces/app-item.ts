@@ -13,5 +13,5 @@ export interface App {
   name: string;
   url: string;
   description: string;
-  extra: string;
+  extra: Anything;
 }

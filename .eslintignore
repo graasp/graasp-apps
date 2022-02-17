@@ -3,3 +3,5 @@
 dist/*
 # data definition files
 **/*.d.ts
+
+*.config.js
