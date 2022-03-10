@@ -3,8 +3,7 @@ import { FastifyPluginAsync } from 'fastify';
 import graaspPublicPlugin from 'graasp-plugin-public';
 
 // local
-import common, { getForOne, getForMany } from './schemas';
-import { ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
+import common, { getForOne } from './schemas';
 import { TaskManager } from './task-manager';
 import { AppSettingService } from './db-service';
 
@@ -36,12 +35,12 @@ const plugin: FastifyPluginAsync = async (fastify) => {
     // origins from the publishers table an build a rule with that.
 
     // get app data
-    fastify.get<{ Params: { itemId: string }; Querystring: SingleItemGetFilter }>(
+    fastify.get<{ Params: { itemId: string } }>(
       '/:itemId/app-settings',
       { schema: getForOne },
-      async ({ authTokenSubject: requestDetails, params: { itemId }, query: filter, log }) => {
+      async ({ authTokenSubject: requestDetails, params: { itemId }, log }) => {
         const t1 = pITM.createGetPublicItemTask(graaspActor, { itemId });
-        const t2 = taskManager.createGetTask(graaspActor, itemId, filter, requestDetails);
+        const t2 = taskManager.createGetTask(graaspActor, itemId, requestDetails);
         return runner.runSingleSequence([t1, t2], log);
       },
     );

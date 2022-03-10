@@ -1,5 +1,6 @@
-import { Actor } from 'graasp';
+import { Actor, ItemMembership } from 'graasp';
 import { v4 } from 'uuid';
+import { PERMISSION_LEVELS } from '../src/util/constants';
 
 export const GRAASP_ACTOR: Actor = {
   id: 'actorid',
@@ -54,3 +55,8 @@ export const buildAppSetting = ({ name = 'setting-name', data = { setting: 'valu
   name,
   data,
 });
+
+export const MOCK_MEMBERSHIP = {
+  memberId: 'weiof',
+  permission: PERMISSION_LEVELS.ADMIN,
+} as Partial<ItemMembership>;

@@ -80,27 +80,4 @@ const getForOne = {
   },
 };
 
-const getForMany = {
-  querystring: {
-    type: 'object',
-    required: ['itemId'],
-    properties: {
-      itemId: {
-        type: 'array',
-        items: { $ref: 'http://graasp.org/#/definitions/uuid' },
-        uniqueItems: true,
-      },
-      visibility: { type: 'string', enum: ['member', 'item'] },
-      memberId: { $ref: 'http://graasp.org/#/definitions/uuid' },
-    },
-    additionalProperties: false,
-  },
-  response: {
-    200: {
-      type: 'array',
-      items: { $ref: 'http://graasp.org/apps/app-settings/#/definitions/appSetting' },
-    },
-  },
-};
-
-export { create, updateOne, deleteOne, getForOne, getForMany };
+export { create, updateOne, deleteOne, getForOne };

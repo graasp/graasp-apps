@@ -7,10 +7,11 @@ import {
   MOCK_JWT_SECRET,
   MOCK_TOKEN,
   buildAppSetting,
+  MOCK_MEMBERSHIP,
 } from './fixtures';
 import { ServiceMethod } from 'graasp-plugin-file';
 import { TaskRunner, ItemTaskManager, ItemMembershipTaskManager } from 'graasp-test';
-import { ItemService, ItemMembershipService, ItemMembership } from 'graasp';
+import { ItemService, ItemMembershipService } from 'graasp';
 import {
   mockCreateGetMemberItemMembershipTask,
   mockCreateGetTask,
@@ -19,7 +20,6 @@ import {
   mockRunSingleSequence,
 } from './mock';
 import { AppsPluginOptions } from '../src/types';
-import { PERMISSION_LEVELS } from '../src/util/constants';
 
 const defaultOptions: AppsPluginOptions = {
   jwtSecret: MOCK_JWT_SECRET,
@@ -99,7 +99,8 @@ describe('Apps Settings Tests', () => {
       beforeEach(() => {
         mockPromisify(buildMockAuthTokenSubject({ item: item.id }));
         mockCreateGetTask(item);
-        mockRunSingle(appSettings);
+        mockCreateGetMemberItemMembershipTask(MOCK_MEMBERSHIP);
+        mockRunSingleSequence(appSettings);
       });
 
       it('Post app setting successfully', async () => {
@@ -113,6 +114,7 @@ describe('Apps Settings Tests', () => {
             Authorization: `Bearer ${MOCK_TOKEN}`,
           },
         });
+        console.log('response: ', response);
         expect(response.statusCode).toEqual(StatusCodes.OK);
         expect(response.json()).toEqual(appSettings);
       });
@@ -144,12 +146,8 @@ describe('Apps Settings Tests', () => {
 
     describe('POST /:itemId/app-settings', () => {
       const appSetting = buildAppSetting();
-      const mockMembership = {
-        memberId: 'weiof',
-        permission: PERMISSION_LEVELS.ADMIN,
-      } as Partial<ItemMembership>;
       beforeEach(() => {
-        mockCreateGetMemberItemMembershipTask(mockMembership);
+        mockCreateGetMemberItemMembershipTask(MOCK_MEMBERSHIP);
         mockPromisify(buildMockAuthTokenSubject({ item: item.id }));
         mockCreateGetTask(item);
         mockRunSingleSequence(appSetting);
@@ -203,8 +201,10 @@ describe('Apps Settings Tests', () => {
       const appSetting = buildAppSetting();
       const updatedSetting = { ...appSetting, data: { mySetting: 'value' } };
       beforeEach(() => {
-        mockRunSingle(updatedSetting);
         mockPromisify(buildMockAuthTokenSubject({ item: item.id }));
+        mockCreateGetMemberItemMembershipTask(MOCK_MEMBERSHIP);
+        mockCreateGetTask(item);
+        mockRunSingleSequence(updatedSetting);
       });
 
       it('Patch app settings successfully', async () => {
@@ -262,7 +262,9 @@ describe('Apps Settings Tests', () => {
       const appSetting = buildAppSetting();
       beforeEach(() => {
         mockPromisify(buildMockAuthTokenSubject({ item: item.id }));
-        mockRunSingle(appSetting);
+        mockCreateGetMemberItemMembershipTask(MOCK_MEMBERSHIP);
+        mockCreateGetTask(item);
+        mockRunSingleSequence(appSetting);
       });
 
       it('Delete app setting successfully', async () => {

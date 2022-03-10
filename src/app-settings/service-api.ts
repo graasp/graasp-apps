@@ -11,7 +11,6 @@ import {
 // local
 import { AppSetting, InputAppSetting } from './interfaces/app-setting';
 import common, { create, updateOne, deleteOne, getForOne } from './schemas';
-import { SingleItemGetFilter } from '../interfaces/request';
 import { TaskManager } from './task-manager';
 import path from 'path';
 import { AppSettingService } from './db-service';
@@ -63,7 +62,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
 
       uploadPreHookTasks: async ({ parentId: itemId }, { token }) => {
         const { member: id } = token;
-        return [taskManager.createGetTask({ id }, itemId, { visibility: 'item' }, token)];
+        return taskManager.createGetTaskSequence({ id }, itemId, token);
       },
       uploadPostHookTasks: async ({ filename, itemId, filepath, size, mimetype }, { token }) => {
         const { member: id } = token;
@@ -96,11 +95,11 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
         return tasks;
       },
 
-      downloadPreHookTasks: async ({ itemId }, { token }) => {
+      downloadPreHookTasks: async ({ itemId: appSettingId }, { token }) => {
         return [
           taskManager.createGetFileTask(
             { id: token.member },
-            { appSettingId: itemId, serviceMethod },
+            { appSettingId, serviceMethod },
             token,
           ),
         ];
@@ -129,14 +128,14 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
         log,
       }) => {
         const { member: id } = requestDetails;
-        const task = taskManager.createUpdateTask(
+        const tasks = taskManager.createUpdateTaskSequence(
           { id },
           appSettingId,
           body,
           itemId,
           requestDetails,
         );
-        return runner.runSingle(task, log);
+        return runner.runSingleSequence(tasks, log);
       },
     );
 
@@ -146,19 +145,24 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
       { schema: deleteOne },
       async ({ authTokenSubject: requestDetails, params: { itemId, id: appSettingId }, log }) => {
         const { member: id } = requestDetails;
-        const task = taskManager.createDeleteTask({ id }, appSettingId, itemId, requestDetails);
-        return runner.runSingle(task, log);
+        const task = taskManager.createDeleteTaskSequence(
+          { id },
+          appSettingId,
+          itemId,
+          requestDetails,
+        );
+        return runner.runSingleSequence(task, log);
       },
     );
 
     // get app settings
-    fastify.get<{ Params: { itemId: string }; Querystring: SingleItemGetFilter }>(
+    fastify.get<{ Params: { itemId: string } }>(
       '/:itemId/app-settings',
       { schema: getForOne },
-      async ({ authTokenSubject: requestDetails, params: { itemId }, query: filter, log }) => {
+      async ({ authTokenSubject: requestDetails, params: { itemId }, log }) => {
         const { member: id } = requestDetails;
-        const task = taskManager.createGetTask({ id }, itemId, filter, requestDetails);
-        return runner.runSingle(task, log);
+        const task = taskManager.createGetTaskSequence({ id }, itemId, requestDetails);
+        return runner.runSingleSequence(task, log);
       },
     );
   });

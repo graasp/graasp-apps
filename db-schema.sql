@@ -70,6 +70,8 @@ BEFORE UPDATE ON "app_data"
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp(); -- "trigger_set_timestamp()" already exists in db
 
+-- APP ACTIONS
+
 CREATE TABLE "app_action" (
   "id" uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
 
@@ -85,3 +87,28 @@ CREATE TABLE "app_action" (
   "created_at" timestamp NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc')
 );
 CREATE INDEX "app_action_item_id_idx" ON app_action("item_id");
+
+-- APP SETTINGS
+
+CREATE TABLE "app_setting" (
+  "id" uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+
+  -- delete row if item is deleted
+  "item_id" uuid REFERENCES "item" ("id") ON DELETE CASCADE NOT NULL,
+
+  "name" character varying(250) NOT NULL,
+
+  "data" jsonb NOT NULL DEFAULT '{}'::jsonb,
+
+  -- don't remove - set creator to NULL
+  "creator" uuid REFERENCES "member" ("id") ON DELETE SET NULL,
+
+  "created_at" timestamp NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc'),
+  "updated_at" timestamp NOT NULL DEFAULT (NOW() AT TIME ZONE 'utc')
+);
+CREATE INDEX "app_setting_item_id_idx" ON app_setting("item_id");
+
+CREATE TRIGGER "app_setting_set_timestamp"
+BEFORE UPDATE ON "app_setting"
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp(); -- "trigger_set_timestamp()" already exists in db

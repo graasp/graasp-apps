@@ -7,4 +7,5 @@ export const THUMBNAILS_ROUTE = '/thumbnails';
 export const PERMISSION_LEVELS = {
   ADMIN: 'admin',
   WRITE: 'write',
+  READ: 'read',
 };

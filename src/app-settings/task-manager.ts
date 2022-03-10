@@ -10,7 +10,7 @@ import {
 // local
 import { AppSettingService } from './db-service';
 import { AppSetting } from './interfaces/app-setting';
-import { AuthTokenSubject, SingleItemGetFilter } from '../interfaces/request';
+import { AuthTokenSubject } from '../interfaces/request';
 import { CreateAppSettingTask } from './tasks/create-app-setting-task';
 import { DeleteAppSettingTask } from './tasks/delete-app-setting-task';
 import { GetAppSettingTask } from './tasks/get-app-setting-task';
@@ -90,36 +90,36 @@ export class TaskManager {
    * @param requestDetails All the metadata contained in the jwt auth token.
    * @returns DeleteAppSettingTask
    */
-  createGetTask(
-    actor: Actor,
-    itemId: string,
-    filter: SingleItemGetFilter,
-    requestDetails: AuthTokenSubject,
-  ): GetAppSettingTask {
+  createGetTask(actor: Actor, itemId: string, requestDetails: AuthTokenSubject): GetAppSettingTask {
     return new GetAppSettingTask(
       actor,
       this.appDataService,
       this.itemService,
       this.itemMembershipService,
-      { itemId, filter, requestDetails },
+      { itemId, requestDetails },
     );
   }
+
+  /**
+   * Create a new AppSetting Get Task Sequence
+   * @param actor Object containing an id matching the member that made the request - a copy of `requestDetails.member`.
+   * @param itemId Id of item (app item) to which the new AppSetting will be bond to.
+   * @param requestDetails All the metadata contained in the jwt auth token.
+   * @returns Task[]
+   */
   createGetTaskSequence(
     actor: Actor,
-    data: Partial<AppSetting>,
     itemId: string,
     requestDetails: AuthTokenSubject,
   ): Task<Actor, unknown>[] {
-    // check item exists
-    const t1 = this.itemTaskManager.createGetTaskSequence(actor, itemId);
-
-    // get permission over item
+    const t1 = this.itemTaskManager.createGetTask(actor, itemId);
     const t2 = this.itemMembershipTaskManager.createGetMemberItemMembershipTask(actor);
     t2.getInput = () => ({
-      item: t1[t1.length - 1].result,
+      item: t1.result,
+      validatePermission: PERMISSION_LEVELS.READ,
     });
 
-    // get app data
+    // get app settings
     const t3 = new GetAppSettingTask(
       actor,
       this.appDataService,
@@ -127,14 +127,11 @@ export class TaskManager {
       this.itemMembershipService,
       { itemId, requestDetails },
     );
-    t3.getInput = () => ({
-      permission: t2.result.permission,
-    });
-    return [...t1, t2, t3];
+    return [t1, t2, t3];
   }
 
   /**
-   * Create a new AppSetting UpdateTask
+   * Create a new AppSetting Update Task Sequence
    * @param actor Object containing an id matching the member that made the request - a copy of `requestDetails.member`.
    * @param appDataId Id of AppSetting to update.
    * @param data AppSetting (partial) object with property `data` - the only property that can be updated.
@@ -142,14 +139,20 @@ export class TaskManager {
    * @param requestDetails All the metadata contained in the jwt auth token.
    * @returns UpdateAppSettingTask
    */
-  createUpdateTask(
+  createUpdateTaskSequence(
     actor: Actor,
     appDataId: string,
     data: Partial<AppSetting>,
     itemId: string,
     requestDetails: AuthTokenSubject,
-  ): UpdateAppSettingTask {
-    return new UpdateAppSettingTask(
+  ): Task<Actor, unknown>[] {
+    const t1 = this.itemTaskManager.createGetTask(actor, itemId);
+    const t2 = this.itemMembershipTaskManager.createGetMemberItemMembershipTask(actor);
+    t2.getInput = () => ({
+      item: t1.result,
+      validatePermission: PERMISSION_LEVELS.ADMIN,
+    });
+    const updateTask = new UpdateAppSettingTask(
       actor,
       appDataId,
       data,
@@ -159,23 +162,30 @@ export class TaskManager {
       this.itemService,
       this.itemMembershipService,
     );
+    return [t1, t2, updateTask];
   }
 
   /**
-   * Create a new AppSetting DeleteTask
+   * Create a new AppSetting Delete Task Sequence
    * @param actor Object containing an id matching the member that made the request - a copy of `requestDetails.member`.
    * @param appDataId Id of AppSetting to delete.
    * @param itemId Id of item (app item) to which the new AppSetting will be bond to.
    * @param requestDetails All the metadata contained in the jwt auth token.
    * @returns DeleteAppSettingTask
    */
-  createDeleteTask(
+  createDeleteTaskSequence(
     actor: Actor,
     appDataId: string,
     itemId: string,
     requestDetails: AuthTokenSubject,
-  ): DeleteAppSettingTask {
-    return new DeleteAppSettingTask(
+  ): Task<Actor, unknown>[] {
+    const t1 = this.itemTaskManager.createGetTask(actor, itemId);
+    const t2 = this.itemMembershipTaskManager.createGetMemberItemMembershipTask(actor);
+    t2.getInput = () => ({
+      item: t1.result,
+      validatePermission: PERMISSION_LEVELS.ADMIN,
+    });
+    const deleteTask = new DeleteAppSettingTask(
       actor,
       appDataId,
       itemId,
@@ -184,6 +194,7 @@ export class TaskManager {
       this.itemService,
       this.itemMembershipService,
     );
+    return [t1, t2, deleteTask];
   }
 
   createGetFileTask(

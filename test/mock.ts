@@ -53,7 +53,7 @@ export const mockCreateGetMemberItemMembershipTask = (
 };
 
 export const mockRunSingleSequence = (
-  data?: Partial<Item> | Error,
+  data?: any | Error,
   shouldThrow?: boolean,
 ): jest.SpyInstance => {
   return jest.spyOn(TaskRunner.prototype, 'runSingleSequence').mockImplementation(async () => data);

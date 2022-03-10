@@ -1,9 +1,4 @@
-// global
-import { Item, Member } from 'graasp';
 import { sql, DatabaseTransactionConnection as TrxHandler } from 'slonik';
-
-import { RecordVisibility } from '../interfaces/app-details';
-// local
 import { AppSetting } from './interfaces/app-setting';
 
 /**
@@ -35,6 +30,7 @@ export class AppSettingService {
       [['app_setting', 'id'], ['id']],
       [['app_setting', 'item_id'], ['itemId']],
       [['app_setting', 'data'], ['data']],
+      [['app_setting', 'name'], ['name']],
       [['app_setting', 'creator'], ['creator']],
       [['app_setting', 'created_at'], ['createdAt']],
       [['app_setting', 'updated_at'], ['updatedAt']],

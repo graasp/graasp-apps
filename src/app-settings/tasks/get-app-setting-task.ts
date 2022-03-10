@@ -4,13 +4,11 @@ import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService }
 import { AppSetting } from '../interfaces/app-setting';
 import { AppSettingService } from '../db-service';
 import { BaseAppSettingTask } from './base-app-setting-task';
-import { AuthTokenSubject, SingleItemGetFilter } from '../../interfaces/request';
+import { AuthTokenSubject } from '../../interfaces/request';
 
 type InputType = {
   itemId?: string;
-  filter?: SingleItemGetFilter;
   requestDetails?: AuthTokenSubject;
-  permission?: string;
 };
 
 export class GetAppSettingTask extends BaseAppSettingTask<Actor, readonly AppSetting[]> {
