@@ -48,3 +48,9 @@ export const MOCK_SETTINGS = {
 export const MOCK_APPS = [
   { id: v4(), name: 'some-name', url: 'some-url', description: 'description', extra: {} },
 ];
+
+export const buildAppSetting = ({ name = 'setting-name', data = { setting: 'value' } } = {}) => ({
+  id: v4(),
+  name,
+  data,
+});

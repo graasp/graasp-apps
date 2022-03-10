@@ -77,3 +77,15 @@ export class AppActionNotAccessible extends GraaspAppsError {
     );
   }
 }
+
+export class AppSettingNotFound extends GraaspAppsError {
+  constructor(data?: unknown) {
+    super({ code: 'GAERR009', statusCode: 404, message: 'App setting not found' }, data);
+  }
+}
+
+export class MemberCannotAdminSetting extends GraaspAppsError {
+  constructor(data?: unknown) {
+    super({ code: 'GAERR010', statusCode: 400, message: 'Member cannot admin setting' }, data);
+  }
+}

@@ -7,7 +7,6 @@ import {
   buildMockAuthTokenSubject,
   MOCK_CONTEXT,
   MOCK_JWT_SECRET,
-  MOCK_SETTINGS,
   MOCK_TOKEN,
   MOCK_APPS,
 } from './fixtures';
@@ -16,7 +15,6 @@ import { TaskRunner, ItemTaskManager } from 'graasp-test';
 import { ItemService, ItemMembershipService } from 'graasp';
 import {
   mockCreateGetTaskSequence,
-  mockCreateUpdateTaskSequence,
   mockPromisify,
   mockRunSingle,
   mockRunSingleSequence,
@@ -226,55 +224,6 @@ describe('Apps Plugin Tests', () => {
         const response = await app.inject({
           method: 'GET',
           url: '/invalid-id/context',
-        });
-        expect(response.statusCode).toEqual(StatusCodes.BAD_REQUEST);
-      });
-    });
-
-    describe('PATCH /:itemId/settings', () => {
-      it('Patch item settings successfully', async () => {
-        mockCreateUpdateTaskSequence();
-        const item = { id: v4() };
-        mockPromisify(buildMockAuthTokenSubject({ item: item.id }));
-
-        const app = await build(buildAppOptions());
-        expect(app).toBeTruthy();
-
-        const response = await app.inject({
-          method: 'PATCH',
-          url: `/${item.id}/settings`,
-          headers: {
-            Authorization: `Bearer ${MOCK_TOKEN}`,
-          },
-          payload: MOCK_SETTINGS,
-        });
-        expect(response.statusCode).toEqual(StatusCodes.NO_CONTENT);
-      });
-
-      it('Request without member and token throws', async () => {
-        mockCreateUpdateTaskSequence();
-        const item = { id: v4() };
-        // mock promisifiedJwtVerify to pass
-        mockPromisify(buildMockAuthTokenSubject({ item: item.id }));
-
-        const app = await build(buildAppOptions({ member: null }));
-        expect(app).toBeTruthy();
-
-        const response = await app.inject({
-          method: 'PATCH',
-          url: `/${item.id}/settings`,
-          payload: MOCK_SETTINGS,
-        });
-        expect(response.statusCode).toEqual(StatusCodes.UNAUTHORIZED);
-      });
-      it('Invalid item id throws bad request', async () => {
-        const app = await build(buildAppOptions());
-        expect(app).toBeTruthy();
-
-        const response = await app.inject({
-          method: 'PATCH',
-          url: '/invalid-id/settings',
-          payload: MOCK_SETTINGS,
         });
         expect(response.statusCode).toEqual(StatusCodes.BAD_REQUEST);
       });

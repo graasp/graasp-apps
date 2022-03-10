@@ -1,4 +1,4 @@
-import { Item } from 'graasp';
+import { Item, ItemMembership } from 'graasp';
 import util from 'util';
 import { ItemMembershipTaskManager, TaskRunner, ItemTaskManager, Task } from 'graasp-test';
 import { AuthTokenSubject } from '../src/interfaces/request';
@@ -15,6 +15,18 @@ export const mockCreateGetTaskSequence = (
   jest.spyOn(TaskRunner.prototype, 'runSingleSequence').mockImplementation(async () => data);
   return mockCreateTask;
 };
+export const mockCreateGetTask = (
+  data: Partial<Item> | Error,
+  shouldThrow?: boolean,
+): jest.SpyInstance => {
+  const mockCreateTask = jest
+    .spyOn(ItemTaskManager.prototype, 'createGetTask')
+    .mockImplementation(() => {
+      return new Task(data);
+    });
+  jest.spyOn(TaskRunner.prototype, 'runSingleSequence').mockImplementation(async () => data);
+  return mockCreateTask;
+};
 export const mockCreateUpdateTaskSequence = (
   data?: Partial<Item> | Error,
   shouldThrow?: boolean,
@@ -27,6 +39,19 @@ export const mockCreateUpdateTaskSequence = (
   jest.spyOn(TaskRunner.prototype, 'runSingleSequence').mockImplementation(async () => data);
   return mockTask;
 };
+export const mockCreateGetMemberItemMembershipTask = (
+  data?: Partial<ItemMembership> | Error,
+  shouldThrow?: boolean,
+): jest.SpyInstance => {
+  const mockTask = jest
+    .spyOn(ItemMembershipTaskManager.prototype, 'createGetMemberItemMembershipTask')
+    .mockImplementation(() => {
+      return new Task(data);
+    });
+  jest.spyOn(TaskRunner.prototype, 'runSingle').mockImplementation(async () => data);
+  return mockTask;
+};
+
 export const mockRunSingleSequence = (
   data?: Partial<Item> | Error,
   shouldThrow?: boolean,
