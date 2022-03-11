@@ -65,7 +65,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
       uploadPostHookTasks: async (
         { filename, itemId, filepath, size, mimetype },
         { token },
-        requestBody,
+        fileBody = {},
       ) => {
         const { member: id } = token;
 
@@ -91,7 +91,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
             },
             type: 'file',
             visibility: 'member',
-            ...requestBody,
+            ...fileBody,
           },
           itemId,
           token,
