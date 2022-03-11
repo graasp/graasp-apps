@@ -1,4 +1,3 @@
-// global
 import { FastifyPluginAsync } from 'fastify';
 import { IdParam } from 'graasp';
 import GraaspFilePlugin, { ServiceMethod } from 'graasp-plugin-file';
@@ -7,8 +6,6 @@ import {
   ORIGINAL_FILENAME_TRUNCATE_LIMIT,
   FILE_ITEM_TYPES,
 } from 'graasp-plugin-file-item';
-
-// local
 import { AppSetting, InputAppSetting } from './interfaces/app-setting';
 import common, { create, updateOne, deleteOne, getForOne } from './schemas';
 import { TaskManager } from './task-manager';

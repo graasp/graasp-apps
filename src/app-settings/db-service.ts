@@ -11,6 +11,7 @@ export class AppSettingService {
       'id',
       ['item_id', 'itemId'],
       'data',
+      'name',
       'creator',
       ['created_at', 'createdAt'],
       ['updated_at', 'updatedAt'],
