@@ -62,7 +62,11 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
         const { member: id } = token;
         return [taskManager.createGetTask({ id }, itemId, { visibility: 'member' }, token)];
       },
-      uploadPostHookTasks: async ({ filename, itemId, filepath, size, mimetype }, { token }) => {
+      uploadPostHookTasks: async (
+        { filename, itemId, filepath, size, mimetype },
+        { token },
+        requestBody,
+      ) => {
         const { member: id } = token;
 
         const name = filename.substring(0, ORIGINAL_FILENAME_TRUNCATE_LIMIT);
@@ -87,6 +91,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
             },
             type: 'file',
             visibility: 'member',
+            ...requestBody,
           },
           itemId,
           token,
