@@ -3,9 +3,7 @@ import { IdParam, Item } from 'graasp';
 import GraaspFilePlugin, {
   ServiceMethod,
   FileTaskManager,
-  GraaspS3FileItemOptions,
-  GraaspLocalFileItemOptions,
-  FileItemExtra,
+  FileProperties,
 } from 'graasp-plugin-file';
 import { ORIGINAL_FILENAME_TRUNCATE_LIMIT, FILE_ITEM_TYPES } from 'graasp-plugin-file-item';
 import { AppSetting, InputAppSetting } from './interfaces/app-setting';
@@ -142,17 +140,14 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
               copyData.data = newFileData;
 
               // run copy task
-              const fileCopyTask = fTM.createCopyFileTask(actor);
-              fileCopyTask.getInput = () => {
-                const originalFileData = copyData.data.extra as FileItemExtra;
-                const fileCopyData = {
-                  newId: newSetting.id,
-                  newFilePath,
-                  originalPath: originalFileData.path,
-                  mimetype: originalFileData.mimetype,
-                };
-                return fileCopyData;
+              const originalFileExtra = copyData.data.extra[SERVICE_ITEM_TYPE] as FileProperties;
+              const fileCopyData = {
+                newId: newSetting.id,
+                newFilePath,
+                originalPath: originalFileExtra.path,
+                mimetype: originalFileExtra.mimetype,
               };
+              const fileCopyTask = fTM.createCopyFileTask(actor, fileCopyData);
               await runner.runSingle(fileCopyTask);
 
               // update new setting with file data

@@ -3529,14 +3529,14 @@ __metadata:
 
 "graasp-plugin-file@github:graasp/graasp-plugin-file#11/returnFile":
   version: 0.1.0
-  resolution: "graasp-plugin-file@https://github.com/graasp/graasp-plugin-file.git#commit=9806c86b5555fa534ea74791628cc1c841eb4c58"
+  resolution: "graasp-plugin-file@https://github.com/graasp/graasp-plugin-file.git#commit=ba493af54621894a16d11d47122c430e98df9ce1"
   dependencies:
     aws-sdk: 2.1074.0
     content-disposition: 0.5.4
     fastify-multipart: 5.3.1
     http-status-codes: 2.2.0
     node-fetch: 2
-  checksum: e4f27b09ca003b431afdad03d56e8fb93f3280ee28666cec6aa84ffd9182e628bcd54d688e8d688a6d60a0a820cc03991b0146b21dd74e1c44182b5828768d4a
+  checksum: 86d9ee6a78284183f275de50001475022e4b596ff0efe31b6de041ba5f57ac1bd4fa017ea02e684d56dfc6ce50499c898ec27308907a4ba8ab1956987bf4fee3
   languageName: node
   linkType: hard
 
