@@ -1,33 +1,39 @@
 import { FastifyPluginAsync } from 'fastify';
-import { IdParam } from 'graasp';
-import GraaspFilePlugin, { ServiceMethod } from 'graasp-plugin-file';
-import {
-  randomHexOf4,
-  ORIGINAL_FILENAME_TRUNCATE_LIMIT,
-  FILE_ITEM_TYPES,
-} from 'graasp-plugin-file-item';
+import { IdParam, Item } from 'graasp';
+import GraaspFilePlugin, {
+  ServiceMethod,
+  FileTaskManager,
+  GraaspS3FileItemOptions,
+  GraaspLocalFileItemOptions,
+  FileItemExtra,
+} from 'graasp-plugin-file';
+import { ORIGINAL_FILENAME_TRUNCATE_LIMIT, FILE_ITEM_TYPES } from 'graasp-plugin-file-item';
 import { AppSetting, InputAppSetting } from './interfaces/app-setting';
 import common, { create, updateOne, deleteOne, getForOne } from './schemas';
 import { TaskManager } from './task-manager';
-import path from 'path';
 import { AppSettingService } from './db-service';
+import { buildFilePath, buildFileItemData } from '../util/utils';
 
 interface PluginOptions {
   serviceMethod: ServiceMethod;
 }
-
-const PATH_PREFIX = 'apps/';
 
 const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
   const {
     items: { dbService: iS, taskManager: iTM },
     itemMemberships: { dbService: iMS, taskManager: iMTM },
     taskRunner: runner,
+    fileItemPluginOptions,
+    s3FileItemPluginOptions,
   } = fastify;
 
   const aSS = new AppSettingService();
 
   const { serviceMethod } = options;
+  const fTM = new FileTaskManager(
+    { s3: s3FileItemPluginOptions, local: fileItemPluginOptions },
+    serviceMethod,
+  );
 
   const taskManager = new TaskManager(aSS, iS, iMS, iTM, iMTM);
 
@@ -43,11 +49,6 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
     const SERVICE_ITEM_TYPE =
       serviceMethod === ServiceMethod.S3 ? FILE_ITEM_TYPES.S3 : FILE_ITEM_TYPES.LOCAL;
 
-    const buildFilePath = () => {
-      const filepath = `${randomHexOf4()}/${randomHexOf4()}/${randomHexOf4()}-${Date.now()}`;
-      return path.join(PATH_PREFIX, filepath);
-    };
-
     fastify.register(GraaspFilePlugin, {
       prefix: '/app-settings',
       serviceMethod: serviceMethod,
@@ -55,7 +56,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
         s3: fastify.s3FileItemPluginOptions,
         local: fastify.fileItemPluginOptions,
       },
-      buildFilePath: buildFilePath,
+      buildFilePath,
 
       uploadPreHookTasks: async ({ parentId: itemId }, { token }) => {
         const { member: id } = token;
@@ -69,18 +70,14 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
         const { member: id } = token;
 
         const name = filename.substring(0, ORIGINAL_FILENAME_TRUNCATE_LIMIT);
-        const data = {
+        const data = buildFileItemData({
           name,
           type: SERVICE_ITEM_TYPE,
-          extra: {
-            [SERVICE_ITEM_TYPE]: {
-              name: filename,
-              path: filepath,
-              size,
-              mimetype,
-            },
-          },
-        };
+          filename,
+          filepath,
+          size,
+          mimetype,
+        });
 
         const tasks = taskManager.createCreateTaskSequence(
           { id },
@@ -107,6 +104,66 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
         ];
       },
     });
+
+    // copy app settings and related files on item copy
+    const copyTaskName = iTM.getCopyTaskName();
+    runner.setTaskPostHookHandler<Item>(
+      copyTaskName,
+      async ({ id, type }, actor, { log, handler }) => {
+        try {
+          if (!id || type !== 'app') return;
+
+          const appSettings = await aSS.getForItem(id, handler);
+          for (const appS of appSettings) {
+            const copyData = {
+              name: appS.name,
+              data: appS.data,
+              itemId: id,
+              creator: actor.id,
+            };
+
+            const newSetting = await aSS.create(copyData, handler);
+
+            // copy file only if content is a file
+            const isFileSetting = appS.data.type === SERVICE_ITEM_TYPE;
+            if (isFileSetting) {
+              // create file data object
+              const newFilePath = buildFilePath();
+              const newFileData = buildFileItemData({
+                filepath: newFilePath,
+                name: appS.data.name,
+                type: appS.data.type,
+                filename: appS.data.extra[SERVICE_ITEM_TYPE].name,
+                size: appS.data.extra[SERVICE_ITEM_TYPE].size,
+                mimetype: appS.data.extra[SERVICE_ITEM_TYPE].mimetype,
+              });
+
+              // set to new app setting
+              copyData.data = newFileData;
+
+              // run copy task
+              const fileCopyTask = fTM.createCopyFileTask(actor);
+              fileCopyTask.getInput = () => {
+                const originalFileData = copyData.data.extra as FileItemExtra;
+                const fileCopyData = {
+                  newId: newSetting.id,
+                  newFilePath,
+                  originalPath: originalFileData.path,
+                  mimetype: originalFileData.mimetype,
+                };
+                return fileCopyData;
+              };
+              await runner.runSingle(fileCopyTask);
+
+              // update new setting with file data
+              await aSS.update(newSetting.id, { data: newFileData }, handler);
+            }
+          }
+        } catch (err) {
+          log.error(err);
+        }
+      },
+    );
 
     // create app setting
     fastify.post<{ Params: { itemId: string }; Body: Partial<InputAppSetting> }>(

@@ -1,3 +1,6 @@
+import path from 'path';
+import { randomHexOf4 } from 'graasp-plugin-file-item';
+import { PATH_PREFIX } from './constants';
 import { TokenItemIdMismatch } from './graasp-apps-error';
 
 export const checkTargetItemAndTokenItemMatch = (itemId1: string, itemId2: string): void => {
@@ -5,3 +8,21 @@ export const checkTargetItemAndTokenItemMatch = (itemId1: string, itemId2: strin
     throw new TokenItemIdMismatch();
   }
 };
+
+export const buildFilePath = () => {
+  const filepath = `${randomHexOf4()}/${randomHexOf4()}/${randomHexOf4()}-${Date.now()}`;
+  return path.join(PATH_PREFIX, filepath);
+};
+
+export const buildFileItemData = ({ name, type, filename, filepath, size, mimetype }) => ({
+  name,
+  type,
+  extra: {
+    [type]: {
+      name: filename,
+      path: filepath,
+      size,
+      mimetype,
+    },
+  },
+});

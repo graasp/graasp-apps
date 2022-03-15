@@ -85,21 +85,17 @@ export class AppSettingService {
    * @param id AppSetting id
    * @param data Partial AppSetting (only property `data` is considered)
    * @param transactionHandler Database transaction handler
-   * @param memberId Id of member to whom the AppSetting should be linked to
    */
   async update(
     id: string,
     { data }: Partial<AppSetting>,
     transactionHandler: TrxHandler,
-    memberId?: string,
   ): Promise<AppSetting> {
     return transactionHandler
       .query<AppSetting>(
         sql`
         UPDATE app_setting
         SET data = ${sql.json(data)}
-        WHERE id = ${id}
-          ${memberId ? sql`AND member_id = ${memberId}` : sql``}
         RETURNING ${AppSettingService.allColumns}
       `,
       )
@@ -110,15 +106,12 @@ export class AppSettingService {
    * Delete AppSetting.
    * @param id AppSetting id
    * @param transactionHandler Database transaction handler
-   * @param memberId Id of member to whom the AppSetting should be linked to
    */
-  async delete(id: string, transactionHandler: TrxHandler, memberId?: string): Promise<AppSetting> {
+  async delete(id: string, transactionHandler: TrxHandler): Promise<AppSetting> {
     return transactionHandler
       .query<AppSetting>(
         sql`
         DELETE FROM app_setting
-        WHERE id = ${id}
-          ${memberId ? sql`AND member_id = ${memberId}` : sql``}
         RETURNING ${AppSettingService.allColumns}
       `,
       )

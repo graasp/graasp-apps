@@ -9,3 +9,5 @@ export const PERMISSION_LEVELS = {
   WRITE: 'write',
   READ: 'read',
 };
+
+export const PATH_PREFIX = 'apps/';
