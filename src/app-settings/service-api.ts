@@ -140,7 +140,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
               copyData.data = newFileData;
 
               // run copy task
-              const originalFileExtra = copyData.data.extra[SERVICE_ITEM_TYPE] as FileProperties;
+              const originalFileExtra = appS.data.extra[SERVICE_ITEM_TYPE] as FileProperties;
               const fileCopyData = {
                 newId: newSetting.id,
                 newFilePath,

@@ -96,6 +96,7 @@ export class AppSettingService {
         sql`
         UPDATE app_setting
         SET data = ${sql.json(data)}
+        WHERE id = ${id}
         RETURNING ${AppSettingService.allColumns}
       `,
       )
@@ -112,6 +113,7 @@ export class AppSettingService {
       .query<AppSetting>(
         sql`
         DELETE FROM app_setting
+        WHERE id = ${id}
         RETURNING ${AppSettingService.allColumns}
       `,
       )
