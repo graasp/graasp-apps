@@ -109,16 +109,16 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
     const copyTaskName = iTM.getCopyTaskName();
     runner.setTaskPostHookHandler<Item>(
       copyTaskName,
-      async ({ id, type }, actor, { log, handler }) => {
+      async ({ id: newId, type }, actor, { log, handler }, { original }) => {
         try {
-          if (!id || type !== 'app') return;
+          if (!newId || type !== 'app') return;
 
-          const appSettings = await aSS.getForItem(id, handler);
+          const appSettings = await aSS.getForItem(original.id, handler);
           for (const appS of appSettings) {
             const copyData = {
               name: appS.name,
               data: appS.data,
-              itemId: id,
+              itemId: newId,
               creator: actor.id,
             };
 
