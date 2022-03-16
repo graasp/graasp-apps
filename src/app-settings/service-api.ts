@@ -11,6 +11,7 @@ import common, { create, updateOne, deleteOne, getForOne } from './schemas';
 import { TaskManager } from './task-manager';
 import { AppSettingService } from './db-service';
 import { buildFilePath, buildFileItemData } from '../util/utils';
+import { ITEM_TYPE_APP } from '../util/constants';
 
 interface PluginOptions {
   serviceMethod: ServiceMethod;
@@ -109,7 +110,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
       copyTaskName,
       async ({ id: newId, type }, actor, { log, handler }, { original }) => {
         try {
-          if (!newId || type !== 'app') return;
+          if (!newId || type !== ITEM_TYPE_APP) return;
 
           const appSettings = await aSS.getForItem(original.id, handler);
           for (const appS of appSettings) {
@@ -119,7 +120,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
               itemId: newId,
               creator: actor.id,
             };
-
+            console.log(copyData);
             const newSetting = await aSS.create(copyData, handler);
 
             // copy file only if content is a file

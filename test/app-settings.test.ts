@@ -8,18 +8,23 @@ import {
   MOCK_TOKEN,
   buildAppSetting,
   MOCK_MEMBERSHIP,
+  ITEM_APP,
+  MOCK_LOGGER,
 } from './fixtures';
 import { ServiceMethod } from 'graasp-plugin-file';
 import { TaskRunner, ItemTaskManager, ItemMembershipTaskManager } from 'graasp-test';
 import { ItemService, ItemMembershipService } from 'graasp';
 import {
+  mockCreateCopyFileTask,
   mockCreateGetMemberItemMembershipTask,
   mockCreateGetTask,
   mockPromisify,
-  mockRunSingle,
   mockRunSingleSequence,
 } from './mock';
 import { AppsPluginOptions } from '../src/types';
+import { AppSettingService } from '../src/app-settings/db-service';
+import { buildFileItemData } from '../src/util/utils';
+import { FILE_ITEM_TYPES } from 'graasp-plugin-file-item';
 
 const defaultOptions: AppsPluginOptions = {
   jwtSecret: MOCK_JWT_SECRET,
@@ -317,6 +322,83 @@ describe('Apps Settings Tests', () => {
           },
         });
         expect(response.statusCode).toEqual(StatusCodes.BAD_REQUEST);
+      });
+    });
+  });
+
+  describe('Hooks', () => {
+    describe('Copy Post Hook', () => {
+      const taskName = itemTaskManager.getCopyTaskName();
+      const actor = GRAASP_ACTOR;
+
+      it('Stop if item is not an app item', async () => {
+        jest.spyOn(runner, 'setTaskPostHookHandler').mockImplementation(async (name, fn) => {
+          if (name === taskName) {
+            const original = { type: 'file', id: 'some-id' };
+            const fileTaskMock = mockCreateCopyFileTask('newFilePath');
+            await fn(original, actor, { log: MOCK_LOGGER }, { original });
+            expect(fileTaskMock).toHaveBeenCalledTimes(0);
+          }
+        });
+        await build(buildAppOptions());
+      });
+      it('Copy all app settings', async () => {
+        jest.spyOn(runner, 'setTaskPostHookHandler').mockImplementation(async (name, fn) => {
+          if (name === taskName) {
+            const original = ITEM_APP;
+            const appSettings = [buildAppSetting(), buildAppSetting(), buildAppSetting()];
+            const mockCreate = jest
+              .spyOn(AppSettingService.prototype, 'create')
+              .mockImplementation(async (data) => buildAppSetting(data));
+            jest
+              .spyOn(AppSettingService.prototype, 'getForItem')
+              .mockImplementation(async () => appSettings);
+            const fileTaskMock = mockCreateCopyFileTask('newFilePath');
+            await fn(original, actor, { log: MOCK_LOGGER }, { original });
+            expect(mockCreate).toHaveBeenCalledTimes(appSettings.length);
+            expect(fileTaskMock).toHaveBeenCalledTimes(0);
+          }
+        });
+        await build(buildAppOptions());
+      });
+      it('Copy all app settings and related files', async () => {
+        jest.spyOn(runner, 'setTaskPostHookHandler').mockImplementation(async (name, fn) => {
+          if (name === taskName) {
+            const original = ITEM_APP;
+
+            const SERVICE_ITEM_TYPE =
+              defaultOptions.serviceMethod === ServiceMethod.S3
+                ? FILE_ITEM_TYPES.S3
+                : FILE_ITEM_TYPES.LOCAL;
+
+            const appSettings = [
+              buildAppSetting(),
+              buildAppSetting(),
+              buildAppSetting({
+                name: 'file-setting',
+                data: buildFileItemData({
+                  name: 'myfile',
+                  type: SERVICE_ITEM_TYPE,
+                  filename: 'filename',
+                  mimetype: 'mimetype',
+                  size: 400,
+                  filepath: 'filepath',
+                }),
+              }),
+            ];
+            const mockCreate = jest
+              .spyOn(AppSettingService.prototype, 'create')
+              .mockImplementation(async (data) => buildAppSetting(data));
+            jest
+              .spyOn(AppSettingService.prototype, 'getForItem')
+              .mockImplementation(async () => appSettings);
+            const fileTaskMock = mockCreateCopyFileTask('newFilePath');
+            await fn(original, actor, { log: MOCK_LOGGER }, { original });
+            expect(mockCreate).toHaveBeenCalledTimes(appSettings.length);
+            expect(fileTaskMock).toHaveBeenCalledTimes(1);
+          }
+        });
+        await build(buildAppOptions());
       });
     });
   });

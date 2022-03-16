@@ -12,7 +12,7 @@ import {
 } from './fixtures';
 import { ServiceMethod } from 'graasp-plugin-file';
 import { TaskRunner, ItemTaskManager } from 'graasp-test';
-import { ItemService, ItemMembershipService } from 'graasp';
+import { ItemService, ItemMembershipService, ItemMembershipTaskManager } from 'graasp';
 import {
   mockCreateGetTaskSequence,
   mockPromisify,
@@ -31,6 +31,7 @@ const defaultOptions: AppsPluginOptions = {
 const runner = new TaskRunner();
 const itemService = {} as unknown as ItemService;
 const itemMembershipsService = {} as unknown as ItemMembershipService;
+const itemMembershipTaskManager = {} as unknown as ItemMembershipTaskManager;
 const itemTaskManager = new ItemTaskManager();
 jest.spyOn(runner, 'setTaskPostHookHandler').mockImplementation(() => true);
 
@@ -38,6 +39,7 @@ const buildAppOptions = ({ options = defaultOptions, member = GRAASP_ACTOR } = {
   runner,
   itemService,
   itemMembershipsService,
+  itemMembershipTaskManager,
   itemTaskManager,
   options,
   member,

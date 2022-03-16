@@ -2,6 +2,7 @@ import { Item, ItemMembership } from 'graasp';
 import util from 'util';
 import { ItemMembershipTaskManager, TaskRunner, ItemTaskManager, Task } from 'graasp-test';
 import { AuthTokenSubject } from '../src/interfaces/request';
+import { FileTaskManager } from 'graasp-plugin-file';
 
 export const mockCreateGetTaskSequence = (
   data: Partial<Item> | Error,
@@ -39,6 +40,20 @@ export const mockCreateUpdateTaskSequence = (
   jest.spyOn(TaskRunner.prototype, 'runSingleSequence').mockImplementation(async () => data);
   return mockTask;
 };
+
+export const mockCreateCopyFileTask = (
+  data?: unknown | Error,
+  shouldThrow?: boolean,
+): jest.SpyInstance => {
+  const mockTask = jest
+    .spyOn(FileTaskManager.prototype, 'createCopyFileTask')
+    .mockImplementation(() => {
+      return new Task(data);
+    });
+  jest.spyOn(TaskRunner.prototype, 'runSingleSequence').mockImplementation(async () => data);
+  return mockTask;
+};
+
 export const mockCreateGetMemberItemMembershipTask = (
   data?: Partial<ItemMembership> | Error,
   shouldThrow?: boolean,

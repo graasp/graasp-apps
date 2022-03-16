@@ -11,3 +11,5 @@ export const PERMISSION_LEVELS = {
 };
 
 export const PATH_PREFIX = 'apps/';
+
+export const ITEM_TYPE_APP = 'app';

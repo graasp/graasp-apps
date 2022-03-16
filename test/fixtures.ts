@@ -1,6 +1,8 @@
-import { Actor, ItemMembership } from 'graasp';
+import { FastifyLoggerInstance } from 'fastify';
+import { Actor, DatabaseTransactionHandler, ItemMembership } from 'graasp';
 import { v4 } from 'uuid';
-import { PERMISSION_LEVELS } from '../src/util/constants';
+import { AppSetting } from '../src/app-settings/interfaces/app-setting';
+import { ITEM_TYPE_APP, PERMISSION_LEVELS } from '../src/util/constants';
 
 export const GRAASP_ACTOR: Actor = {
   id: 'actorid',
@@ -50,13 +52,32 @@ export const MOCK_APPS = [
   { id: v4(), name: 'some-name', url: 'some-url', description: 'description', extra: {} },
 ];
 
-export const buildAppSetting = ({ name = 'setting-name', data = { setting: 'value' } } = {}) => ({
+export const buildAppSetting = ({
+  name = 'setting-name',
+  data = { setting: 'value' },
+}: Partial<AppSetting> = {}): AppSetting => ({
   id: v4(),
   name,
   data,
+  itemId: v4(),
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  creator: GRAASP_ACTOR.id,
 });
 
 export const MOCK_MEMBERSHIP = {
   memberId: 'weiof',
   permission: PERMISSION_LEVELS.ADMIN,
 } as Partial<ItemMembership>;
+
+export const ITEM_APP = {
+  id: v4(),
+  type: ITEM_TYPE_APP,
+  name: 'item-app',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+};
+
+export const MOCK_LOGGER = {
+  error: jest.fn(),
+} as unknown as FastifyLoggerInstance;
