@@ -2,7 +2,7 @@ import { sql, DatabaseTransactionConnection as TrxHandler } from 'slonik';
 import { AppSetting } from './interfaces/app-setting';
 
 /**
- * Database's first layer of abstraction for App Data and (exceptionally) for App, Publisher
+ * Database's first layer of abstraction for App Settings
  */
 export class AppSettingService {
   // the 'safe' way to dynamically generate the columns names:

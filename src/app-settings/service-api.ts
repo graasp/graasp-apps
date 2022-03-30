@@ -120,7 +120,6 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
               itemId: newId,
               creator: actor.id,
             };
-            console.log(copyData);
             const newSetting = await aSS.create(copyData, handler);
 
             // copy file only if content is a file

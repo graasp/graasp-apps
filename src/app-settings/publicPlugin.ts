@@ -23,7 +23,7 @@ const plugin: FastifyPluginAsync = async (fastify) => {
   }
 
   const aSS = new AppSettingService();
-  fastify.decorate('appDataService', aSS);
+  fastify.decorate('appSettingService', aSS);
 
   const taskManager = new TaskManager(aSS, iS, iMS, iTM, iMTM);
 
