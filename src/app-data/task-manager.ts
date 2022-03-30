@@ -18,7 +18,9 @@ import { GetAppDataTask } from './tasks/get-app-data-task';
 import { GetItemsAppDataTask } from './tasks/get-items-app-data-task';
 import { UpdateAppDataTask } from './tasks/update-app-data-task';
 import { GetFileDataInputType, GetFileDataTask } from './tasks/get-file-data-task';
-import { PERMISSION_LEVELS } from '../util/constants';
+import { APP_DATA_TYPE_FILE, PERMISSION_LEVELS } from '../util/constants';
+import { FileItemExtra, FileTaskManager } from 'graasp-plugin-file';
+import { FileServiceNotDefined } from '../util/graasp-apps-error';
 
 export class TaskManager {
   private appDataService: AppDataService;
@@ -26,6 +28,8 @@ export class TaskManager {
   private itemMembershipService: ItemMembershipService;
   private itemTaskManager: ItemTaskManager;
   private itemMembershipTaskManager: ItemMembershipTaskManager;
+  private fileServiceType?: string;
+  private fileTaskManager?: FileTaskManager;
 
   constructor(
     appDataService: AppDataService,
@@ -33,12 +37,16 @@ export class TaskManager {
     itemMembershipService: ItemMembershipService,
     itemTaskManager: ItemTaskManager,
     itemMembershipTaskManager: ItemMembershipTaskManager,
+    fileServiceType?: string,
+    fileTaskManager?: FileTaskManager,
   ) {
     this.appDataService = appDataService;
     this.itemService = itemService;
     this.itemMembershipService = itemMembershipService;
     this.itemTaskManager = itemTaskManager;
     this.itemMembershipTaskManager = itemMembershipTaskManager;
+    this.fileServiceType = fileServiceType;
+    this.fileTaskManager = fileTaskManager;
   }
 
   getCreateTaskName(): string {
@@ -157,6 +165,13 @@ export class TaskManager {
     itemId: string,
     requestDetails: AuthTokenSubject,
   ): UpdateAppDataTask {
+    if (!this.fileTaskManager || !this.fileServiceType) {
+      throw new FileServiceNotDefined({
+        fileTaskManager: this.fileTaskManager,
+        fileServiceType: this.fileServiceType,
+      });
+    }
+
     return new UpdateAppDataTask(
       actor,
       appDataId,
@@ -166,6 +181,7 @@ export class TaskManager {
       this.appDataService,
       this.itemService,
       this.itemMembershipService,
+      this.fileServiceType,
     );
   }
 
@@ -192,6 +208,54 @@ export class TaskManager {
       this.itemService,
       this.itemMembershipService,
     );
+  }
+
+  /**
+   * Create a new AppData DeleteTask
+   * @param actor Object containing an id matching the member that made the request - a copy of `requestDetails.member`.
+   * @param appDataId Id of AppData to delete.
+   * @param itemId Id of item (app item) to which the new AppData will be bond to.
+   * @param requestDetails All the metadata contained in the jwt auth token.
+   * @returns tasks
+   */
+  createDeleteTaskSequence(
+    actor: Actor,
+    appDataId: string,
+    itemId: string,
+    requestDetails: AuthTokenSubject,
+  ): Task<Actor, unknown>[] {
+    if (!this.fileTaskManager || !this.fileServiceType) {
+      throw new FileServiceNotDefined({
+        fileTaskManager: this.fileTaskManager,
+        fileServiceType: this.fileServiceType,
+      });
+    }
+
+    const t1 = new DeleteAppDataTask(
+      actor,
+      appDataId,
+      itemId,
+      requestDetails,
+      this.appDataService,
+      this.itemService,
+      this.itemMembershipService,
+    );
+
+    // delete related file if type is file
+    const t2 = this.fileTaskManager.createDeleteFileTask(actor, { filepath: null });
+    t2.getInput = () => {
+      if (t1.result.type === APP_DATA_TYPE_FILE) {
+        t2.skip = true;
+        return {};
+      } else {
+        const fileData = t1.result.data as Partial<Item>;
+        const fileDataExtra = fileData?.[this.fileServiceType]?.extra as FileItemExtra;
+        return {
+          filepath: fileDataExtra?.path,
+        };
+      }
+    };
+    return [t1, t2];
   }
 
   // get app data for many items

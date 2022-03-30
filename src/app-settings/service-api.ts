@@ -11,7 +11,7 @@ import common, { create, updateOne, deleteOne, getForOne } from './schemas';
 import { TaskManager } from './task-manager';
 import { AppSettingService } from './db-service';
 import { buildFilePath, buildFileItemData } from '../util/utils';
-import { ITEM_TYPE_APP } from '../util/constants';
+import { ITEM_TYPES_APP } from '../util/constants';
 
 interface PluginOptions {
   serviceMethod: ServiceMethod;
@@ -34,7 +34,10 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
     serviceMethod,
   );
 
-  const taskManager = new TaskManager(aSS, iS, iMS, iTM, iMTM);
+  const SERVICE_ITEM_TYPE =
+    serviceMethod === ServiceMethod.S3 ? FILE_ITEM_TYPES.S3 : FILE_ITEM_TYPES.LOCAL;
+
+  const taskManager = new TaskManager(aSS, iS, iMS, iTM, iMTM, SERVICE_ITEM_TYPE, fTM);
 
   fastify.addSchema(common);
 
@@ -44,9 +47,6 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
     // origins from the publishers table an build a rule with that.
 
     fastify.addHook('preHandler', fastify.verifyBearerAuth);
-
-    const SERVICE_ITEM_TYPE =
-      serviceMethod === ServiceMethod.S3 ? FILE_ITEM_TYPES.S3 : FILE_ITEM_TYPES.LOCAL;
 
     fastify.register(GraaspFilePlugin, {
       prefix: '/app-settings',
@@ -110,7 +110,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
       copyTaskName,
       async ({ id: newId, type }, actor, { log, handler }, { original }) => {
         try {
-          if (!newId || type !== ITEM_TYPE_APP) return;
+          if (!newId || type !== ITEM_TYPES_APP) return;
 
           const appSettings = await aSS.getForItem(original.id, handler);
           for (const appS of appSettings) {

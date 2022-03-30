@@ -1,8 +1,10 @@
 import { FastifyLoggerInstance } from 'fastify';
-import { Actor, DatabaseTransactionHandler, ItemMembership } from 'graasp';
+import { Actor, ItemMembership } from 'graasp';
 import { v4 } from 'uuid';
+import { AppData } from '../src/app-data/interfaces/app-data';
 import { AppSetting } from '../src/app-settings/interfaces/app-setting';
-import { ITEM_TYPE_APP, PERMISSION_LEVELS } from '../src/util/constants';
+import { RecordVisibility } from '../src/interfaces/app-details';
+import { APP_DATA_VISIBILITY, ITEM_TYPES_APP, PERMISSION_LEVELS } from '../src/util/constants';
 
 export const GRAASP_ACTOR: Actor = {
   id: 'actorid',
@@ -52,6 +54,23 @@ export const MOCK_APPS = [
   { id: v4(), name: 'some-name', url: 'some-url', description: 'description', extra: {} },
 ];
 
+export const buildAppData = ({
+  data = { some: 'value' },
+  memberId = 'memberId',
+  type = 'type',
+  visibility = APP_DATA_VISIBILITY.ITEM as RecordVisibility,
+}: Partial<AppData> = {}): AppData => ({
+  id: v4(),
+  data,
+  itemId: v4(),
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  creator: GRAASP_ACTOR.id,
+  memberId,
+  type,
+  visibility,
+});
+
 export const buildAppSetting = ({
   name = 'setting-name',
   data = { setting: 'value' },
@@ -72,7 +91,7 @@ export const MOCK_MEMBERSHIP = {
 
 export const ITEM_APP = {
   id: v4(),
-  type: ITEM_TYPE_APP,
+  type: ITEM_TYPES_APP,
   name: 'item-app',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',

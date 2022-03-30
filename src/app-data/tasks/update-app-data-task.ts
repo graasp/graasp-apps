@@ -5,7 +5,12 @@ import { AppData } from '../interfaces/app-data';
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
 import { AuthTokenSubject } from '../../interfaces/request';
-import { AppDataNotFound, ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
+import {
+  AppDataNotFound,
+  CannotUpdateAppDataFile,
+  ItemNotFound,
+  MemberCannotReadItem,
+} from '../../util/graasp-apps-error';
 
 export class UpdateAppDataTask extends BaseAppDataTask<Actor, AppData> {
   get name(): string {
@@ -13,6 +18,7 @@ export class UpdateAppDataTask extends BaseAppDataTask<Actor, AppData> {
   }
   private requestDetails: AuthTokenSubject;
   private itemId: string;
+  private fileServiceType: string;
 
   /**
    * UpdateAppDataTask constructor
@@ -31,6 +37,7 @@ export class UpdateAppDataTask extends BaseAppDataTask<Actor, AppData> {
     appDataService: AppDataService,
     itemService: ItemService,
     itemMembershipService: ItemMembershipService,
+    fileServiceType: string,
   ) {
     super(actor, appDataService, itemService, itemMembershipService);
 
@@ -38,6 +45,7 @@ export class UpdateAppDataTask extends BaseAppDataTask<Actor, AppData> {
     this.data = data;
     this.targetId = appDataId;
     this.itemId = itemId;
+    this.fileServiceType = fileServiceType;
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
@@ -61,6 +69,12 @@ export class UpdateAppDataTask extends BaseAppDataTask<Actor, AppData> {
 
     // discard everything except AppData's `data`
     const { data } = this.data;
+
+    // shouldn't update file data
+    const originalData = await this.appDataService.getById(this.targetId, handler);
+    if (originalData?.data?.type === this.fileServiceType) {
+      throw new CannotUpdateAppDataFile(originalData);
+    }
 
     // update app data
     let appData;

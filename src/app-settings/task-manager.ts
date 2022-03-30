@@ -6,6 +6,7 @@ import {
   Task,
   ItemTaskManager,
   ItemMembershipTaskManager,
+  Item,
 } from 'graasp';
 // local
 import { AppSettingService } from './db-service';
@@ -17,6 +18,8 @@ import { GetAppSettingTask } from './tasks/get-app-setting-task';
 import { UpdateAppSettingTask } from './tasks/update-app-setting-task';
 import { GetFileDataInputType, GetFileDataTask } from './tasks/get-file-data-task';
 import { PERMISSION_LEVELS } from '../util/constants';
+import { FileItemExtra, FileTaskManager } from 'graasp-plugin-file';
+import { FileServiceNotDefined } from '../util/graasp-apps-error';
 
 export class TaskManager {
   private appDataService: AppSettingService;
@@ -24,6 +27,8 @@ export class TaskManager {
   private itemMembershipService: ItemMembershipService;
   private itemTaskManager: ItemTaskManager;
   private itemMembershipTaskManager: ItemMembershipTaskManager;
+  private fileServiceType?: string;
+  private fileTaskManager?: FileTaskManager;
 
   constructor(
     appDataService: AppSettingService,
@@ -31,12 +36,16 @@ export class TaskManager {
     itemMembershipService: ItemMembershipService,
     itemTaskManager: ItemTaskManager,
     itemMembershipTaskManager: ItemMembershipTaskManager,
+    fileServiceType?: string,
+    fileTaskManager?: FileTaskManager,
   ) {
     this.appDataService = appDataService;
     this.itemService = itemService;
     this.itemMembershipService = itemMembershipService;
     this.itemTaskManager = itemTaskManager;
     this.itemMembershipTaskManager = itemMembershipTaskManager;
+    this.fileServiceType = fileServiceType;
+    this.fileTaskManager = fileTaskManager;
   }
 
   getCreateTaskName(): string {
@@ -146,6 +155,13 @@ export class TaskManager {
     itemId: string,
     requestDetails: AuthTokenSubject,
   ): Task<Actor, unknown>[] {
+    if (!this.fileTaskManager || !this.fileServiceType) {
+      throw new FileServiceNotDefined({
+        fileTaskManager: this.fileTaskManager,
+        fileServiceType: this.fileServiceType,
+      });
+    }
+
     const t1 = this.itemTaskManager.createGetTask(actor, itemId);
     const t2 = this.itemMembershipTaskManager.createGetMemberItemMembershipTask(actor);
     t2.getInput = () => ({
@@ -161,6 +177,7 @@ export class TaskManager {
       this.appDataService,
       this.itemService,
       this.itemMembershipService,
+      this.fileServiceType,
     );
     return [t1, t2, updateTask];
   }
@@ -179,6 +196,13 @@ export class TaskManager {
     itemId: string,
     requestDetails: AuthTokenSubject,
   ): Task<Actor, unknown>[] {
+    if (!this.fileTaskManager || !this.fileServiceType) {
+      throw new FileServiceNotDefined({
+        fileTaskManager: this.fileTaskManager,
+        fileServiceType: this.fileServiceType,
+      });
+    }
+
     const t1 = this.itemTaskManager.createGetTask(actor, itemId);
     const t2 = this.itemMembershipTaskManager.createGetMemberItemMembershipTask(actor);
     t2.getInput = () => ({
@@ -194,7 +218,23 @@ export class TaskManager {
       this.itemService,
       this.itemMembershipService,
     );
-    return [t1, t2, deleteTask];
+
+    // delete related file if type is file
+    const deleteFileTask = this.fileTaskManager.createDeleteFileTask(actor, { filepath: null });
+    deleteFileTask.getInput = () => {
+      const fileData = deleteTask.result.data as Partial<Item>;
+      if (fileData?.[this.fileServiceType]?.type === this.fileServiceType) {
+        deleteFileTask.skip = true;
+        return {};
+      } else {
+        const fileDataExtra = fileData?.[this.fileServiceType]?.extra as FileItemExtra;
+        return {
+          filepath: fileDataExtra?.path,
+        };
+      }
+    };
+
+    return [t1, t2, deleteTask, deleteFileTask];
   }
 
   createGetFileTask(
