@@ -2,24 +2,18 @@
 import { FastifyPluginAsync } from 'fastify';
 import { IdParam } from 'graasp';
 import GraaspFilePlugin, { ServiceMethod } from 'graasp-plugin-file';
-import {
-  randomHexOf4,
-  ORIGINAL_FILENAME_TRUNCATE_LIMIT,
-  FILE_ITEM_TYPES,
-} from 'graasp-plugin-file-item';
+import { ORIGINAL_FILENAME_TRUNCATE_LIMIT, FILE_ITEM_TYPES } from 'graasp-plugin-file-item';
 
 // local
 import { AppData, InputAppData } from './interfaces/app-data';
 import common, { create, updateOne, deleteOne, getForOne, getForMany } from './schemas';
 import { ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
 import { TaskManager } from './task-manager';
-import path from 'path';
+import { buildFilePath, buildFileItemData } from '../util/utils';
 
 interface PluginOptions {
   serviceMethod: ServiceMethod;
 }
-
-const PATH_PREFIX = 'apps/';
 
 const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
   const {
@@ -45,39 +39,34 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
     const SERVICE_ITEM_TYPE =
       serviceMethod === ServiceMethod.S3 ? FILE_ITEM_TYPES.S3 : FILE_ITEM_TYPES.LOCAL;
 
-    const buildFilePath = () => {
-      const filepath = `${randomHexOf4()}/${randomHexOf4()}/${randomHexOf4()}-${Date.now()}`;
-      return path.join(PATH_PREFIX, filepath);
-    };
-
     fastify.register(GraaspFilePlugin, {
       serviceMethod: serviceMethod,
       serviceOptions: {
         s3: fastify.s3FileItemPluginOptions,
         local: fastify.fileItemPluginOptions,
       },
-      buildFilePath: buildFilePath,
+      buildFilePath,
 
       uploadPreHookTasks: async ({ parentId: itemId }, { token }) => {
         const { member: id } = token;
         return [taskManager.createGetTask({ id }, itemId, { visibility: 'member' }, token)];
       },
-      uploadPostHookTasks: async ({ filename, itemId, filepath, size, mimetype }, { token }) => {
+      uploadPostHookTasks: async (
+        { filename, itemId, filepath, size, mimetype },
+        { token },
+        fileBody = {},
+      ) => {
         const { member: id } = token;
 
         const name = filename.substring(0, ORIGINAL_FILENAME_TRUNCATE_LIMIT);
-        const data = {
+        const data = buildFileItemData({
           name,
           type: SERVICE_ITEM_TYPE,
-          extra: {
-            [SERVICE_ITEM_TYPE]: {
-              name: filename,
-              path: filepath,
-              size,
-              mimetype,
-            },
-          },
-        };
+          filename,
+          filepath,
+          size,
+          mimetype,
+        });
 
         const tasks = taskManager.createCreateTaskSequence(
           { id },
@@ -87,6 +76,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
             },
             type: 'file',
             visibility: 'member',
+            ...fileBody,
           },
           itemId,
           token,

@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "test": "jest  --forceExit --coverage --verbose",
+    "test": "jest --forceExit --coverage --verbose",
     "test:watch": "yarn test --watchAll",
     "prettier:check": "prettier --check \"{src,test}/**/*.ts\"",
     "prettier:write": "prettier --write \"{src,test}/**/*.ts\"",

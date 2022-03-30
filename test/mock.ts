@@ -1,7 +1,8 @@
-import { Item } from 'graasp';
+import { Item, ItemMembership } from 'graasp';
 import util from 'util';
 import { ItemMembershipTaskManager, TaskRunner, ItemTaskManager, Task } from 'graasp-test';
 import { AuthTokenSubject } from '../src/interfaces/request';
+import { FileTaskManager } from 'graasp-plugin-file';
 
 export const mockCreateGetTaskSequence = (
   data: Partial<Item> | Error,
@@ -11,6 +12,18 @@ export const mockCreateGetTaskSequence = (
     .spyOn(ItemTaskManager.prototype, 'createGetTaskSequence')
     .mockImplementation(() => {
       return [new Task(data)];
+    });
+  jest.spyOn(TaskRunner.prototype, 'runSingleSequence').mockImplementation(async () => data);
+  return mockCreateTask;
+};
+export const mockCreateGetTask = (
+  data: Partial<Item> | Error,
+  shouldThrow?: boolean,
+): jest.SpyInstance => {
+  const mockCreateTask = jest
+    .spyOn(ItemTaskManager.prototype, 'createGetTask')
+    .mockImplementation(() => {
+      return new Task(data);
     });
   jest.spyOn(TaskRunner.prototype, 'runSingleSequence').mockImplementation(async () => data);
   return mockCreateTask;
@@ -27,8 +40,35 @@ export const mockCreateUpdateTaskSequence = (
   jest.spyOn(TaskRunner.prototype, 'runSingleSequence').mockImplementation(async () => data);
   return mockTask;
 };
+
+export const mockCreateCopyFileTask = (
+  data?: unknown | Error,
+  shouldThrow?: boolean,
+): jest.SpyInstance => {
+  const mockTask = jest
+    .spyOn(FileTaskManager.prototype, 'createCopyFileTask')
+    .mockImplementation(() => {
+      return new Task(data);
+    });
+  jest.spyOn(TaskRunner.prototype, 'runSingleSequence').mockImplementation(async () => data);
+  return mockTask;
+};
+
+export const mockCreateGetMemberItemMembershipTask = (
+  data?: Partial<ItemMembership> | Error,
+  shouldThrow?: boolean,
+): jest.SpyInstance => {
+  const mockTask = jest
+    .spyOn(ItemMembershipTaskManager.prototype, 'createGetMemberItemMembershipTask')
+    .mockImplementation(() => {
+      return new Task(data);
+    });
+  jest.spyOn(TaskRunner.prototype, 'runSingle').mockImplementation(async () => data);
+  return mockTask;
+};
+
 export const mockRunSingleSequence = (
-  data?: Partial<Item> | Error,
+  data?: any | Error,
   shouldThrow?: boolean,
 ): jest.SpyInstance => {
   return jest.spyOn(TaskRunner.prototype, 'runSingleSequence').mockImplementation(async () => data);
