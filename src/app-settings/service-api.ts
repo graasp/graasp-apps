@@ -81,7 +81,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
         const tasks = taskManager.createCreateTaskSequence(
           { id },
           {
-            name: requestBody.name,
+            name: requestBody?.name ?? 'file',
             data: {
               ...data,
             },

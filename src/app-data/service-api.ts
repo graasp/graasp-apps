@@ -61,6 +61,10 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
       ) => {
         const { member: id } = token;
 
+        // remove undefined values
+        const values = { ...fileBody };
+        Object.keys(values).forEach((key) => values[key] === undefined && delete values[key]);
+
         const name = filename.substring(0, ORIGINAL_FILENAME_TRUNCATE_LIMIT);
         const data = buildFileItemData({
           name,
@@ -79,7 +83,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
             },
             type: APP_DATA_TYPE_FILE,
             visibility: 'member',
-            ...fileBody,
+            ...values,
           },
           itemId,
           token,
