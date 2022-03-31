@@ -4,14 +4,20 @@ All following requests need an authentication token received as described in the
 
 Therefore, don't forget to use `Authorization: Bearer <token>` in your request's headers.
 
-**Table of Contents**
-- [App Action](#app-action)
+### Table of Contents
+- [App Actions](#app-actions)
 - [App Context](#app-context)
 - [App Data](#app-data)
+- [App Settings](#app-settings)
 - [Parent Window](#parent-window)
 
+### Query strings
+Within Graasp, the apps are given some information by query string:
+- itemId: item id of the corresponding item
 
-<a name="app-action"></a>
+
+***
+<a name="app-actions"></a>
 ## App Actions
 
 App actions are analytic traces the app might save. They have the following structure:
@@ -53,10 +59,14 @@ App data are all data the app might save. They have the following structure:
 - `itemId`: the item id corresponding to the current app
 - `data`: object containing any necessary data
 - `type`: the related action related to the data
-- `creator`: the member id who created the item
+- `creator`: the member id who created the app data
 - `visibility`: availability of the app data, either `member` or `item` (default: `member`)
+  -  `member`: the app data can be managed by the creator and members with admin permission. Members with write permission can view them but cannot modify them. 
+  - `item`: the app data can be managed by the creator and members with admin permission. All other members can view them but cannot modify them. 
 - `createdAt`: creation timestamp of the app data
 - `updatedAt`: update timestamp of the app data
+
+
 
 ### GET App Data
 
@@ -90,6 +100,20 @@ App data are all data the app might save. They have the following structure:
 
 - returned value: deleted app data
 
+### Upload a file as an app data
+
+`POST <apiHost>/app-items/upload?id=<item-id>`
+
+- it is not possible to patch a file app setting
+- send files as form data, the name of the file will be the name of the app setting
+- returned value: created app setting
+
+### Download a file from an app data
+
+`GET <apiHost>/app-items/<app-data-id>/download`
+
+- returned value: file blob
+
 ****
 
 <a name="app-context"></a>
@@ -109,8 +133,68 @@ The app context contains additional information which might be interesting for y
 
 
 ****
+<a name="app-settings"></a>
+## App Settings
 
-<a name="app-context"></a>
+App settings store the app configuration. Only members with the admin permission can create, update and delete them. The other members can only fetch the app settings. 
+
+App settings have the following structure:
+
+- `id`: the app setting id
+- `name`: the app setting name
+- `itemId`: the item id corresponding to the current app
+- `data`: object containing any necessary setting
+- `creator`: the member id who created the app setting
+- `createdAt`: creation timestamp of the app setting
+- `updatedAt`: update timestamp of the app setting
+
+### GET App Setting
+
+`GET <apiHost>/app-items/<item-id>/app-settings`
+
+- return value: an array of all app settings related to `itemId`
+
+### POST App Setting
+
+`POST <apiHost>/app-items/<item-id>/app-settings`
+
+- body: `{ name, data: { ... }, [memberId] }`
+- returned value: created app setting
+
+### PATCH App Setting
+
+`PATCH <apiHost>/app-items/<item-id>/app-settings/<app-setting-id>`
+
+- body: `{ data: { ... } }`
+- permission: only member with the admin permission can patch an app setting 
+- it is not possible to patch a file app setting
+- returned value: patched app setting
+
+### DELETE App Setting
+
+`DELETE <apiHost>/app-items/<item-id>/app-settings/<app-setting-id>`
+
+- returned value: deleted app data
+- permission: only member with the admin permission can delete an app setting
+
+### Upload a file as an app setting
+
+`POST <apiHost>/app-items/app-settings/upload?id=<item-id>`
+
+- it is not possible to patch a file app setting
+- send files as form data, the name of the file will be the name of the app setting
+- returned value: created app setting
+
+### Download a file from an app setting
+
+`GET <apiHost>/app-items/app-settings/<app-setting-id>/download`
+
+- returned value: file blob
+
+
+****
+
+<a name="parent-window"></a>
 ## Parent Window
 
 Since apps are embedded in Graasp with an iframe, it is possible to communicate with the parent window using both regular `window.postMessage` and `MessageChannel`. One should first use `window.postMessage` to get the context, as well as the `MessageChannel`'s port to continue the process (see [guide](./guide.md)).
@@ -127,11 +211,15 @@ postMessage(
 );
 ```
 - return values:
-    - `itemId`: item id which corresponds to your app resource id
-    - `userId`: the current authenticated user using the app
     - `apiHost`: the api host origin
-    - `mode`: the mode the app is running on
+    - `context`: where the app is running (eg: `builder`, `explorer`, `standalone`, ...)
+    - `itemId`: item id which corresponds to your app resource id
+    - `lang`: language
+    - `memberId`: the current authenticated user using the app
+    - `permission`: the current member's permission
+    - `settings`: the corresponding item settings
     - as well as the `port` of the `MessageChannel` you will use from now on to communicate with the parent window.
+
 
 ### `MessageChannel`
 
@@ -149,11 +237,3 @@ port.postMessage(
   );
 ```
 - return value: authentication token
-
-### GET App Item Settings
-
-`TODO`
-
-### PATCH App Item Settings
-
-`TODO`
