@@ -6,6 +6,7 @@ import { AppSettingService } from '../db-service';
 import { BaseAppSettingTask } from './base-app-setting-task';
 import { AuthTokenSubject } from '../../interfaces/request';
 import { AppSettingNotFound, CannotUpdateAppSettingFile } from '../../util/graasp-apps-error';
+import { FileServiceType } from '../../types';
 
 export class UpdateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> {
   get name(): string {
@@ -13,7 +14,7 @@ export class UpdateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> 
   }
   private requestDetails: AuthTokenSubject;
   private itemId: string;
-  private fileServiceType: string;
+  private fileServiceType: FileServiceType;
 
   /**
    * UpdateAppSettingTask constructor
@@ -32,7 +33,7 @@ export class UpdateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> 
     appSettingService: AppSettingService,
     itemService: ItemService,
     itemMembershipService: ItemMembershipService,
-    fileServiceType: string,
+    fileServiceType: FileServiceType,
   ) {
     super(actor, appSettingService, itemService, itemMembershipService);
 

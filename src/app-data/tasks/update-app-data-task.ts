@@ -11,6 +11,7 @@ import {
   ItemNotFound,
   MemberCannotReadItem,
 } from '../../util/graasp-apps-error';
+import { FileServiceType } from '../../types';
 
 export class UpdateAppDataTask extends BaseAppDataTask<Actor, AppData> {
   get name(): string {
@@ -18,7 +19,7 @@ export class UpdateAppDataTask extends BaseAppDataTask<Actor, AppData> {
   }
   private requestDetails: AuthTokenSubject;
   private itemId: string;
-  private fileServiceType: string;
+  private fileServiceType: FileServiceType;
 
   /**
    * UpdateAppDataTask constructor
@@ -37,7 +38,7 @@ export class UpdateAppDataTask extends BaseAppDataTask<Actor, AppData> {
     appDataService: AppDataService,
     itemService: ItemService,
     itemMembershipService: ItemMembershipService,
-    fileServiceType: string,
+    fileServiceType: FileServiceType,
   ) {
     super(actor, appDataService, itemService, itemMembershipService);
 

@@ -8,3 +8,7 @@ export interface AppsPluginOptions {
   serviceMethod: ServiceMethod;
   thumbnailsPrefix: string;
 }
+
+// todo: get from plugin-file, currently the enum is defined as integer
+// which does not work for string
+export type FileServiceType = string;

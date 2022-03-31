@@ -21,6 +21,7 @@ import { GetFileDataInputType, GetFileDataTask } from './tasks/get-file-data-tas
 import { APP_DATA_TYPE_FILE, PERMISSION_LEVELS } from '../util/constants';
 import { FileItemExtra, FileTaskManager } from 'graasp-plugin-file';
 import { FileServiceNotDefined } from '../util/graasp-apps-error';
+import { FileServiceType } from '../types';
 
 export class TaskManager {
   private appDataService: AppDataService;
@@ -28,7 +29,7 @@ export class TaskManager {
   private itemMembershipService: ItemMembershipService;
   private itemTaskManager: ItemTaskManager;
   private itemMembershipTaskManager: ItemMembershipTaskManager;
-  private fileServiceType?: string;
+  private fileServiceType?: FileServiceType;
   private fileTaskManager?: FileTaskManager;
 
   constructor(
@@ -37,7 +38,7 @@ export class TaskManager {
     itemMembershipService: ItemMembershipService,
     itemTaskManager: ItemTaskManager,
     itemMembershipTaskManager: ItemMembershipTaskManager,
-    fileServiceType?: string,
+    fileServiceType?: FileServiceType,
     fileTaskManager?: FileTaskManager,
   ) {
     this.appDataService = appDataService;
