@@ -244,17 +244,18 @@ export class TaskManager {
     // delete related file if type is file
     const t2 = this.fileTaskManager.createDeleteFileTask(actor, { filepath: null });
     t2.getInput = () => {
-      if (t1.result.type === APP_DATA_TYPE_FILE) {
+      if (t1.result.type !== APP_DATA_TYPE_FILE) {
         t2.skip = true;
         return {};
       } else {
         const fileData = t1.result.data as Partial<Item>;
-        const fileDataExtra = fileData?.[this.fileServiceType]?.extra as FileItemExtra;
+        const fileDataExtra = fileData?.extra?.[this.fileServiceType] as FileItemExtra;
         return {
           filepath: fileDataExtra?.path,
         };
       }
     };
+    t2.getResult = () => t1.result;
     return [t1, t2];
   }
 

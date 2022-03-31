@@ -92,13 +92,13 @@ export class MemberCannotAdminSetting extends GraaspAppsError {
 
 export class CannotUpdateAppDataFile extends GraaspAppsError {
   constructor(data?: unknown) {
-    super({ code: 'GAERR0011', statusCode: 400, message: 'Cannot update file app data' }, data);
+    super({ code: 'GAERR0011', statusCode: 403, message: 'Cannot update file app data' }, data);
   }
 }
 
 export class CannotUpdateAppSettingFile extends GraaspAppsError {
   constructor(data?: unknown) {
-    super({ code: 'GAERR0012', statusCode: 400, message: 'Cannot update file app setting' }, data);
+    super({ code: 'GAERR0012', statusCode: 403, message: 'Cannot update file app setting' }, data);
   }
 }
 

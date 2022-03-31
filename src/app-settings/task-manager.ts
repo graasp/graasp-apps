@@ -223,16 +223,17 @@ export class TaskManager {
     const deleteFileTask = this.fileTaskManager.createDeleteFileTask(actor, { filepath: null });
     deleteFileTask.getInput = () => {
       const fileData = deleteTask.result.data as Partial<Item>;
-      if (fileData?.[this.fileServiceType]?.type === this.fileServiceType) {
+      if (fileData?.type !== this.fileServiceType) {
         deleteFileTask.skip = true;
         return {};
       } else {
-        const fileDataExtra = fileData?.[this.fileServiceType]?.extra as FileItemExtra;
+        const fileDataExtra = fileData?.extra?.[this.fileServiceType] as FileItemExtra;
         return {
           filepath: fileDataExtra?.path,
         };
       }
     };
+    deleteFileTask.getResult = () => deleteTask.result;
 
     return [t1, t2, deleteTask, deleteFileTask];
   }
