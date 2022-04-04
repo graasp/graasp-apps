@@ -158,7 +158,7 @@ App settings have the following structure:
 
 `POST <apiHost>/app-items/<item-id>/app-settings`
 
-- body: `{ name, data: { ... }, [memberId] }`
+- body: `{ name, data: { ... } }`
 - returned value: created app setting
 
 ### PATCH App Setting

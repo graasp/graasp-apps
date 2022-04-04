@@ -50,6 +50,8 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
 
     fastify.register(GraaspFilePlugin, {
       prefix: '/app-settings',
+      shouldRedirectOnDownload: false,
+      uploadMaxFileNb: 1,
       serviceMethod: serviceMethod,
       serviceOptions: {
         s3: fastify.s3FileItemPluginOptions,
