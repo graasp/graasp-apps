@@ -112,7 +112,7 @@ App data are all data the app might save. They have the following structure:
 
 `GET <apiHost>/app-items/<app-data-id>/download`
 
-- returned value: file blob
+- returned value: signed url of the file
 
 ****
 
@@ -189,7 +189,7 @@ App settings have the following structure:
 
 `GET <apiHost>/app-items/app-settings/<app-setting-id>/download`
 
-- returned value: file blob
+- returned value: signed url of the file
 
 
 ****

@@ -3462,10 +3462,10 @@ __metadata:
     fastify-cors: ^6.0.2
     fastify-jwt: ^4.1.3
     fluent-json-schema: ^3.0.1
-    graasp-plugin-file: "github:graasp/graasp-plugin-file#13/redirect"
-    graasp-plugin-file-item: "github:graasp/graasp-plugin-file-item#30/updateDep"
+    graasp-plugin-file: "github:graasp/graasp-plugin-file"
+    graasp-plugin-file-item: "github:graasp/graasp-plugin-file-item"
     graasp-plugin-public: "github:graasp/graasp-plugin-public"
-    graasp-plugin-thumbnails: "github:graasp/graasp-plugin-thumbnails#20/updateDep"
+    graasp-plugin-thumbnails: "github:graasp/graasp-plugin-thumbnails"
     graasp-test: "github:graasp/graasp-test"
     http-status-codes: 2.2.0
     husky: 7.0.4
@@ -3498,27 +3498,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graasp-plugin-file-item@github:graasp/graasp-plugin-file-item#30/updateDep":
+"graasp-plugin-file-item@github:graasp/graasp-plugin-file-item":
   version: 0.1.0
-  resolution: "graasp-plugin-file-item@https://github.com/graasp/graasp-plugin-file-item.git#commit=96f71c7220f88fed4c94775cdae3c004612faa8d"
+  resolution: "graasp-plugin-file-item@https://github.com/graasp/graasp-plugin-file-item.git#commit=7d59c7de6de8bfd337d50ed3a604edc55ec14013"
   dependencies:
     graasp-file-upload-limiter: "github:graasp/graasp-file-upload-limiter"
-    graasp-plugin-file: "github:graasp/graasp-plugin-file#13/redirect"
+    graasp-plugin-file: "github:graasp/graasp-plugin-file"
     graasp-plugin-public: "github:graasp/graasp-plugin-public"
-  checksum: 2f8e93db42455b282b99027405b41c4d0136c2cf61e57c63145f8fd422bd431d548f92c8f39cbdb06e1a45579a93c61982b62e38bca05da72a2033f707bbcafb
+  checksum: ab11ab21e5131f71b823df0d2413eb731bf4648143116b47f3b7b1568a638ab8a044b93efea715249162a2d199212bf0212d7bfdbe398b57f3b43ecb7b8d2115
   languageName: node
   linkType: hard
 
-"graasp-plugin-file@github:graasp/graasp-plugin-file#13/redirect":
+"graasp-plugin-file@github:graasp/graasp-plugin-file":
   version: 0.1.0
-  resolution: "graasp-plugin-file@https://github.com/graasp/graasp-plugin-file.git#commit=baabca5fadf66b85dc3a3e39d7143211f0c7b591"
+  resolution: "graasp-plugin-file@https://github.com/graasp/graasp-plugin-file.git#commit=11ff0fd59b6b9bcbd0d863364e2f6864dc330ace"
   dependencies:
     aws-sdk: 2.1074.0
     content-disposition: 0.5.4
     fastify-multipart: 5.3.1
     http-status-codes: 2.2.0
     node-fetch: 2
-  checksum: 0c001d076f4d36fc80892e9be09f04da814c04fcda16bc794c08f5e484b82e4a1b81933f7ce9950344659ed8e504505be77fc36c0e96ae2b2a9bf7e0a0e6b3da
+  checksum: aa141edf29e9a8181f5caee38d2874e97a597e32b08badd73cbf17b3f5f0d0d14b67b83a7063fefba6e962db17ad1f7cd442d8491bf606424b8ce89e895b9499
   languageName: node
   linkType: hard
 
@@ -3534,16 +3534,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graasp-plugin-thumbnails@github:graasp/graasp-plugin-thumbnails#20/updateDep":
+"graasp-plugin-thumbnails@github:graasp/graasp-plugin-thumbnails":
   version: 0.1.0
-  resolution: "graasp-plugin-thumbnails@https://github.com/graasp/graasp-plugin-thumbnails.git#commit=64586c332a6a69b78968cb462e3ce1f45ff28a62"
+  resolution: "graasp-plugin-thumbnails@https://github.com/graasp/graasp-plugin-thumbnails.git#commit=06f8c8975af77e95941de7c188aacf4b29c3a296"
   dependencies:
     "@graasp/translations": "github:graasp/graasp-translations"
-    graasp-plugin-file: "github:graasp/graasp-plugin-file#13/redirect"
-    graasp-plugin-file-item: "github:graasp/graasp-plugin-file-item#30/updateDep"
+    graasp-plugin-file: "github:graasp/graasp-plugin-file"
+    graasp-plugin-file-item: "github:graasp/graasp-plugin-file-item"
     graasp-plugin-public: "github:graasp/graasp-plugin-public"
-    sharp: 0.30.2
-  checksum: 27965e1cb6649e83e8100cd40ca21397d0189a8f60e01db93d3093589cdf292b47f4c1ffcc1be8e86454f88ca9f0474ffa530af663c4a086b53b18fb03a28e5c
+    sharp: 0.30.3
+  checksum: 22f05ff2a13bb63ff248dd8f944ed576f9c1c5aee3f19f58907e932d733b1a47d7fb0b2b7728e6c6396dee87d07f01898ac9431dae9263554f50821ffbb46467
   languageName: node
   linkType: hard
 
@@ -6291,9 +6291,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sharp@npm:0.30.2":
-  version: 0.30.2
-  resolution: "sharp@npm:0.30.2"
+"sharp@npm:0.30.3":
+  version: 0.30.3
+  resolution: "sharp@npm:0.30.3"
   dependencies:
     color: ^4.2.1
     detect-libc: ^2.0.1
@@ -6304,7 +6304,7 @@ __metadata:
     simple-get: ^4.0.1
     tar-fs: ^2.1.1
     tunnel-agent: ^0.6.0
-  checksum: d8a8eecd5ecb618826286c9487c47b3593b944cc48e767a8358038dd8bac652e4d0a7e13b74590d55d80abbb55b8d4aeac71edd8bb21f7aba1984b4b22737866
+  checksum: 05738f0a74f55217ccbbe74ad7b8b579e2e24cbcebd021ae53cfb81d7a3e8ab42b02526249ad7d04900a4ea0da80fa63805b492edab3bfa0541888169c079057
   languageName: node
   linkType: hard
 
