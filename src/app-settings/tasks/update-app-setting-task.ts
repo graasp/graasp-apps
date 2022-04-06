@@ -5,7 +5,8 @@ import { AppSetting } from '../interfaces/app-setting';
 import { AppSettingService } from '../db-service';
 import { BaseAppSettingTask } from './base-app-setting-task';
 import { AuthTokenSubject } from '../../interfaces/request';
-import { AppSettingNotFound } from '../../util/graasp-apps-error';
+import { AppSettingNotFound, CannotUpdateAppSettingFile } from '../../util/graasp-apps-error';
+import { FileServiceType } from '../../types';
 
 export class UpdateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> {
   get name(): string {
@@ -13,6 +14,7 @@ export class UpdateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> 
   }
   private requestDetails: AuthTokenSubject;
   private itemId: string;
+  private fileServiceType: FileServiceType;
 
   /**
    * UpdateAppSettingTask constructor
@@ -31,6 +33,7 @@ export class UpdateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> 
     appSettingService: AppSettingService,
     itemService: ItemService,
     itemMembershipService: ItemMembershipService,
+    fileServiceType: FileServiceType,
   ) {
     super(actor, appSettingService, itemService, itemMembershipService);
 
@@ -38,6 +41,7 @@ export class UpdateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> 
     this.data = data;
     this.targetId = appSettingId;
     this.itemId = itemId;
+    this.fileServiceType = fileServiceType;
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
@@ -49,6 +53,12 @@ export class UpdateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> 
 
     // check if appId matches origin (?) - is this really necessary?; because when the token was generated it was true.
     // atmost the token can be valid until its expiration, even if the app/origin are no londer valid (removed from db)
+
+    // shouldn't update file data
+    const originalData = await this.appSettingService.getById(this.targetId, handler);
+    if (originalData?.data?.type === this.fileServiceType) {
+      throw new CannotUpdateAppSettingFile(originalData);
+    }
 
     // discard everything except AppSetting's `data`
     const { data } = this.data;

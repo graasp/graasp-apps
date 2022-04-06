@@ -51,8 +51,11 @@ The response will contain `token` you will be using to request your app's data.
 
 4. **Refetch the token**: The token might expire. In this case, redo step 2.
 
-****
+
+## File Upload
+Apps can upload files, as (app) data or (app) setting. App Data are created by a member and are available to in a given scope. App Settings are created and managed by the admins and can be fetched by all the other members.  
+
 
 ## React Framework
 
-We are currently working on an app framework, which would provide the token request procedure.
+We are currently working on an app framework, which would ease the token request procedure.

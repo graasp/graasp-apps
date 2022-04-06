@@ -1,7 +1,7 @@
 // global
 import { FastifyPluginAsync } from 'fastify';
 import { IdParam } from 'graasp';
-import GraaspFilePlugin, { ServiceMethod } from 'graasp-plugin-file';
+import GraaspFilePlugin, { ServiceMethod, FileTaskManager } from 'graasp-plugin-file';
 import { ORIGINAL_FILENAME_TRUNCATE_LIMIT, FILE_ITEM_TYPES } from 'graasp-plugin-file-item';
 
 // local
@@ -10,6 +10,7 @@ import common, { create, updateOne, deleteOne, getForOne, getForMany } from './s
 import { ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
 import { TaskManager } from './task-manager';
 import { buildFilePath, buildFileItemData } from '../util/utils';
+import { APP_DATA_TYPE_FILE } from '../util/constants';
 
 interface PluginOptions {
   serviceMethod: ServiceMethod;
@@ -25,7 +26,15 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
 
   const { serviceMethod } = options;
 
-  const taskManager = new TaskManager(aDS, iS, iMS, iTM, iMTM);
+  const SERVICE_ITEM_TYPE =
+    serviceMethod === ServiceMethod.S3 ? FILE_ITEM_TYPES.S3 : FILE_ITEM_TYPES.LOCAL;
+
+  const fileOptions = {
+    s3: fastify.s3FileItemPluginOptions,
+    local: fastify.fileItemPluginOptions,
+  };
+  const fileTaskManager = new FileTaskManager(fileOptions, serviceMethod);
+  const taskManager = new TaskManager(aDS, iS, iMS, iTM, iMTM, SERVICE_ITEM_TYPE, fileTaskManager);
 
   fastify.addSchema(common);
 
@@ -36,15 +45,11 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
 
     fastify.addHook('preHandler', fastify.verifyBearerAuth);
 
-    const SERVICE_ITEM_TYPE =
-      serviceMethod === ServiceMethod.S3 ? FILE_ITEM_TYPES.S3 : FILE_ITEM_TYPES.LOCAL;
-
     fastify.register(GraaspFilePlugin, {
       serviceMethod: serviceMethod,
-      serviceOptions: {
-        s3: fastify.s3FileItemPluginOptions,
-        local: fastify.fileItemPluginOptions,
-      },
+      uploadMaxFileNb: 1,
+      shouldRedirectOnDownload: false,
+      serviceOptions: fileOptions,
       buildFilePath,
 
       uploadPreHookTasks: async ({ parentId: itemId }, { token }) => {
@@ -57,6 +62,10 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
         fileBody = {},
       ) => {
         const { member: id } = token;
+
+        // remove undefined values
+        const values = { ...fileBody };
+        Object.keys(values).forEach((key) => values[key] === undefined && delete values[key]);
 
         const name = filename.substring(0, ORIGINAL_FILENAME_TRUNCATE_LIMIT);
         const data = buildFileItemData({
@@ -74,9 +83,9 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
             data: {
               ...data,
             },
-            type: 'file',
+            type: APP_DATA_TYPE_FILE,
             visibility: 'member',
-            ...fileBody,
+            ...values,
           },
           itemId,
           token,
@@ -129,8 +138,13 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
       { schema: deleteOne },
       async ({ authTokenSubject: requestDetails, params: { itemId, id: appDataId }, log }) => {
         const { member: id } = requestDetails;
-        const task = taskManager.createDeleteTask({ id }, appDataId, itemId, requestDetails);
-        return runner.runSingle(task, log);
+        const tasks = taskManager.createDeleteTaskSequence(
+          { id },
+          appDataId,
+          itemId,
+          requestDetails,
+        );
+        return runner.runSingleSequence(tasks, log);
       },
     );
 

@@ -12,4 +12,11 @@ export const PERMISSION_LEVELS = {
 
 export const PATH_PREFIX = 'apps/';
 
-export const ITEM_TYPE_APP = 'app';
+export const ITEM_TYPES_APP = 'app';
+
+export const APP_DATA_VISIBILITY = {
+  ITEM: 'item',
+  MEMBER: 'member',
+};
+
+export const APP_DATA_TYPE_FILE = 'file';

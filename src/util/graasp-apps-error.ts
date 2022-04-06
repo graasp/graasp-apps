@@ -89,3 +89,24 @@ export class MemberCannotAdminSetting extends GraaspAppsError {
     super({ code: 'GAERR010', statusCode: 400, message: 'Member cannot admin setting' }, data);
   }
 }
+
+export class CannotUpdateAppDataFile extends GraaspAppsError {
+  constructor(data?: unknown) {
+    super({ code: 'GAERR0011', statusCode: 403, message: 'Cannot update file app data' }, data);
+  }
+}
+
+export class CannotUpdateAppSettingFile extends GraaspAppsError {
+  constructor(data?: unknown) {
+    super({ code: 'GAERR0012', statusCode: 403, message: 'Cannot update file app setting' }, data);
+  }
+}
+
+export class FileServiceNotDefined extends GraaspAppsError {
+  constructor(data?: unknown) {
+    super(
+      { code: 'GAERR0013', statusCode: 500, message: 'File service or type is not defined' },
+      data,
+    );
+  }
+}
