@@ -5,7 +5,7 @@ import GraaspFilePlugin, {
   FileTaskManager,
   FileProperties,
 } from 'graasp-plugin-file';
-import { ORIGINAL_FILENAME_TRUNCATE_LIMIT, FILE_ITEM_TYPES } from 'graasp-plugin-file-item';
+import { ORIGINAL_FILENAME_TRUNCATE_LIMIT } from 'graasp-plugin-file-item';
 import { AppSetting, InputAppSetting } from './interfaces/app-setting';
 import common, { create, updateOne, deleteOne, getForOne } from './schemas';
 import { TaskManager } from './task-manager';
@@ -34,10 +34,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
     serviceMethod,
   );
 
-  const SERVICE_ITEM_TYPE =
-    serviceMethod === ServiceMethod.S3 ? FILE_ITEM_TYPES.S3 : FILE_ITEM_TYPES.LOCAL;
-
-  const taskManager = new TaskManager(aSS, iS, iMS, iTM, iMTM, SERVICE_ITEM_TYPE, fTM);
+  const taskManager = new TaskManager(aSS, iS, iMS, iTM, iMTM, serviceMethod, fTM);
 
   fastify.addSchema(common);
 
@@ -73,7 +70,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
         const name = filename.substring(0, ORIGINAL_FILENAME_TRUNCATE_LIMIT);
         const data = buildFileItemData({
           name,
-          type: SERVICE_ITEM_TYPE,
+          type: serviceMethod,
           filename,
           filepath,
           size,
@@ -125,7 +122,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
             const newSetting = await aSS.create(copyData, handler);
 
             // copy file only if content is a file
-            const isFileSetting = appS.data.type === SERVICE_ITEM_TYPE;
+            const isFileSetting = appS.data.type === serviceMethod;
             if (isFileSetting) {
               // create file data object
               const newFilePath = buildFilePath();
@@ -133,16 +130,16 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
                 filepath: newFilePath,
                 name: appS.data.name,
                 type: appS.data.type,
-                filename: appS.data.extra[SERVICE_ITEM_TYPE].name,
-                size: appS.data.extra[SERVICE_ITEM_TYPE].size,
-                mimetype: appS.data.extra[SERVICE_ITEM_TYPE].mimetype,
+                filename: appS.data.extra[serviceMethod].name,
+                size: appS.data.extra[serviceMethod].size,
+                mimetype: appS.data.extra[serviceMethod].mimetype,
               });
 
               // set to new app setting
               copyData.data = newFileData;
 
               // run copy task
-              const originalFileExtra = appS.data.extra[SERVICE_ITEM_TYPE] as FileProperties;
+              const originalFileExtra = appS.data.extra[serviceMethod] as FileProperties;
               const fileCopyData = {
                 newId: newSetting.id,
                 newFilePath,

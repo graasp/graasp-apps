@@ -2,7 +2,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { IdParam } from 'graasp';
 import GraaspFilePlugin, { ServiceMethod, FileTaskManager } from 'graasp-plugin-file';
-import { ORIGINAL_FILENAME_TRUNCATE_LIMIT, FILE_ITEM_TYPES } from 'graasp-plugin-file-item';
+import { ORIGINAL_FILENAME_TRUNCATE_LIMIT } from 'graasp-plugin-file-item';
 
 // local
 import { AppData, InputAppData } from './interfaces/app-data';
@@ -26,15 +26,12 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
 
   const { serviceMethod } = options;
 
-  const SERVICE_ITEM_TYPE =
-    serviceMethod === ServiceMethod.S3 ? FILE_ITEM_TYPES.S3 : FILE_ITEM_TYPES.LOCAL;
-
   const fileOptions = {
     s3: fastify.s3FileItemPluginOptions,
     local: fastify.fileItemPluginOptions,
   };
   const fileTaskManager = new FileTaskManager(fileOptions, serviceMethod);
-  const taskManager = new TaskManager(aDS, iS, iMS, iTM, iMTM, SERVICE_ITEM_TYPE, fileTaskManager);
+  const taskManager = new TaskManager(aDS, iS, iMS, iTM, iMTM, serviceMethod, fileTaskManager);
 
   fastify.addSchema(common);
 
@@ -70,7 +67,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
         const name = filename.substring(0, ORIGINAL_FILENAME_TRUNCATE_LIMIT);
         const data = buildFileItemData({
           name,
-          type: SERVICE_ITEM_TYPE,
+          type: serviceMethod,
           filename,
           filepath,
           size,
