@@ -24,7 +24,6 @@ import {
 import { AppsPluginOptions } from '../src/types';
 import { AppSettingService } from '../src/app-settings/db-service';
 import { buildFileItemData } from '../src/util/utils';
-import { FILE_ITEM_TYPES } from 'graasp-plugin-file-item';
 
 const defaultOptions: AppsPluginOptions = {
   jwtSecret: MOCK_JWT_SECRET,
@@ -366,11 +365,6 @@ describe('Apps Settings Tests', () => {
           if (name === taskName) {
             const original = ITEM_APP;
 
-            const SERVICE_ITEM_TYPE =
-              defaultOptions.serviceMethod === ServiceMethod.S3
-                ? FILE_ITEM_TYPES.S3
-                : FILE_ITEM_TYPES.LOCAL;
-
             const appSettings = [
               buildAppSetting(),
               buildAppSetting(),
@@ -378,7 +372,7 @@ describe('Apps Settings Tests', () => {
                 name: 'file-setting',
                 data: buildFileItemData({
                   name: 'myfile',
-                  type: SERVICE_ITEM_TYPE,
+                  type: defaultOptions.serviceMethod,
                   filename: 'filename',
                   mimetype: 'mimetype',
                   size: 400,
