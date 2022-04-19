@@ -138,6 +138,8 @@ The app context contains additional information which might be interesting for y
 
 App settings store the app configuration. Only members with the admin permission can create, update and delete them. The other members can only fetch the app settings. 
 
+If the related item is copied, its app settings are copied alongside, opposed to app data. 
+
 App settings have the following structure:
 
 - `id`: the app setting id
