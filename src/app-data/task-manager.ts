@@ -87,7 +87,7 @@ export class TaskManager {
     const t2 = this.itemMembershipTaskManager.createGetMemberItemMembershipTask(actor);
     t2.getInput = () => ({
       item: t1.result,
-      validatePermission: PERMISSION_LEVELS.WRITE,
+      validatePermission: PERMISSION_LEVELS.READ,
     });
     const t3 = new CreateAppDataTask(
       actor,
