@@ -1,27 +1,27 @@
-// other services
 import {
-  ItemService,
-  ItemMembershipService,
   Actor,
-  Task,
-  ItemTaskManager,
-  ItemMembershipTaskManager,
   Item,
+  ItemMembershipService,
+  ItemMembershipTaskManager,
+  ItemService,
+  ItemTaskManager,
+  Task,
 } from 'graasp';
+import { FileItemExtra, FileTaskManager } from 'graasp-plugin-file';
+
+import { AuthTokenSubject, ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
+import { FileServiceType } from '../types';
+import { APP_DATA_TYPE_FILE } from '../util/constants';
+import { FileServiceNotDefined } from '../util/graasp-apps-error';
 // local
 import { AppDataService } from './db-service';
 import { AppData } from './interfaces/app-data';
-import { AuthTokenSubject, ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
 import { CreateAppDataTask } from './tasks/create-app-data-task';
 import { DeleteAppDataTask } from './tasks/delete-app-data-task';
 import { GetAppDataTask } from './tasks/get-app-data-task';
+import { GetFileDataInputType, GetFileDataTask } from './tasks/get-file-data-task';
 import { GetItemsAppDataTask } from './tasks/get-items-app-data-task';
 import { UpdateAppDataTask } from './tasks/update-app-data-task';
-import { GetFileDataInputType, GetFileDataTask } from './tasks/get-file-data-task';
-import { APP_DATA_TYPE_FILE } from '../util/constants';
-import { FileItemExtra, FileTaskManager } from 'graasp-plugin-file';
-import { FileServiceNotDefined } from '../util/graasp-apps-error';
-import { FileServiceType } from '../types';
 
 export class TaskManager {
   private appDataService: AppDataService;

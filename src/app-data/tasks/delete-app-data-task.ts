@@ -1,11 +1,10 @@
-// global
 import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
-// local
-import { AppData } from '../interfaces/app-data';
-import { AppDataService } from '../db-service';
-import { BaseAppDataTask } from './base-app-data-task';
+
 import { AuthTokenSubject } from '../../interfaces/request';
 import { AppDataNotFound, ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
+import { AppDataService } from '../db-service';
+import { AppData } from '../interfaces/app-data';
+import { BaseAppDataTask } from './base-app-data-task';
 
 export class DeleteAppDataTask extends BaseAppDataTask<Actor, AppData> {
   get name(): string {

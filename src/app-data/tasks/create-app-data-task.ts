@@ -1,10 +1,9 @@
-// global
 import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
-// local
-import { AppData } from '../interfaces/app-data';
-import { AppDataService } from '../db-service';
-import { BaseAppDataTask } from './base-app-data-task';
+
 import { AuthTokenSubject } from '../../interfaces/request';
+import { AppDataService } from '../db-service';
+import { AppData } from '../interfaces/app-data';
+import { BaseAppDataTask } from './base-app-data-task';
 
 type InputType = {
   data: Partial<AppData>;

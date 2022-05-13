@@ -1,15 +1,14 @@
-// global
 import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
-// local
-import { AppAction } from '../interfaces/app-action';
-import { AppActionService } from '../db-service';
-import { BaseAppActionTask } from './base-app-action-task';
+
 import { AuthTokenSubject, ManyItemsGetFilter } from '../../interfaces/request';
 import {
   AppActionNotAccessible,
   ItemNotFound,
   MemberCannotReadItem,
 } from '../../util/graasp-apps-error';
+import { AppActionService } from '../db-service';
+import { AppAction } from '../interfaces/app-action';
+import { BaseAppActionTask } from './base-app-action-task';
 
 export class GetItemsAppActionTask extends BaseAppActionTask<readonly AppAction[]> {
   get name(): string {

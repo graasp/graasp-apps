@@ -1,8 +1,7 @@
-// global
-import { Item } from 'graasp';
-import { sql, DatabaseTransactionConnection as TrxHandler } from 'slonik';
+import { DatabaseTransactionConnection as TrxHandler, sql } from 'slonik';
 
-// local
+import { Item } from 'graasp';
+
 import { AppAction } from './interfaces/app-action';
 
 /**

@@ -1,10 +1,11 @@
 import fastify from 'fastify';
+
 import { Actor, ItemMembershipService, ItemService, ItemTaskManager } from 'graasp';
 import { ItemMembershipTaskManager, TaskRunner } from 'graasp-test';
-import { AuthTokenSubject } from '../src/interfaces/request';
+
 import plugin from '../src/plugin';
 import { AppsPluginOptions } from '../src/types';
-import { MOCK_LOCAL_OPTIONS, MOCK_S3_OPTIONS, GRAASP_ACTOR } from './fixtures';
+import { GRAASP_ACTOR, MOCK_LOCAL_OPTIONS, MOCK_S3_OPTIONS } from './fixtures';
 
 const schemas = {
   $id: 'http://graasp.org/',

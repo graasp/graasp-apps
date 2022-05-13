@@ -1,16 +1,15 @@
-// global
 import { FastifyPluginAsync } from 'fastify';
+
 import { IdParam } from 'graasp';
-import GraaspFilePlugin, { ServiceMethod, FileTaskManager } from 'graasp-plugin-file';
+import GraaspFilePlugin, { FileTaskManager, ServiceMethod } from 'graasp-plugin-file';
 import { ORIGINAL_FILENAME_TRUNCATE_LIMIT } from 'graasp-plugin-file-item';
 
-// local
-import { AppData, InputAppData } from './interfaces/app-data';
-import common, { create, updateOne, deleteOne, getForOne, getForMany } from './schemas';
 import { ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
-import { TaskManager } from './task-manager';
-import { buildFilePath, buildFileItemData } from '../util/utils';
 import { APP_DATA_TYPE_FILE } from '../util/constants';
+import { buildFileItemData, buildFilePath } from '../util/utils';
+import { AppData, InputAppData } from './interfaces/app-data';
+import common, { create, deleteOne, getForMany, getForOne, updateOne } from './schemas';
+import { TaskManager } from './task-manager';
 
 interface PluginOptions {
   serviceMethod: ServiceMethod;

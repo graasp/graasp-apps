@@ -1,9 +1,8 @@
-// other services
-import { ItemService, ItemMembershipService, Actor } from 'graasp';
-// local
+import { Actor, ItemMembershipService, ItemService } from 'graasp';
+
+import { AuthTokenSubject, ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
 import { AppActionService } from './db-service';
 import { AppAction } from './interfaces/app-action';
-import { AuthTokenSubject, ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
 import { CreateAppActionTask } from './tasks/create-app-action-task';
 import { GetAppActionTask } from './tasks/get-app-action-task';
 import { GetItemsAppActionTask } from './tasks/get-items-app-action-task';
