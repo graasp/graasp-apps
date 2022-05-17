@@ -18,7 +18,7 @@ import { GetAppDataTask } from './tasks/get-app-data-task';
 import { GetItemsAppDataTask } from './tasks/get-items-app-data-task';
 import { UpdateAppDataTask } from './tasks/update-app-data-task';
 import { GetFileDataInputType, GetFileDataTask } from './tasks/get-file-data-task';
-import { APP_DATA_TYPE_FILE, PERMISSION_LEVELS } from '../util/constants';
+import { APP_DATA_TYPE_FILE } from '../util/constants';
 import { FileItemExtra, FileTaskManager } from 'graasp-plugin-file';
 import { FileServiceNotDefined } from '../util/graasp-apps-error';
 import { FileServiceType } from '../types';
@@ -83,20 +83,15 @@ export class TaskManager {
     itemId: string,
     requestDetails: AuthTokenSubject,
   ): Task<Actor, unknown>[] {
-    const t1 = this.itemTaskManager.createGetTask(actor, itemId);
-    const t2 = this.itemMembershipTaskManager.createGetMemberItemMembershipTask(actor);
-    t2.getInput = () => ({
-      item: t1.result,
-      validatePermission: PERMISSION_LEVELS.READ,
-    });
-    const t3 = new CreateAppDataTask(
+    const t1 = this.itemTaskManager.createGetTaskSequence(actor, itemId);
+    const t2 = new CreateAppDataTask(
       actor,
       this.appDataService,
       this.itemService,
       this.itemMembershipService,
       { data, itemId, requestDetails },
     );
-    return [t1, t2, t3];
+    return [...t1, t2];
   }
 
   /**
@@ -133,7 +128,7 @@ export class TaskManager {
     // get permission over item
     const t2 = this.itemMembershipTaskManager.createGetMemberItemMembershipTask(actor);
     t2.getInput = () => ({
-      item: t1[t1.length - 1].result,
+      item: t1[t1.length - 1].getResult(),
     });
 
     // get app data
