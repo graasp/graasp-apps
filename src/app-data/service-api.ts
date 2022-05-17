@@ -151,8 +151,8 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
       { schema: getForOne },
       async ({ authTokenSubject: requestDetails, params: { itemId }, query: filter, log }) => {
         const { member: id } = requestDetails;
-        const task = taskManager.createGetTask({ id }, itemId, filter, requestDetails);
-        return runner.runSingle(task, log);
+        const tasks = taskManager.createGetTaskSequence({ id }, filter, itemId, requestDetails);
+        return runner.runSingleSequence(tasks, log);
       },
     );
 

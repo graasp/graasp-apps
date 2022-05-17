@@ -123,7 +123,7 @@ export class TaskManager {
   }
   createGetTaskSequence(
     actor: Actor,
-    data: Partial<AppData>,
+    filter: Partial<AppData>,
     itemId: string,
     requestDetails: AuthTokenSubject,
   ): Task<Actor, unknown>[] {
@@ -142,7 +142,7 @@ export class TaskManager {
       this.appDataService,
       this.itemService,
       this.itemMembershipService,
-      { itemId, requestDetails },
+      { itemId, requestDetails, filter },
     );
     t3.getInput = () => ({
       permission: t2.result.permission,
