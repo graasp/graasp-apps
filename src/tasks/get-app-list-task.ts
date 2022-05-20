@@ -1,4 +1,3 @@
-// global
 import {
   Actor,
   DatabaseTransactionHandler,
@@ -7,6 +6,7 @@ import {
   Task,
   TaskStatus,
 } from 'graasp';
+
 import { AppService } from '../db-service';
 import { App } from '../interfaces/app-item';
 

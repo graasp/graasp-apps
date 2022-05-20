@@ -1,10 +1,11 @@
-import { UpdateAppSettingTask } from './update-app-setting-task';
-import { buildAppSetting, GRAASP_ACTOR } from '../../../test/fixtures';
-import { AuthTokenSubject } from '../../interfaces/request';
-import { AppSettingService } from '../db-service';
 import { DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
-import { buildFileItemData } from '../../util/utils';
+
+import { GRAASP_ACTOR, buildAppSetting } from '../../../test/fixtures';
+import { AuthTokenSubject } from '../../interfaces/request';
 import { CannotUpdateAppSettingFile } from '../../util/graasp-apps-error';
+import { buildFileItemData } from '../../util/utils';
+import { AppSettingService } from '../db-service';
+import { UpdateAppSettingTask } from './update-app-setting-task';
 
 const appSettingService = {} as unknown as AppSettingService;
 const itemService = {} as unknown as ItemService;

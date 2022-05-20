@@ -1,19 +1,24 @@
 import { StatusCodes } from 'http-status-codes';
 import { v4 } from 'uuid';
+
+import { ItemMembershipService, ItemService } from 'graasp';
+import { ServiceMethod } from 'graasp-plugin-file';
+import { ItemMembershipTaskManager, ItemTaskManager, TaskRunner } from 'graasp-test';
+
+import { AppSettingService } from '../src/app-settings/db-service';
+import { AppsPluginOptions } from '../src/types';
+import { buildFileItemData } from '../src/util/utils';
 import build from './app';
 import {
   GRAASP_ACTOR,
-  buildMockAuthTokenSubject,
+  ITEM_APP,
   MOCK_JWT_SECRET,
+  MOCK_LOGGER,
+  MOCK_MEMBERSHIP,
   MOCK_TOKEN,
   buildAppSetting,
-  MOCK_MEMBERSHIP,
-  ITEM_APP,
-  MOCK_LOGGER,
+  buildMockAuthTokenSubject,
 } from './fixtures';
-import { ServiceMethod } from 'graasp-plugin-file';
-import { TaskRunner, ItemTaskManager, ItemMembershipTaskManager } from 'graasp-test';
-import { ItemService, ItemMembershipService } from 'graasp';
 import {
   mockCreateCopyFileTask,
   mockCreateGetMemberItemMembershipTask,
@@ -21,9 +26,6 @@ import {
   mockPromisify,
   mockRunSingleSequence,
 } from './mock';
-import { AppsPluginOptions } from '../src/types';
-import { AppSettingService } from '../src/app-settings/db-service';
-import { buildFileItemData } from '../src/util/utils';
 
 const defaultOptions: AppsPluginOptions = {
   jwtSecret: MOCK_JWT_SECRET,

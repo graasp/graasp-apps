@@ -1,12 +1,11 @@
-// global
 import { FastifyPluginAsync } from 'fastify';
+
 import graaspPublicPlugin from 'graasp-plugin-public';
 
-// local
-import common, { getForOne, getForMany } from './schemas';
 import { ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
-import { TaskManager } from './task-manager';
 import { AppDataService } from './db-service';
+import common, { getForMany, getForOne } from './schemas';
+import { TaskManager } from './task-manager';
 
 const plugin: FastifyPluginAsync = async (fastify) => {
   const {

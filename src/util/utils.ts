@@ -1,5 +1,7 @@
 import path from 'path';
+
 import { randomHexOf4 } from 'graasp-plugin-file-item';
+
 import { PATH_PREFIX } from './constants';
 import { TokenItemIdMismatch } from './graasp-apps-error';
 

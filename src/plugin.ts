@@ -1,34 +1,37 @@
-import { FastifyPluginAsync, FastifyRequest } from 'fastify';
-import { Item } from 'graasp';
-import fastifyCors from 'fastify-cors';
-import fastifyBearerAuth from 'fastify-bearer-auth';
 import { promisify } from 'util';
-import fastifyJwt from 'fastify-jwt';
-import fastifyAuth from 'fastify-auth';
-import ThumbnailsPlugin from 'graasp-plugin-thumbnails';
+
+import fastifyAuth from '@fastify/auth';
+import fastifyBearerAuth from '@fastify/bearer-auth';
+import fastifyCors from '@fastify/cors';
+import fastifyJwt from '@fastify/jwt';
+import { FastifyPluginAsync, FastifyRequest } from 'fastify';
+
+import { Item } from 'graasp';
 import {
   GraaspLocalFileItemOptions,
   GraaspS3FileItemOptions,
   ServiceMethod,
 } from 'graasp-plugin-file';
-import appDataPlugin from './app-data/service-api';
+import ThumbnailsPlugin from 'graasp-plugin-thumbnails';
+
 import appActionPlugin from './app-actions/service-api';
-import appSettingPlugin from './app-settings/service-api';
-import { AuthTokenSubject } from './interfaces/request';
-import { getMany, createSchema, updateSchema } from './fluent-schema';
-import common, { generateToken, getContext } from './schemas';
-import { AppIdentification } from './interfaces/app-details';
 import { AppDataService } from './app-data/db-service';
+import appDataPlugin from './app-data/service-api';
 import { GenerateApiAccessTokenSujectTask } from './app-data/tasks/generate-api-access-token-subject';
 import { GetContextTask } from './app-data/tasks/get-context-task';
+import appSettingPlugin from './app-settings/service-api';
 import { AppService } from './db-service';
+import { createSchema, getMany, updateSchema } from './fluent-schema';
+import { AppIdentification } from './interfaces/app-details';
+import { AuthTokenSubject } from './interfaces/request';
+import common, { generateToken, getContext } from './schemas';
 import { GetAppListTask } from './tasks/get-app-list-task';
+import { AppsPluginOptions } from './types';
 import {
   APPS_TEMPLATE_PATH_PREFIX,
   DEFAULT_JWT_EXPIRATION,
   THUMBNAILS_ROUTE,
 } from './util/constants';
-import { AppsPluginOptions } from './types';
 
 declare module 'fastify' {
   interface FastifyInstance {

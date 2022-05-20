@@ -1,4 +1,3 @@
-// global
 import {
   Actor,
   DatabaseTransactionHandler,
@@ -6,12 +5,12 @@ import {
   ItemMembershipService,
   ItemService,
 } from 'graasp';
-// local
-import { BaseAppDataTask } from './base-app-data-task';
-import { AuthTokenSubject } from '../../interfaces/request';
+
 import { APP_ITEM_TYPE } from '../../interfaces/app-item';
+import { AuthTokenSubject } from '../../interfaces/request';
 import { InvalidApplicationOrigin, NotAnAppItem } from '../../util/graasp-apps-error';
 import { AppDataService } from '../db-service';
+import { BaseAppDataTask } from './base-app-data-task';
 
 type InputType = {
   item?: Item;

@@ -1,5 +1,5 @@
-// global
 import { FastifyLoggerInstance } from 'fastify';
+
 import {
   Actor,
   DatabaseTransactionHandler,
@@ -9,10 +9,9 @@ import {
   Task,
   TaskStatus,
 } from 'graasp';
-// other services
-// local
-import { AppActionService } from '../db-service';
+
 import { TokenItemIdMismatch } from '../../util/graasp-apps-error';
+import { AppActionService } from '../db-service';
 
 export abstract class BaseAppActionTask<R> implements Task<Actor, R> {
   protected itemService: ItemService;

@@ -1,12 +1,10 @@
-// global
 import { FastifyPluginAsync } from 'fastify';
 
-// local
-import { InputAppAction } from './interfaces/app-action';
-import common, { create, getForOne, getForMany } from './schemas';
 import { ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
-import { TaskManager } from './task-manager';
 import { AppActionService } from './db-service';
+import { InputAppAction } from './interfaces/app-action';
+import common, { create, getForMany, getForOne } from './schemas';
+import { TaskManager } from './task-manager';
 
 declare module 'fastify' {
   interface FastifyInstance {

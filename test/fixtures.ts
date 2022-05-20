@@ -1,6 +1,9 @@
-import { FastifyLoggerInstance } from 'fastify';
-import { Actor, ItemMembership } from 'graasp';
 import { v4 } from 'uuid';
+
+import { FastifyLoggerInstance } from 'fastify';
+
+import { Actor, ItemMembership } from 'graasp';
+
 import { AppData } from '../src/app-data/interfaces/app-data';
 import { AppSetting } from '../src/app-settings/interfaces/app-setting';
 import { RecordVisibility } from '../src/interfaces/app-details';

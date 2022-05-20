@@ -1,11 +1,12 @@
-import { UpdateAppDataTask } from './update-app-data-task';
-import { buildAppData, GRAASP_ACTOR } from '../../../test/fixtures';
-import { AuthTokenSubject } from '../../interfaces/request';
-import { AppDataService } from '../db-service';
 import { DatabaseTransactionHandler, Item, ItemMembershipService, ItemService } from 'graasp';
-import { buildFileItemData } from '../../util/utils';
-import { CannotUpdateAppDataFile } from '../../util/graasp-apps-error';
+
+import { GRAASP_ACTOR, buildAppData } from '../../../test/fixtures';
+import { AuthTokenSubject } from '../../interfaces/request';
 import { PERMISSION_LEVELS } from '../../util/constants';
+import { CannotUpdateAppDataFile } from '../../util/graasp-apps-error';
+import { buildFileItemData } from '../../util/utils';
+import { AppDataService } from '../db-service';
+import { UpdateAppDataTask } from './update-app-data-task';
 
 const appDataService = {} as unknown as AppDataService;
 const itemService = {} as unknown as ItemService;

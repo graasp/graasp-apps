@@ -1,4 +1,4 @@
-import { GraaspErrorDetails, GraaspError } from 'graasp';
+import { GraaspError, GraaspErrorDetails } from 'graasp';
 
 export class GraaspAppsError implements GraaspError {
   name: string;

@@ -1,4 +1,5 @@
 import { Anything } from 'graasp';
+
 import { RecordVisibility } from '../../interfaces/app-details';
 
 export interface InputAppData {

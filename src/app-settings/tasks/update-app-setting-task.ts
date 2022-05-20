@@ -1,12 +1,11 @@
-// global
 import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
-// local
-import { AppSetting } from '../interfaces/app-setting';
-import { AppSettingService } from '../db-service';
-import { BaseAppSettingTask } from './base-app-setting-task';
+
 import { AuthTokenSubject } from '../../interfaces/request';
-import { AppSettingNotFound, CannotUpdateAppSettingFile } from '../../util/graasp-apps-error';
 import { FileServiceType } from '../../types';
+import { AppSettingNotFound, CannotUpdateAppSettingFile } from '../../util/graasp-apps-error';
+import { AppSettingService } from '../db-service';
+import { AppSetting } from '../interfaces/app-setting';
+import { BaseAppSettingTask } from './base-app-setting-task';
 
 export class UpdateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> {
   get name(): string {

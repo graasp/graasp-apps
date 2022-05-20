@@ -1,4 +1,3 @@
-// global
 import {
   Actor,
   DatabaseTransactionHandler,
@@ -7,11 +6,11 @@ import {
   ItemService,
   Member,
 } from 'graasp';
-// local
-import { AppDataService } from '../db-service';
-import { BaseAppDataTask } from './base-app-data-task';
+
 import { AuthTokenSubject } from '../../interfaces/request';
 import { ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
+import { AppDataService } from '../db-service';
+import { BaseAppDataTask } from './base-app-data-task';
 
 export class GetContextTask extends BaseAppDataTask<Actor, Partial<Item>> {
   get name(): string {

@@ -1,26 +1,25 @@
-// other services
 import {
-  ItemService,
-  ItemMembershipService,
   Actor,
-  Task,
-  ItemTaskManager,
-  ItemMembershipTaskManager,
   Item,
+  ItemMembershipService,
+  ItemMembershipTaskManager,
+  ItemService,
+  ItemTaskManager,
+  Task,
 } from 'graasp';
-// local
+import { FileItemExtra, FileTaskManager } from 'graasp-plugin-file';
+
+import { AuthTokenSubject } from '../interfaces/request';
+import { FileServiceType } from '../types';
+import { PERMISSION_LEVELS } from '../util/constants';
+import { FileServiceNotDefined } from '../util/graasp-apps-error';
 import { AppSettingService } from './db-service';
 import { AppSetting } from './interfaces/app-setting';
-import { AuthTokenSubject } from '../interfaces/request';
 import { CreateAppSettingTask } from './tasks/create-app-setting-task';
 import { DeleteAppSettingTask } from './tasks/delete-app-setting-task';
 import { GetAppSettingTask } from './tasks/get-app-setting-task';
-import { UpdateAppSettingTask } from './tasks/update-app-setting-task';
 import { GetFileDataInputType, GetFileDataTask } from './tasks/get-file-data-task';
-import { PERMISSION_LEVELS } from '../util/constants';
-import { FileItemExtra, FileTaskManager } from 'graasp-plugin-file';
-import { FileServiceNotDefined } from '../util/graasp-apps-error';
-import { FileServiceType } from '../types';
+import { UpdateAppSettingTask } from './tasks/update-app-setting-task';
 
 export class TaskManager {
   private appDataService: AppSettingService;

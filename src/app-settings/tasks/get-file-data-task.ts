@@ -1,12 +1,11 @@
-// global
 import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
-// local
-import { AppSettingService } from '../db-service';
-import { BaseAppSettingTask } from './base-app-setting-task';
-import { AuthTokenSubject } from '../../interfaces/request';
-import { ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
 import { FileItemExtra, ServiceMethod } from 'graasp-plugin-file';
 import { getFileExtra } from 'graasp-plugin-file-item';
+
+import { AuthTokenSubject } from '../../interfaces/request';
+import { ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
+import { AppSettingService } from '../db-service';
+import { BaseAppSettingTask } from './base-app-setting-task';
 
 export type GetFileDataInputType = {
   appSettingId?: string;

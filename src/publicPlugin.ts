@@ -1,18 +1,19 @@
-// global
+import { promisify } from 'util';
+
+import fastifyCors from '@fastify/cors';
+import fastifyJwt from '@fastify/jwt';
 import { FastifyPluginAsync } from 'fastify';
-import fastifyJwt from 'fastify-jwt';
-import fastifyCors from 'fastify-cors';
+
 import graaspPublicPlugin from 'graasp-plugin-public';
 
+import { AppDataService } from './app-data/db-service';
+import publicAppDataPlugin from './app-data/publicPlugin';
+import { GenerateApiAccessTokenSujectTask } from './app-data/tasks/generate-api-access-token-subject';
+import { AppIdentification } from './interfaces/app-details';
+import { AuthTokenSubject } from './interfaces/request';
 // local
 import common, { generateToken } from './schemas';
-import publicAppDataPlugin from './app-data/publicPlugin';
-import { AuthTokenSubject } from './interfaces/request';
-import { promisify } from 'util';
-import { AppIdentification } from './interfaces/app-details';
-import { GenerateApiAccessTokenSujectTask } from './app-data/tasks/generate-api-access-token-subject';
 import { DEFAULT_JWT_EXPIRATION } from './util/constants';
-import { AppDataService } from './app-data/db-service';
 
 type PublicAppsPluginOptions = {
   jwtExpiration?: number;

@@ -1,26 +1,28 @@
 import { StatusCodes } from 'http-status-codes';
 import { v4 } from 'uuid';
+
+import { ItemMembershipService, ItemMembershipTaskManager, ItemService } from 'graasp';
+import { ServiceMethod } from 'graasp-plugin-file';
+import { ItemTaskManager, TaskRunner } from 'graasp-test';
+
+import { AppService } from '../src/db-service';
+import { AppsPluginOptions } from '../src/types';
 import build from './app';
 import {
   GRAASP_ACTOR,
+  MOCK_APPS,
   MOCK_APP_ORIGIN,
-  buildMockAuthTokenSubject,
   MOCK_CONTEXT,
   MOCK_JWT_SECRET,
   MOCK_TOKEN,
-  MOCK_APPS,
+  buildMockAuthTokenSubject,
 } from './fixtures';
-import { ServiceMethod } from 'graasp-plugin-file';
-import { TaskRunner, ItemTaskManager } from 'graasp-test';
-import { ItemService, ItemMembershipService, ItemMembershipTaskManager } from 'graasp';
 import {
   mockCreateGetTaskSequence,
   mockPromisify,
   mockRunSingle,
   mockRunSingleSequence,
 } from './mock';
-import { AppService } from '../src/db-service';
-import { AppsPluginOptions } from '../src/types';
 
 const defaultOptions: AppsPluginOptions = {
   jwtSecret: MOCK_JWT_SECRET,

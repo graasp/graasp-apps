@@ -1,8 +1,10 @@
-import { Item, ItemMembership } from 'graasp';
 import util from 'util';
-import { ItemMembershipTaskManager, TaskRunner, ItemTaskManager, Task } from 'graasp-test';
-import { AuthTokenSubject } from '../src/interfaces/request';
+
+import { Item, ItemMembership } from 'graasp';
 import { FileTaskManager } from 'graasp-plugin-file';
+import { ItemMembershipTaskManager, ItemTaskManager, Task, TaskRunner } from 'graasp-test';
+
+import { AuthTokenSubject } from '../src/interfaces/request';
 
 export const mockCreateGetTaskSequence = (
   data: Partial<Item> | Error,
