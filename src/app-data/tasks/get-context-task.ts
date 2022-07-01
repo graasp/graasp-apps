@@ -57,7 +57,7 @@ export class GetContextTask extends BaseAppDataTask<Actor, Partial<Item>> {
     if (!canRead) throw new MemberCannotReadItem(this.itemId);
 
     const p1 = this.appDataService.getFoldersAndAppsFromParent(item, handler);
-    const p2 = this.appDataService.getParentItemMembers(item, handler);
+    const p2 = this.appDataService.getItemAndParentMembers(item, handler);
 
     const [foldersAndAppItems, members] = await Promise.all([p1, p2]);
     const parent: Partial<Item> & { children?: Partial<Item>[]; members?: Partial<Member>[] } =

@@ -13,6 +13,8 @@ export const GRAASP_ACTOR: Actor = {
   id: 'actorid',
 };
 
+export const GRAASP_PUBLISHER_ID = 'publisher-id';
+
 export const MOCK_JWT_SECRET = '1234567890123456789012345678901234567890';
 
 export const MOCK_S3_OPTIONS = {

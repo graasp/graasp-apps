@@ -240,20 +240,18 @@ export class AppDataService {
   }
 
   /**
-   * Get info of members who can access the `item`'s parent or, if there's no parent,
-   * members who can access the member
+   * Get info of members who can access the item and
+   * the `item`'s parent if it exists
    * @param item Item
    * @param transactionHandler Database transaction handler
    */
-  async getParentItemMembers(
+  async getItemAndParentMembers(
     item: Item,
     transactionHandler: TrxHandler,
   ): Promise<Partial<Member>[]> {
     const { path: itemPath } = item;
 
-    const itemPathCondition = itemPath.includes('.')
-      ? sql`@> subpath(${itemPath}, 0, -1)`
-      : sql`= ${itemPath}`;
+    const parentCondition = itemPath.includes('.') ? sql`@> subpath(${itemPath}, 0, -1)` : '';
 
     return transactionHandler
       .query<Partial<Member>>(
@@ -262,7 +260,7 @@ export class AppDataService {
           FROM member
         INNER JOIN item_membership
           ON member.id = item_membership.member_id
-        WHERE item_membership.item_path ${itemPathCondition}
+        WHERE item_membership.item_path = ${itemPath} OR ${parentCondition}
       `,
       )
       .then(({ rows }) => rows.slice(0));
