@@ -125,7 +125,6 @@ describe('Apps Settings Tests', () => {
             Authorization: `Bearer ${MOCK_TOKEN}`,
           },
         });
-        console.log('response: ', response);
         expect(response.statusCode).toEqual(StatusCodes.OK);
         expect(response.json()).toEqual(appSettings);
       });
