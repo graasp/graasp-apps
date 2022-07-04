@@ -47,7 +47,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
     jwtExpiration = DEFAULT_JWT_EXPIRATION,
     serviceMethod,
     thumbnailsPrefix,
-    GRAASP_PUBLISHER_ID,
+    publisherId,
   } = options;
 
   if (!thumbnailsPrefix) {
@@ -139,7 +139,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
       // get all apps
       fastify.get('/list', { schema: getMany }, async ({ member }) => {
-        const task = new GetAppListTask(member, aS, GRAASP_PUBLISHER_ID);
+        const task = new GetAppListTask(member, aS, publisherId);
         return await runner.runSingle(task);
       });
 

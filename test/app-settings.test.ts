@@ -32,7 +32,7 @@ const defaultOptions: AppsPluginOptions = {
   jwtSecret: MOCK_JWT_SECRET,
   serviceMethod: ServiceMethod.LOCAL,
   thumbnailsPrefix: '/',
-  GRAASP_PUBLISHER_ID,
+  publisherId: GRAASP_PUBLISHER_ID,
 };
 
 const runner = new TaskRunner();

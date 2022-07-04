@@ -7,7 +7,7 @@ export interface AppsPluginOptions {
 
   serviceMethod: ServiceMethod;
   thumbnailsPrefix: string;
-  GRAASP_PUBLISHER_ID: string;
+  publisherId: string;
 }
 
 // todo: get from plugin-file, currently the enum is defined as integer
