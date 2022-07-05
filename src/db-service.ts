@@ -38,7 +38,7 @@ export class AppService {
     transactionHandler: TrxHandler,
   ): Promise<readonly App[]> {
     return transactionHandler
-      .query<App>(sql`SELECT ${AppService.allColumns} FROM app WHERE publisher=${publisherId}`)
+      .query<App>(sql`SELECT ${AppService.allColumns} FROM app WHERE publisher_id = ${publisherId}`)
       .then(({ rows }) => rows);
   }
 
