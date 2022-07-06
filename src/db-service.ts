@@ -28,14 +28,17 @@ export class AppService {
   );
 
   /**
-   * Get item's app action.
+   * Get apps by publisher
    * @param itemId Item id
    * @param filter Filter
    * @param transactionHandler Database transaction handler
    */
-  public async getAppsList(transactionHandler: TrxHandler): Promise<readonly App[]> {
+  public async getAppsListFor(
+    publisherId: string,
+    transactionHandler: TrxHandler,
+  ): Promise<readonly App[]> {
     return transactionHandler
-      .query<App>(sql`SELECT ${AppService.allColumns} FROM app`)
+      .query<App>(sql`SELECT ${AppService.allColumns} FROM app WHERE publisher_id = ${publisherId}`)
       .then(({ rows }) => rows);
   }
 

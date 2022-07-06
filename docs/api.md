@@ -119,11 +119,11 @@ App data are all data the app might save. They have the following structure:
 <a name="app-context"></a>
 ## App Context
 
-The app context contains additional information which might be interesting for you app such as:
+The app context contains additional information which might be interesting for your app such as:
 
-- `members`: a list of all the members having access to this item
-- `children`: all children items contained in the app item
-- and all the item's properties such as `ìd`, `name`, `description`, etc 
+- `members`: a list of all the members having access to the app's parent and the app itself
+- `children`: all folder and app items contained in the parent item
+- and all the item's properties such as `ìd`, `name`, `description`, etc
 
 ### GET App Action
 

@@ -1,7 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { v4 } from 'uuid';
 
-import { ItemMembershipService, ItemService } from 'graasp';
+import { ItemMembershipService, ItemService, Member } from 'graasp';
 import { ServiceMethod } from 'graasp-plugin-file';
 import { ItemMembershipTaskManager, ItemTaskManager, TaskRunner } from 'graasp-test';
 
@@ -11,6 +11,7 @@ import { buildFileItemData } from '../src/util/utils';
 import build from './app';
 import {
   GRAASP_ACTOR,
+  GRAASP_PUBLISHER_ID,
   ITEM_APP,
   MOCK_JWT_SECRET,
   MOCK_LOGGER,
@@ -31,24 +32,28 @@ const defaultOptions: AppsPluginOptions = {
   jwtSecret: MOCK_JWT_SECRET,
   serviceMethod: ServiceMethod.LOCAL,
   thumbnailsPrefix: '/',
+  publisherId: GRAASP_PUBLISHER_ID,
 };
 
 const runner = new TaskRunner();
 const itemService = {} as unknown as ItemService;
 const itemMembershipsService = {} as unknown as ItemMembershipService;
-const itemTaskManager = new ItemTaskManager();
 const itemMembershipTaskManager = new ItemMembershipTaskManager();
+const itemTaskManager = new ItemTaskManager();
 jest.spyOn(runner, 'setTaskPostHookHandler').mockImplementation(() => true);
 
-const buildAppOptions = ({ options = defaultOptions, member = GRAASP_ACTOR } = {}) => ({
-  runner,
-  itemService,
-  itemMembershipsService,
-  itemMembershipTaskManager,
-  itemTaskManager,
-  options,
-  member,
-});
+const buildAppOptions = (args?: { options?: AppsPluginOptions; member?: Member }) => {
+  const { options = defaultOptions, member = GRAASP_ACTOR } = args ?? {};
+  return {
+    runner,
+    itemService,
+    itemMembershipsService,
+    itemMembershipTaskManager,
+    itemTaskManager,
+    options,
+    member,
+  };
+};
 
 const item = { id: v4() };
 

@@ -15,11 +15,13 @@ export class GetAppListTask implements Task<Actor, readonly App[]> {
     return GetAppListTask.name;
   }
 
-  constructor(actor: Actor, appService: AppService) {
+  constructor(actor: Actor, appService: AppService, publisherId: string) {
     this.appService = appService;
     this.actor = actor;
+    this.publisherId = publisherId;
   }
 
+  publisherId: string;
   actor: Actor;
   targetId?: string;
   data?: readonly App[];
@@ -37,9 +39,9 @@ export class GetAppListTask implements Task<Actor, readonly App[]> {
   async run(handler: DatabaseTransactionHandler): Promise<void> {
     this.status = 'RUNNING';
 
-    const appData = await this.appService.getAppsList(handler);
+    const apps = await this.appService.getAppsListFor(this.publisherId, handler);
 
     this.status = 'OK';
-    this.result = appData;
+    this.result = apps;
   }
 }
