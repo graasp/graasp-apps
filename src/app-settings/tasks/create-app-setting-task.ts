@@ -1,6 +1,12 @@
-import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
+import {
+  Actor,
+  AuthTokenSubject,
+  DatabaseTransactionHandler,
+  ItemMembershipService,
+  ItemService,
+  TaskStatus,
+} from '@graasp/sdk';
 
-import { AuthTokenSubject } from '../../interfaces/request';
 import { AppSettingService } from '../db-service';
 import { AppSetting } from '../interfaces/app-setting';
 import { BaseAppSettingTask } from './base-app-setting-task';
@@ -32,7 +38,7 @@ export class CreateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> 
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
-    this.status = 'RUNNING';
+    this.status = TaskStatus.RUNNING;
 
     const { requestDetails, itemId, data } = this.input;
     const { id: memberId } = this.actor; // extracted from token on task creation - see create endpoint
@@ -51,7 +57,7 @@ export class CreateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> 
     // create app data
     const appSetting = await this.appSettingService.create(completeData, handler);
 
-    this.status = 'OK';
+    this.status = TaskStatus.OK;
     this._result = appSetting;
   }
 }

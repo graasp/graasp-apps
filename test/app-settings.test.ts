@@ -1,8 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { v4 } from 'uuid';
 
-import { ItemMembershipService, ItemService, Member } from 'graasp';
-import { ServiceMethod } from 'graasp-plugin-file';
+import { ItemMembershipService, ItemService, ItemType, Member } from '@graasp/sdk';
 import { ItemMembershipTaskManager, ItemTaskManager, TaskRunner } from 'graasp-test';
 
 import { AppSettingService } from '../src/app-settings/db-service';
@@ -30,7 +29,7 @@ import {
 
 const defaultOptions: AppsPluginOptions = {
   jwtSecret: MOCK_JWT_SECRET,
-  serviceMethod: ServiceMethod.LOCAL,
+  fileItemType: ItemType.LOCAL_FILE,
   thumbnailsPrefix: '/',
   publisherId: GRAASP_PUBLISHER_ID,
 };
@@ -66,41 +65,6 @@ describe('Apps Settings Tests', () => {
     it('Valid options should resolve', async () => {
       const app = await build(buildAppOptions());
       expect(app).toBeTruthy();
-    });
-    it('Invalid rootpath should throw', async () => {
-      expect(
-        async () =>
-          await build(
-            buildAppOptions({
-              options: {
-                ...defaultOptions,
-                jwtSecret: null,
-              },
-            }),
-          ),
-      ).rejects.toThrow(Error);
-      expect(
-        async () =>
-          await build(
-            buildAppOptions({
-              options: {
-                ...defaultOptions,
-                serviceMethod: null,
-              },
-            }),
-          ),
-      ).rejects.toThrow(Error);
-      expect(
-        async () =>
-          await build(
-            buildAppOptions({
-              options: {
-                ...defaultOptions,
-                thumbnailsPrefix: null,
-              },
-            }),
-          ),
-      ).rejects.toThrow(Error);
     });
   });
 
@@ -234,7 +198,7 @@ describe('Apps Settings Tests', () => {
       });
 
       it('Request without member and token throws', async () => {
-        const app = await build(buildAppOptions({ member: null }));
+        const app = await build(buildAppOptions({ member: undefined }));
         expect(app).toBeTruthy();
 
         const response = await app.inject({
@@ -379,7 +343,7 @@ describe('Apps Settings Tests', () => {
                 name: 'file-setting',
                 data: buildFileItemData({
                   name: 'myfile',
-                  type: defaultOptions.serviceMethod,
+                  type: defaultOptions.fileItemType,
                   filename: 'filename',
                   mimetype: 'mimetype',
                   size: 400,

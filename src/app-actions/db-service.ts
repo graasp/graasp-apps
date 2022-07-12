@@ -1,6 +1,6 @@
 import { DatabaseTransactionConnection as TrxHandler, sql } from 'slonik';
 
-import { Item } from 'graasp';
+import { Item } from '@graasp/sdk';
 
 import { AppAction } from './interfaces/app-action';
 
@@ -65,6 +65,8 @@ export class AppActionService {
     // dynamically build a [{column1, value1}, ...] based on properties present in the Partial obj
     const columnsAndValues = Object.keys(appAction).map((key: keyof AppAction) => {
       const column = sql.identifier([this.objectPropertiesToDBColumnsMapping(key)]);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       const value = key !== 'data' ? sql`${appAction[key]}` : sql.json(appAction[key]);
       return { column, value };
     });

@@ -1,8 +1,14 @@
-import { DatabaseTransactionHandler, Item, ItemMembershipService, ItemService } from 'graasp';
+import {
+  AuthTokenSubject,
+  DatabaseTransactionHandler,
+  Item,
+  ItemMembershipService,
+  ItemService,
+  ItemType,
+  PermissionLevel,
+} from '@graasp/sdk';
 
 import { GRAASP_ACTOR, buildAppData } from '../../../test/fixtures';
-import { AuthTokenSubject } from '../../interfaces/request';
-import { PERMISSION_LEVELS } from '../../util/constants';
 import { CannotUpdateAppDataFile } from '../../util/graasp-apps-error';
 import { buildFileItemData } from '../../util/utils';
 import { AppDataService } from '../db-service';
@@ -13,7 +19,7 @@ const itemService = {} as unknown as ItemService;
 const itemMembershipService = {
   getPermissionLevel: jest.fn(),
 } as unknown as ItemMembershipService;
-const fileServiceType = 'file';
+const fileItemType = ItemType.LOCAL_FILE;
 const handler = {} as unknown as DatabaseTransactionHandler;
 
 const data = { data: { some: 'data' } };
@@ -28,7 +34,7 @@ const requestDetails: AuthTokenSubject = {
 describe('Update App Setting Task', () => {
   it('Update app setting successfully', async () => {
     const appData = buildAppData();
-    const permission = PERMISSION_LEVELS.ADMIN;
+    const permission = PermissionLevel.Admin;
     itemService.get = jest.fn().mockResolvedValue(item);
     itemMembershipService.getPermissionLevel = jest.fn().mockResolvedValue(permission);
     appDataService.getById = jest.fn().mockResolvedValue(appData);
@@ -43,7 +49,7 @@ describe('Update App Setting Task', () => {
       appDataService,
       itemService,
       itemMembershipService,
-      fileServiceType,
+      fileItemType,
     );
 
     await updateTask.run(handler);
@@ -54,7 +60,7 @@ describe('Update App Setting Task', () => {
     const fileAppSetting = buildAppData({
       data: buildFileItemData({
         name: 'name',
-        type: fileServiceType,
+        type: fileItemType,
         filename: 'filename',
         filepath: 'filepath',
         size: 120,
@@ -62,7 +68,7 @@ describe('Update App Setting Task', () => {
       }),
     });
     const appData = buildAppData();
-    const permission = PERMISSION_LEVELS.ADMIN;
+    const permission = PermissionLevel.Admin;
     itemService.get = jest.fn().mockResolvedValue(item);
     itemMembershipService.getPermissionLevel = jest.fn().mockResolvedValue(permission);
     appDataService.getById = jest.fn().mockResolvedValue(appData);
@@ -77,7 +83,7 @@ describe('Update App Setting Task', () => {
       appDataService,
       itemService,
       itemMembershipService,
-      fileServiceType,
+      fileItemType,
     );
 
     try {

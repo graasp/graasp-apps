@@ -5,7 +5,7 @@ import {
   PreHookHandlerType,
   Task,
   TaskStatus,
-} from 'graasp';
+} from '@graasp/sdk';
 
 import { AppService } from '../db-service';
 import { App } from '../interfaces/app-item';
@@ -37,11 +37,11 @@ export class GetAppListTask implements Task<Actor, readonly App[]> {
   appService: AppService;
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
-    this.status = 'RUNNING';
+    this.status = TaskStatus.RUNNING;
 
     const apps = await this.appService.getAppsListFor(this.publisherId, handler);
 
-    this.status = 'OK';
+    this.status = TaskStatus.OK;
     this.result = apps;
   }
 }

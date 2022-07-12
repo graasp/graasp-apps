@@ -1,6 +1,6 @@
 import { DatabaseTransactionConnection as TrxHandler, sql } from 'slonik';
 
-import { Item, Member } from 'graasp';
+import { Item, Member } from '@graasp/sdk';
 
 import { RecordVisibility } from '../interfaces/app-details';
 import { AppData } from './interfaces/app-data';
@@ -72,6 +72,8 @@ export class AppDataService {
     // dynamically build a [{column1, value1}, ...] based on properties present in the Partial obj
     const columnsAndValues = Object.keys(appData).map((key: keyof AppData) => {
       const column = sql.identifier([this.objectPropertiesToDBColumnsMapping(key)]);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       const value = key !== 'data' ? sql`${appData[key]}` : sql.json(appData[key]);
       return { column, value };
     });
@@ -103,11 +105,14 @@ export class AppDataService {
     transactionHandler: TrxHandler,
     memberId?: string,
   ): Promise<AppData> {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const sqlData = sql.json(data);
     return transactionHandler
       .query<AppData>(
         sql`
         UPDATE app_data
-        SET data = ${sql.json(data)}
+        SET data = ${sqlData}
         WHERE id = ${id}
           ${memberId ? sql`AND member_id = ${memberId}` : sql``}
         RETURNING ${AppDataService.allColumns}

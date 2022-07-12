@@ -6,12 +6,7 @@ import fastifyCors from '@fastify/cors';
 import fastifyJwt from '@fastify/jwt';
 import { FastifyPluginAsync, FastifyRequest } from 'fastify';
 
-import { Item } from 'graasp';
-import {
-  GraaspLocalFileItemOptions,
-  GraaspS3FileItemOptions,
-  ServiceMethod,
-} from 'graasp-plugin-file';
+import { AppIdentification, AuthTokenSubject, Item } from '@graasp/sdk';
 import ThumbnailsPlugin from 'graasp-plugin-thumbnails';
 
 import appActionPlugin from './app-actions/service-api';
@@ -22,8 +17,6 @@ import { GetContextTask } from './app-data/tasks/get-context-task';
 import appSettingPlugin from './app-settings/service-api';
 import { AppService } from './db-service';
 import { createSchema, getMany, updateSchema } from './fluent-schema';
-import { AppIdentification } from './interfaces/app-details';
-import { AuthTokenSubject } from './interfaces/request';
 import common, { generateToken, getContext } from './schemas';
 import { GetAppListTask } from './tasks/get-app-list-task';
 import { AppsPluginOptions } from './types';
@@ -36,8 +29,6 @@ import {
 declare module 'fastify' {
   interface FastifyInstance {
     appDataService: AppDataService;
-    s3FileItemPluginOptions?: GraaspS3FileItemOptions;
-    fileItemPluginOptions?: GraaspLocalFileItemOptions;
   }
 }
 
@@ -45,16 +36,13 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
   const {
     jwtSecret,
     jwtExpiration = DEFAULT_JWT_EXPIRATION,
-    serviceMethod,
+    fileItemType,
     thumbnailsPrefix,
     publisherId,
   } = options;
 
   if (!thumbnailsPrefix) {
     throw new Error('thumbnail prefix is not defined!');
-  }
-  if (!Object.values(ServiceMethod).includes(serviceMethod)) {
-    throw new Error('serviceMethod is not defined!');
   }
   if (!jwtSecret) {
     throw new Error('jwtSecret is not defined!');
@@ -167,8 +155,8 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
       // register thumbnail plugin for creation hook
       fastify.register(ThumbnailsPlugin, {
-        serviceMethod: serviceMethod,
-        serviceOptions: {
+        fileItemType: fileItemType,
+        fileConfigurations: {
           s3: fastify.s3FileItemPluginOptions,
           local: fastify.fileItemPluginOptions,
         },
@@ -211,13 +199,13 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
     });
 
     // register app data plugin
-    fastify.register(appDataPlugin, { serviceMethod });
+    fastify.register(appDataPlugin, { fileItemType });
 
     // register app action plugin
     fastify.register(appActionPlugin);
 
     // register app settings plugin
-    fastify.register(appSettingPlugin, { serviceMethod });
+    fastify.register(appSettingPlugin, { fileItemType });
   });
 };
 

@@ -10,7 +10,7 @@ import {
   PreHookHandlerType,
   Task,
   TaskStatus,
-} from 'graasp';
+} from '@graasp/sdk';
 
 import { TokenItemIdMismatch } from '../../util/graasp-apps-error';
 import { AppDataService } from '../db-service';
@@ -47,7 +47,7 @@ export abstract class BaseAppDataTask<A extends Actor, R> implements Task<A, R> 
     this.appDataService = appDataService;
     this.itemService = itemService;
     this.itemMembershipService = itemMembershipService;
-    this.status = 'NEW';
+    this.status = TaskStatus.NEW;
   }
 
   abstract get name(): string;
