@@ -253,7 +253,7 @@ export class AppDataService {
 
     const parentCondition = itemPath.includes('.')
       ? sql`OR item_membership.item_path @> subpath(${itemPath}, 0, -1)`
-      : '';
+      : sql``;
 
     return transactionHandler
       .query<Partial<Member>>(
