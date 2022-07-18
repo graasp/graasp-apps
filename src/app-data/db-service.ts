@@ -251,7 +251,9 @@ export class AppDataService {
   ): Promise<Partial<Member>[]> {
     const { path: itemPath } = item;
 
-    const parentCondition = itemPath.includes('.') ? sql`@> subpath(${itemPath}, 0, -1)` : '';
+    const parentCondition = itemPath.includes('.')
+      ? sql`OR item_membership.item_path @> subpath(${itemPath}, 0, -1)`
+      : sql``;
 
     return transactionHandler
       .query<Partial<Member>>(
@@ -260,7 +262,7 @@ export class AppDataService {
           FROM member
         INNER JOIN item_membership
           ON member.id = item_membership.member_id
-        WHERE item_membership.item_path = ${itemPath} OR ${parentCondition}
+        WHERE item_membership.item_path = ${itemPath} ${parentCondition}
       `,
       )
       .then(({ rows }) => rows.slice(0));
