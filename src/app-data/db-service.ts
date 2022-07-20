@@ -73,7 +73,7 @@ export class AppDataService {
     const columnsAndValues = Object.keys(appData).map((key: keyof AppData) => {
       const column = sql.identifier([this.objectPropertiesToDBColumnsMapping(key)]);
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-ignore ignore appData[key] type
       const value = key !== 'data' ? sql`${appData[key]}` : sql.json(appData[key]);
       return { column, value };
     });
@@ -106,7 +106,7 @@ export class AppDataService {
     memberId?: string,
   ): Promise<AppData> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // @ts-ignore ignore data type
     const sqlData = sql.json(data);
     return transactionHandler
       .query<AppData>(

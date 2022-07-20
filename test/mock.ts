@@ -23,7 +23,7 @@ export const mockCreateGetTask = (
   const mockCreateTask = jest
     .spyOn(ItemTaskManager.prototype, 'createGetTask')
     .mockImplementation(() => {
-      return new Task(data);
+      return new Task<Item>(data);
     });
   jest.spyOn(TaskRunner.prototype, 'runSingleSequence').mockImplementation(async () => data);
   return mockCreateTask;
@@ -61,7 +61,7 @@ export const mockCreateGetMemberItemMembershipTask = (
   const mockTask = jest
     .spyOn(ItemMembershipTaskManager.prototype, 'createGetMemberItemMembershipTask')
     .mockImplementation(() => {
-      return new Task(data);
+      return new Task<ItemMembership>(data);
     });
   jest.spyOn(TaskRunner.prototype, 'runSingle').mockImplementation(async () => data);
   return mockTask;
