@@ -1,7 +1,14 @@
-import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
+import {
+  Actor,
+  AuthTokenSubject,
+  DatabaseTransactionHandler,
+  FileItemType,
+  ItemMembershipService,
+  ItemService,
+  PermissionLevel,
+  TaskStatus,
+} from '@graasp/sdk';
 
-import { AuthTokenSubject } from '../../interfaces/request';
-import { FileServiceType } from '../../types';
 import {
   AppDataNotFound,
   CannotUpdateAppDataFile,
@@ -18,7 +25,7 @@ export class UpdateAppDataTask extends BaseAppDataTask<Actor, AppData> {
   }
   private requestDetails: AuthTokenSubject;
   private itemId: string;
-  private fileServiceType: FileServiceType;
+  private fileItemType: FileItemType;
 
   /**
    * UpdateAppDataTask constructor
@@ -37,7 +44,7 @@ export class UpdateAppDataTask extends BaseAppDataTask<Actor, AppData> {
     appDataService: AppDataService,
     itemService: ItemService,
     itemMembershipService: ItemMembershipService,
-    fileServiceType: FileServiceType,
+    fileItemType: FileItemType,
   ) {
     super(actor, appDataService, itemService, itemMembershipService);
 
@@ -45,11 +52,11 @@ export class UpdateAppDataTask extends BaseAppDataTask<Actor, AppData> {
     this.data = data;
     this.targetId = appDataId;
     this.itemId = itemId;
-    this.fileServiceType = fileServiceType;
+    this.fileItemType = fileItemType;
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
-    this.status = 'RUNNING';
+    this.status = TaskStatus.RUNNING;
 
     const { id: memberId } = this.actor; // extracted from token on task creation - see endpoint
     const { item: tokenItemId } = this.requestDetails;
@@ -72,14 +79,14 @@ export class UpdateAppDataTask extends BaseAppDataTask<Actor, AppData> {
 
     // shouldn't update file data
     const originalData = await this.appDataService.getById(this.targetId, handler);
-    if (originalData?.data?.type === this.fileServiceType) {
+    if (originalData?.data?.type === this.fileItemType) {
       throw new CannotUpdateAppDataFile(originalData);
     }
 
     // update app data
     let appData;
 
-    if (permission === 'admin') {
+    if (permission === PermissionLevel.Admin) {
       // updating other member's AppData
       appData = await this.appDataService.update(this.targetId, { data }, handler);
     } else {
@@ -89,7 +96,7 @@ export class UpdateAppDataTask extends BaseAppDataTask<Actor, AppData> {
 
     if (!appData) throw new AppDataNotFound(this.targetId);
 
-    this.status = 'OK';
+    this.status = TaskStatus.OK;
     this._result = appData;
   }
 }

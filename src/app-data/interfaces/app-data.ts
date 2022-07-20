@@ -1,4 +1,4 @@
-import { Anything } from 'graasp';
+import { Anything } from '@graasp/sdk';
 
 import { RecordVisibility } from '../../interfaces/app-details';
 

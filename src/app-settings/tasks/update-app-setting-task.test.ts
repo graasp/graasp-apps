@@ -1,7 +1,12 @@
-import { DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
+import {
+  DatabaseTransactionHandler,
+  ItemMembershipService,
+  ItemService,
+  ItemType,
+} from '@graasp/sdk';
+import { AuthTokenSubject } from '@graasp/sdk';
 
 import { GRAASP_ACTOR, buildAppSetting } from '../../../test/fixtures';
-import { AuthTokenSubject } from '../../interfaces/request';
 import { CannotUpdateAppSettingFile } from '../../util/graasp-apps-error';
 import { buildFileItemData } from '../../util/utils';
 import { AppSettingService } from '../db-service';
@@ -10,7 +15,7 @@ import { UpdateAppSettingTask } from './update-app-setting-task';
 const appSettingService = {} as unknown as AppSettingService;
 const itemService = {} as unknown as ItemService;
 const itemMembershipService = {} as unknown as ItemMembershipService;
-const fileServiceType = 'file';
+const fileItemType = ItemType.LOCAL_FILE;
 const handler = {} as unknown as DatabaseTransactionHandler;
 
 const data = { data: { some: 'data' } };
@@ -37,7 +42,7 @@ describe('Update App Setting Task', () => {
       appSettingService,
       itemService,
       itemMembershipService,
-      fileServiceType,
+      fileItemType,
     );
 
     await updateTask.run(handler);
@@ -48,7 +53,7 @@ describe('Update App Setting Task', () => {
     const fileAppSetting = buildAppSetting({
       data: buildFileItemData({
         name: 'name',
-        type: fileServiceType,
+        type: fileItemType,
         filename: 'filename',
         filepath: 'filepath',
         size: 120,
@@ -67,7 +72,7 @@ describe('Update App Setting Task', () => {
       appSettingService,
       itemService,
       itemMembershipService,
-      fileServiceType,
+      fileItemType,
     );
 
     try {

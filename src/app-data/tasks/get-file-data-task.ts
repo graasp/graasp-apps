@@ -1,8 +1,16 @@
-import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
-import { FileItemExtra, ServiceMethod } from 'graasp-plugin-file';
+import {
+  Actor,
+  AuthTokenSubject,
+  DatabaseTransactionHandler,
+  FileItemExtra,
+  FileItemType,
+  ItemMembershipService,
+  ItemService,
+  PermissionLevel,
+  TaskStatus,
+} from '@graasp/sdk';
 import { getFileExtra } from 'graasp-plugin-file-item';
 
-import { AuthTokenSubject } from '../../interfaces/request';
 import {
   AppDataNotAccessible,
   ItemNotFound,
@@ -13,7 +21,7 @@ import { BaseAppDataTask } from './base-app-data-task';
 
 export type GetFileDataInputType = {
   appDataId?: string;
-  serviceMethod?: ServiceMethod;
+  fileItemType?: FileItemType;
 };
 
 export class GetFileDataTask extends BaseAppDataTask<
@@ -48,9 +56,9 @@ export class GetFileDataTask extends BaseAppDataTask<
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
-    this.status = 'RUNNING';
+    this.status = TaskStatus.RUNNING;
 
-    const { appDataId, serviceMethod } = this.input;
+    const { appDataId, fileItemType } = this.input;
     const { id: memberId } = this.actor;
     const { item: tokenItemId } = this.requestDetails;
 
@@ -69,18 +77,18 @@ export class GetFileDataTask extends BaseAppDataTask<
     const permission = await this.itemMembershipService.getPermissionLevel(memberId, item, handler);
     if (!permission) throw new MemberCannotReadItem(appData.itemId);
 
-    if (permission !== 'admin') {
+    if (permission !== PermissionLevel.Admin) {
       // members are only allowed to download their items
       if (appData.memberId !== memberId && appData.visibility === 'member') {
         throw new AppDataNotAccessible();
       }
     }
-    const extra = getFileExtra(serviceMethod, appData.data.extra as FileItemExtra);
+    const extra = getFileExtra(fileItemType, appData.data.extra as FileItemExtra);
 
     this._result = {
       filepath: extra.path,
       mimetype: extra.mimetype,
     };
-    this.status = 'OK';
+    this.status = TaskStatus.OK;
   }
 }

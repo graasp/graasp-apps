@@ -1,6 +1,13 @@
-import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
+import {
+  Actor,
+  AuthTokenSubject,
+  DatabaseTransactionHandler,
+  ItemMembershipService,
+  ItemService,
+  PermissionLevel,
+  TaskStatus,
+} from '@graasp/sdk';
 
-import { AuthTokenSubject } from '../../interfaces/request';
 import { ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
 import { AppActionService } from '../db-service';
 import { AppAction } from '../interfaces/app-action';
@@ -29,7 +36,7 @@ export class CreateAppActionTask extends BaseAppActionTask<AppAction> {
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
-    this.status = 'RUNNING';
+    this.status = TaskStatus.RUNNING;
 
     const { id: memberId } = this.actor; // extracted from token on task creation - see create endpoint
     const { item: tokenItemId } = this.requestDetails;
@@ -51,7 +58,7 @@ export class CreateAppActionTask extends BaseAppActionTask<AppAction> {
 
     let data: Partial<AppAction>;
 
-    if (permission === 'admin') {
+    if (permission === PermissionLevel.Admin) {
       const appActionMemberId = this.data.memberId ?? memberId;
       data = Object.assign({}, this.data, { memberId: appActionMemberId, itemId: appItemId });
     } else {
@@ -61,7 +68,7 @@ export class CreateAppActionTask extends BaseAppActionTask<AppAction> {
     // create app action
     const appAction = await this.appActionService.create(data, handler);
 
-    this.status = 'OK';
+    this.status = TaskStatus.OK;
     this._result = appAction;
   }
 }

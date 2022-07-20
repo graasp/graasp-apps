@@ -2,12 +2,11 @@ import { v4 } from 'uuid';
 
 import { FastifyLoggerInstance } from 'fastify';
 
-import { Actor, ItemMembership } from 'graasp';
+import { Actor, ItemMembership, ItemType, PermissionLevel } from '@graasp/sdk';
 
 import { AppData } from '../src/app-data/interfaces/app-data';
 import { AppSetting } from '../src/app-settings/interfaces/app-setting';
-import { RecordVisibility } from '../src/interfaces/app-details';
-import { APP_DATA_VISIBILITY, ITEM_TYPES_APP, PERMISSION_LEVELS } from '../src/util/constants';
+import { AppDataVisibility } from '../src/interfaces/app-details';
 
 export const GRAASP_ACTOR: Actor = {
   id: 'actorid',
@@ -63,7 +62,7 @@ export const buildAppData = ({
   data = { some: 'value' },
   memberId = 'memberId',
   type = 'type',
-  visibility = APP_DATA_VISIBILITY.ITEM as RecordVisibility,
+  visibility = AppDataVisibility.ITEM,
 }: Partial<AppData> = {}): AppData => ({
   id: v4(),
   data,
@@ -91,12 +90,12 @@ export const buildAppSetting = ({
 
 export const MOCK_MEMBERSHIP = {
   memberId: 'weiof',
-  permission: PERMISSION_LEVELS.ADMIN,
+  permission: PermissionLevel.Admin,
 } as Partial<ItemMembership>;
 
 export const ITEM_APP = {
   id: v4(),
-  type: ITEM_TYPES_APP,
+  type: ItemType.APP,
   name: 'item-app',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',

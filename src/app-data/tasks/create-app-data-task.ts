@@ -1,6 +1,13 @@
-import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
+import {
+  Actor,
+  AuthTokenSubject,
+  DatabaseTransactionHandler,
+  ItemMembershipService,
+  ItemService,
+  PermissionLevel,
+  TaskStatus,
+} from '@graasp/sdk';
 
-import { AuthTokenSubject } from '../../interfaces/request';
 import { AppDataService } from '../db-service';
 import { AppData } from '../interfaces/app-data';
 import { BaseAppDataTask } from './base-app-data-task';
@@ -32,7 +39,7 @@ export class CreateAppDataTask extends BaseAppDataTask<Actor, AppData> {
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
-    this.status = 'RUNNING';
+    this.status = TaskStatus.RUNNING;
 
     const { requestDetails, itemId, permission, data } = this.input;
     const { id: memberId } = this.actor; // extracted from token on task creation - see create endpoint
@@ -45,7 +52,7 @@ export class CreateAppDataTask extends BaseAppDataTask<Actor, AppData> {
 
     let completeData: Partial<AppData>;
 
-    if (permission === 'admin') {
+    if (permission === PermissionLevel.Admin) {
       const appDataMemberId = this.data.memberId ?? memberId;
       completeData = Object.assign({}, data, {
         memberId: appDataMemberId,
@@ -59,7 +66,7 @@ export class CreateAppDataTask extends BaseAppDataTask<Actor, AppData> {
     // create app data
     const appData = await this.appDataService.create(completeData, handler);
 
-    this.status = 'OK';
+    this.status = TaskStatus.OK;
     this._result = appData;
   }
 }

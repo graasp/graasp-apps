@@ -1,17 +1,18 @@
 import {
   Actor,
+  AuthTokenSubject,
+  FileItemExtra,
+  FileItemType,
   Item,
   ItemMembershipService,
   ItemMembershipTaskManager,
   ItemService,
   ItemTaskManager,
+  PermissionLevel,
   Task,
-} from 'graasp';
-import { FileItemExtra, FileTaskManager } from 'graasp-plugin-file';
+} from '@graasp/sdk';
+import { FileTaskManager } from 'graasp-plugin-file';
 
-import { AuthTokenSubject } from '../interfaces/request';
-import { FileServiceType } from '../types';
-import { PERMISSION_LEVELS } from '../util/constants';
 import { FileServiceNotDefined } from '../util/graasp-apps-error';
 import { AppSettingService } from './db-service';
 import { AppSetting } from './interfaces/app-setting';
@@ -27,7 +28,7 @@ export class TaskManager {
   private itemMembershipService: ItemMembershipService;
   private itemTaskManager: ItemTaskManager;
   private itemMembershipTaskManager: ItemMembershipTaskManager;
-  private fileServiceType?: FileServiceType;
+  private fileItemType?: FileItemType;
   private fileTaskManager?: FileTaskManager;
 
   constructor(
@@ -36,7 +37,7 @@ export class TaskManager {
     itemMembershipService: ItemMembershipService,
     itemTaskManager: ItemTaskManager,
     itemMembershipTaskManager: ItemMembershipTaskManager,
-    fileServiceType?: FileServiceType,
+    fileItemType?: FileItemType,
     fileTaskManager?: FileTaskManager,
   ) {
     this.appDataService = appDataService;
@@ -44,7 +45,7 @@ export class TaskManager {
     this.itemMembershipService = itemMembershipService;
     this.itemTaskManager = itemTaskManager;
     this.itemMembershipTaskManager = itemMembershipTaskManager;
-    this.fileServiceType = fileServiceType;
+    this.fileItemType = fileItemType;
     this.fileTaskManager = fileTaskManager;
   }
 
@@ -79,7 +80,7 @@ export class TaskManager {
     const t2 = this.itemMembershipTaskManager.createGetMemberItemMembershipTask(actor);
     t2.getInput = () => ({
       item: t1.result,
-      validatePermission: PERMISSION_LEVELS.ADMIN,
+      validatePermission: PermissionLevel.Admin,
     });
     const t3 = new CreateAppSettingTask(
       actor,
@@ -125,7 +126,7 @@ export class TaskManager {
     const t2 = this.itemMembershipTaskManager.createGetMemberItemMembershipTask(actor);
     t2.getInput = () => ({
       item: t1.result,
-      validatePermission: PERMISSION_LEVELS.READ,
+      validatePermission: PermissionLevel.Read,
     });
 
     // get app settings
@@ -155,10 +156,10 @@ export class TaskManager {
     itemId: string,
     requestDetails: AuthTokenSubject,
   ): Task<Actor, unknown>[] {
-    if (!this.fileTaskManager || !this.fileServiceType) {
+    if (!this.fileTaskManager || !this.fileItemType) {
       throw new FileServiceNotDefined({
         fileTaskManager: this.fileTaskManager,
-        fileServiceType: this.fileServiceType,
+        fileItemType: this.fileItemType,
       });
     }
 
@@ -166,7 +167,7 @@ export class TaskManager {
     const t2 = this.itemMembershipTaskManager.createGetMemberItemMembershipTask(actor);
     t2.getInput = () => ({
       item: t1.result,
-      validatePermission: PERMISSION_LEVELS.ADMIN,
+      validatePermission: PermissionLevel.Admin,
     });
     const updateTask = new UpdateAppSettingTask(
       actor,
@@ -177,7 +178,7 @@ export class TaskManager {
       this.appDataService,
       this.itemService,
       this.itemMembershipService,
-      this.fileServiceType,
+      this.fileItemType,
     );
     return [t1, t2, updateTask];
   }
@@ -196,10 +197,10 @@ export class TaskManager {
     itemId: string,
     requestDetails: AuthTokenSubject,
   ): Task<Actor, unknown>[] {
-    if (!this.fileTaskManager || !this.fileServiceType) {
+    if (!this.fileTaskManager || !this.fileItemType) {
       throw new FileServiceNotDefined({
         fileTaskManager: this.fileTaskManager,
-        fileServiceType: this.fileServiceType,
+        fileItemType: this.fileItemType,
       });
     }
 
@@ -207,7 +208,7 @@ export class TaskManager {
     const t2 = this.itemMembershipTaskManager.createGetMemberItemMembershipTask(actor);
     t2.getInput = () => ({
       item: t1.result,
-      validatePermission: PERMISSION_LEVELS.ADMIN,
+      validatePermission: PermissionLevel.Admin,
     });
     const deleteTask = new DeleteAppSettingTask(
       actor,
@@ -223,11 +224,11 @@ export class TaskManager {
     const deleteFileTask = this.fileTaskManager.createDeleteFileTask(actor, { filepath: null });
     deleteFileTask.getInput = () => {
       const fileData = deleteTask.result.data as Partial<Item>;
-      if (fileData?.type !== this.fileServiceType) {
+      if (fileData?.type !== this.fileItemType) {
         deleteFileTask.skip = true;
         return {};
       } else {
-        const fileDataExtra = fileData?.extra?.[this.fileServiceType] as FileItemExtra;
+        const fileDataExtra = fileData?.extra?.[this.fileItemType] as FileItemExtra;
         return {
           filepath: fileDataExtra?.path,
         };

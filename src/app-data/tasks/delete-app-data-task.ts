@@ -1,6 +1,13 @@
-import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
+import {
+  Actor,
+  AuthTokenSubject,
+  DatabaseTransactionHandler,
+  ItemMembershipService,
+  ItemService,
+  PermissionLevel,
+  TaskStatus,
+} from '@graasp/sdk';
 
-import { AuthTokenSubject } from '../../interfaces/request';
 import { AppDataNotFound, ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
 import { AppDataService } from '../db-service';
 import { AppData } from '../interfaces/app-data';
@@ -37,7 +44,7 @@ export class DeleteAppDataTask extends BaseAppDataTask<Actor, AppData> {
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
-    this.status = 'RUNNING';
+    this.status = TaskStatus.RUNNING;
 
     const { id: memberId } = this.actor; // extracted from token on task creation - see endpoint
     const { item: tokenItemId } = this.requestDetails;
@@ -58,7 +65,7 @@ export class DeleteAppDataTask extends BaseAppDataTask<Actor, AppData> {
     // delete app data
     let appData;
 
-    if (permission === 'admin') {
+    if (permission === PermissionLevel.Admin) {
       // deleting other member's AppData
       appData = await this.appDataService.delete(this.targetId, handler);
     } else {
@@ -68,7 +75,7 @@ export class DeleteAppDataTask extends BaseAppDataTask<Actor, AppData> {
 
     if (!appData) throw new AppDataNotFound(this.targetId);
 
-    this.status = 'OK';
+    this.status = TaskStatus.OK;
     this._result = appData;
   }
 }

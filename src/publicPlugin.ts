@@ -4,14 +4,12 @@ import fastifyCors from '@fastify/cors';
 import fastifyJwt from '@fastify/jwt';
 import { FastifyPluginAsync } from 'fastify';
 
+import { AppIdentification, AuthTokenSubject } from '@graasp/sdk';
 import graaspPublicPlugin from 'graasp-plugin-public';
 
 import { AppDataService } from './app-data/db-service';
 import publicAppDataPlugin from './app-data/publicPlugin';
 import { GenerateApiAccessTokenSujectTask } from './app-data/tasks/generate-api-access-token-subject';
-import { AppIdentification } from './interfaces/app-details';
-import { AuthTokenSubject } from './interfaces/request';
-// local
 import common, { generateToken } from './schemas';
 import { DEFAULT_JWT_EXPIRATION } from './util/constants';
 

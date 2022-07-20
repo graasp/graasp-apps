@@ -1,6 +1,4 @@
-import { Anything, UnknownExtra } from 'graasp';
-
-export const APP_ITEM_TYPE = 'app';
+import { Anything, UnknownExtra } from '@graasp/sdk';
 
 export interface AppItemExtra extends UnknownExtra {
   app: {

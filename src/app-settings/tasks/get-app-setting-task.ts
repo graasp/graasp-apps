@@ -1,6 +1,12 @@
-import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
+import {
+  Actor,
+  AuthTokenSubject,
+  DatabaseTransactionHandler,
+  ItemMembershipService,
+  ItemService,
+  TaskStatus,
+} from '@graasp/sdk';
 
-import { AuthTokenSubject } from '../../interfaces/request';
 import { AppSettingService } from '../db-service';
 import { AppSetting } from '../interfaces/app-setting';
 import { BaseAppSettingTask } from './base-app-setting-task';
@@ -36,7 +42,7 @@ export class GetAppSettingTask extends BaseAppSettingTask<Actor, readonly AppSet
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
-    this.status = 'RUNNING';
+    this.status = TaskStatus.RUNNING;
 
     const { requestDetails, itemId } = this.input;
     this.targetId = itemId;
@@ -51,7 +57,7 @@ export class GetAppSettingTask extends BaseAppSettingTask<Actor, readonly AppSet
     // get item's AppSetting w/ no restrictions
     const appSettings = await this.appSettingService.getForItem(itemId, handler);
 
-    this.status = 'OK';
+    this.status = TaskStatus.OK;
     this._result = appSettings;
   }
 }

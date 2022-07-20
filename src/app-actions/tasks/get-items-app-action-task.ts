@@ -1,6 +1,14 @@
-import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
+import {
+  Actor,
+  AuthTokenSubject,
+  DatabaseTransactionHandler,
+  ItemMembershipService,
+  ItemService,
+  PermissionLevel,
+  TaskStatus,
+} from '@graasp/sdk';
 
-import { AuthTokenSubject, ManyItemsGetFilter } from '../../interfaces/request';
+import { ManyItemsGetFilter } from '../../interfaces/request';
 import {
   AppActionNotAccessible,
   ItemNotFound,
@@ -38,7 +46,7 @@ export class GetItemsAppActionTask extends BaseAppActionTask<readonly AppAction[
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
-    this.status = 'RUNNING';
+    this.status = TaskStatus.RUNNING;
 
     const { id: memberId } = this.actor;
     const { item: tokenItemId } = this.requestDetails;
@@ -54,7 +62,7 @@ export class GetItemsAppActionTask extends BaseAppActionTask<readonly AppAction[
     const { itemId: itemIds } = this.filter;
     let { memberId: fMemberId } = this.filter;
 
-    if (permission !== 'admin') {
+    if (permission !== PermissionLevel.Admin) {
       if (!fMemberId) {
         fMemberId = memberId;
       } else if (fMemberId !== memberId) {
@@ -69,7 +77,7 @@ export class GetItemsAppActionTask extends BaseAppActionTask<readonly AppAction[
       handler,
     );
 
-    this.status = 'OK';
+    this.status = TaskStatus.OK;
     this._result = appActions;
   }
 }

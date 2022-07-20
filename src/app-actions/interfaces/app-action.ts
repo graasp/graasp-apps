@@ -1,4 +1,4 @@
-import { Anything } from 'graasp';
+import { Anything } from '@graasp/sdk';
 
 export interface InputAppAction {
   data: { [key: string]: Anything };

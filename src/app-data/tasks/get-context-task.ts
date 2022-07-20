@@ -1,13 +1,14 @@
 import {
   Actor,
+  AuthTokenSubject,
   DatabaseTransactionHandler,
   Item,
   ItemMembershipService,
   ItemService,
   Member,
-} from 'graasp';
+  TaskStatus,
+} from '@graasp/sdk';
 
-import { AuthTokenSubject } from '../../interfaces/request';
 import { ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
@@ -40,7 +41,7 @@ export class GetContextTask extends BaseAppDataTask<Actor, Partial<Item>> {
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
-    this.status = 'RUNNING';
+    this.status = TaskStatus.RUNNING;
 
     if (this.requestDetails) {
       const { item: tokenItemId } = this.requestDetails;
@@ -67,7 +68,7 @@ export class GetContextTask extends BaseAppDataTask<Actor, Partial<Item>> {
 
     parent.members = members;
 
-    this.status = 'OK';
+    this.status = TaskStatus.OK;
     this._result = parent;
   }
 

@@ -1,7 +1,13 @@
 import fastify from 'fastify';
 
-import { Actor, ItemMembershipService, ItemService, ItemTaskManager } from 'graasp';
-import { ItemMembershipTaskManager, TaskRunner } from 'graasp-test';
+import {
+  Actor,
+  ItemMembershipService,
+  ItemMembershipTaskManager,
+  ItemService,
+  ItemTaskManager,
+  TaskRunner,
+} from '@graasp/sdk';
 
 import plugin from '../src/plugin';
 import { AppsPluginOptions } from '../src/types';
@@ -32,9 +38,9 @@ const build = async ({
   itemMembershipTaskManager: iMTM,
   itemMembershipsService: iMS,
   options,
-  member = GRAASP_ACTOR,
+  member,
 }: {
-  runner: TaskRunner;
+  runner: TaskRunner<Actor>;
   itemService: ItemService;
   itemTaskManager: ItemTaskManager;
   itemMembershipsService: ItemMembershipService;

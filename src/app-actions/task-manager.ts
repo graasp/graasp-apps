@@ -1,6 +1,6 @@
-import { Actor, ItemMembershipService, ItemService } from 'graasp';
+import { Actor, AuthTokenSubject, ItemMembershipService, ItemService } from '@graasp/sdk';
 
-import { AuthTokenSubject, ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
+import { ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
 import { AppActionService } from './db-service';
 import { AppAction } from './interfaces/app-action';
 import { CreateAppActionTask } from './tasks/create-app-action-task';

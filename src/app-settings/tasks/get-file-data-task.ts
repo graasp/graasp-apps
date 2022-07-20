@@ -1,15 +1,22 @@
-import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
-import { FileItemExtra, ServiceMethod } from 'graasp-plugin-file';
+import {
+  Actor,
+  AuthTokenSubject,
+  DatabaseTransactionHandler,
+  FileItemExtra,
+  FileItemType,
+  ItemMembershipService,
+  ItemService,
+  TaskStatus,
+} from '@graasp/sdk';
 import { getFileExtra } from 'graasp-plugin-file-item';
 
-import { AuthTokenSubject } from '../../interfaces/request';
 import { ItemNotFound, MemberCannotReadItem } from '../../util/graasp-apps-error';
 import { AppSettingService } from '../db-service';
 import { BaseAppSettingTask } from './base-app-setting-task';
 
 export type GetFileDataInputType = {
   appSettingId?: string;
-  serviceMethod?: ServiceMethod;
+  fileItemType?: FileItemType;
 };
 
 export class GetFileDataTask extends BaseAppSettingTask<
@@ -44,9 +51,9 @@ export class GetFileDataTask extends BaseAppSettingTask<
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
-    this.status = 'RUNNING';
+    this.status = TaskStatus.RUNNING;
 
-    const { appSettingId, serviceMethod } = this.input;
+    const { appSettingId, fileItemType } = this.input;
     const { id: memberId } = this.actor;
     const { item: tokenItemId } = this.requestDetails;
 
@@ -65,12 +72,12 @@ export class GetFileDataTask extends BaseAppSettingTask<
     const permission = await this.itemMembershipService.getPermissionLevel(memberId, item, handler);
     if (!permission) throw new MemberCannotReadItem(appSetting.itemId);
 
-    const extra = getFileExtra(serviceMethod, appSetting.data.extra as FileItemExtra);
+    const extra = getFileExtra(fileItemType, appSetting.data.extra as FileItemExtra);
 
     this._result = {
       filepath: extra.path,
       mimetype: extra.mimetype,
     };
-    this.status = 'OK';
+    this.status = TaskStatus.OK;
   }
 }
