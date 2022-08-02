@@ -19,17 +19,13 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
     items: { dbService: iS, taskManager: iTM },
     itemMemberships: { dbService: iMS, taskManager: iMTM },
     taskRunner: runner,
-    fileItemPluginOptions,
-    s3FileItemPluginOptions,
+    file: { s3Config, localConfig },
   } = fastify;
 
   const aSS = new AppSettingService();
 
   const { fileItemType } = options;
-  const fTM = new FileTaskManager(
-    { s3: s3FileItemPluginOptions, local: fileItemPluginOptions },
-    fileItemType,
-  );
+  const fTM = new FileTaskManager({ s3: s3Config, local: localConfig }, fileItemType);
 
   const taskManager = new TaskManager(aSS, iS, iMS, iTM, iMTM, fileItemType, fTM);
 
@@ -48,8 +44,8 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
       uploadMaxFileNb: 1,
       fileItemType,
       fileConfigurations: {
-        s3: fastify.s3FileItemPluginOptions,
-        local: fastify.fileItemPluginOptions,
+        s3: s3Config,
+        local: localConfig,
       },
       buildFilePath,
 

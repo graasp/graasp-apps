@@ -60,8 +60,7 @@ const build = async ({
     extendExtrasUpdateSchema: jest.fn(),
   });
   app.decorate('itemMemberships', { dbService: iMS, taskManager: iMTM });
-  app.decorate('s3FileItemPluginOptions', MOCK_S3_OPTIONS);
-  app.decorate('fileItemPluginOptions', MOCK_LOCAL_OPTIONS);
+  app.decorate('file', { s3Config: MOCK_S3_OPTIONS, localConfig: MOCK_LOCAL_OPTIONS });
 
   app.decorate('taskRunner', runner);
 

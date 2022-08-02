@@ -22,13 +22,14 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
     itemMemberships: { dbService: iMS, taskManager: iMTM },
     taskRunner: runner,
     appDataService: aDS,
+    file: { s3Config, localConfig },
   } = fastify;
 
   const { fileItemType } = options;
 
   const fileOptions = {
-    s3: fastify.s3FileItemPluginOptions,
-    local: fastify.fileItemPluginOptions,
+    s3: s3Config,
+    local: localConfig,
   };
   const fileTaskManager = new FileTaskManager(fileOptions, fileItemType);
 

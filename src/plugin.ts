@@ -53,6 +53,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
     itemMemberships: { dbService: iMS },
     taskRunner: runner,
     db,
+    file: { s3Config, localConfig },
   } = fastify;
 
   // "install" custom schema for validating document items creation
@@ -157,8 +158,8 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
       fastify.register(ThumbnailsPlugin, {
         fileItemType,
         fileConfigurations: {
-          s3: fastify.s3FileItemPluginOptions,
-          local: fastify.fileItemPluginOptions,
+          s3: s3Config,
+          local: localConfig,
         },
         pathPrefix: APPS_TEMPLATE_PATH_PREFIX,
         enableAppsHooks: {
