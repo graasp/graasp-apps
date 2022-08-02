@@ -1,9 +1,10 @@
 import { FastifyPluginAsync } from 'fastify';
 
-import { IdParam } from 'graasp';
-import GraaspFilePlugin, { FileTaskManager, ServiceMethod } from 'graasp-plugin-file';
+import { FileItemType, IdParam } from '@graasp/sdk';
+import GraaspFilePlugin, { FileTaskManager } from 'graasp-plugin-file';
 import { ORIGINAL_FILENAME_TRUNCATE_LIMIT } from 'graasp-plugin-file-item';
 
+import { AppDataVisibility } from '../interfaces/app-details';
 import { ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
 import { APP_DATA_TYPE_FILE } from '../util/constants';
 import { buildFileItemData, buildFilePath } from '../util/utils';
@@ -12,7 +13,7 @@ import common, { create, deleteOne, getForMany, getForOne, updateOne } from './s
 import { TaskManager } from './task-manager';
 
 interface PluginOptions {
-  serviceMethod: ServiceMethod;
+  fileItemType: FileItemType;
 }
 
 const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
@@ -21,16 +22,18 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
     itemMemberships: { dbService: iMS, taskManager: iMTM },
     taskRunner: runner,
     appDataService: aDS,
+    file: { s3Config, localConfig },
   } = fastify;
 
-  const { serviceMethod } = options;
+  const { fileItemType } = options;
 
   const fileOptions = {
-    s3: fastify.s3FileItemPluginOptions,
-    local: fastify.fileItemPluginOptions,
+    s3: s3Config,
+    local: localConfig,
   };
-  const fileTaskManager = new FileTaskManager(fileOptions, serviceMethod);
-  const taskManager = new TaskManager(aDS, iS, iMS, iTM, iMTM, serviceMethod, fileTaskManager);
+  const fileTaskManager = new FileTaskManager(fileOptions, fileItemType);
+
+  const taskManager = new TaskManager(aDS, iS, iMS, iTM, iMTM, fileItemType, fileTaskManager);
 
   fastify.addSchema(common);
 
@@ -42,15 +45,22 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
     fastify.addHook('preHandler', fastify.verifyBearerAuth);
 
     fastify.register(GraaspFilePlugin, {
-      serviceMethod: serviceMethod,
+      fileItemType,
       uploadMaxFileNb: 1,
       shouldRedirectOnDownload: false,
-      serviceOptions: fileOptions,
+      fileConfigurations: fileOptions,
       buildFilePath,
 
       uploadPreHookTasks: async ({ parentId: itemId }, { token }) => {
         const { member: id } = token;
-        return [taskManager.createGetTask({ id }, itemId, { visibility: 'member' }, token)];
+        return [
+          taskManager.createGetTask(
+            { id },
+            itemId,
+            { visibility: AppDataVisibility.MEMBER },
+            token,
+          ),
+        ];
       },
       uploadPostHookTasks: async (
         { filename, itemId, filepath, size, mimetype },
@@ -66,7 +76,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
         const name = filename.substring(0, ORIGINAL_FILENAME_TRUNCATE_LIMIT);
         const data = buildFileItemData({
           name,
-          type: serviceMethod,
+          type: fileItemType,
           filename,
           filepath,
           size,
@@ -94,7 +104,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
         return [
           taskManager.createGetFileTask(
             { id: token.member },
-            { appDataId: itemId, serviceMethod },
+            { appDataId: itemId, fileItemType },
             token,
           ),
         ];

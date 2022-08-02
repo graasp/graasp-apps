@@ -8,7 +8,7 @@ import {
   ItemService,
   Task,
   TaskStatus,
-} from 'graasp';
+} from '@graasp/sdk';
 
 import { TokenItemIdMismatch } from '../../util/graasp-apps-error';
 import { AppActionService } from '../db-service';
@@ -36,7 +36,7 @@ export abstract class BaseAppActionTask<R> implements Task<Actor, R> {
     this.appActionService = appActionService;
     this.itemService = itemService;
     this.itemMembershipService = itemMembershipService;
-    this.status = 'NEW';
+    this.status = TaskStatus.NEW;
   }
 
   abstract get name(): string;

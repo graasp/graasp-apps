@@ -1,7 +1,13 @@
-import { Actor, DatabaseTransactionHandler, ItemMembershipService, ItemService } from 'graasp';
+import {
+  Actor,
+  AuthTokenSubject,
+  DatabaseTransactionHandler,
+  FileItemType,
+  ItemMembershipService,
+  ItemService,
+  TaskStatus,
+} from '@graasp/sdk';
 
-import { AuthTokenSubject } from '../../interfaces/request';
-import { FileServiceType } from '../../types';
 import { AppSettingNotFound, CannotUpdateAppSettingFile } from '../../util/graasp-apps-error';
 import { AppSettingService } from '../db-service';
 import { AppSetting } from '../interfaces/app-setting';
@@ -13,7 +19,7 @@ export class UpdateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> 
   }
   private requestDetails: AuthTokenSubject;
   private itemId: string;
-  private fileServiceType: FileServiceType;
+  private fileItemType: FileItemType;
 
   /**
    * UpdateAppSettingTask constructor
@@ -32,7 +38,7 @@ export class UpdateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> 
     appSettingService: AppSettingService,
     itemService: ItemService,
     itemMembershipService: ItemMembershipService,
-    fileServiceType: FileServiceType,
+    fileItemType: FileItemType,
   ) {
     super(actor, appSettingService, itemService, itemMembershipService);
 
@@ -40,11 +46,11 @@ export class UpdateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> 
     this.data = data;
     this.targetId = appSettingId;
     this.itemId = itemId;
-    this.fileServiceType = fileServiceType;
+    this.fileItemType = fileItemType;
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
-    this.status = 'RUNNING';
+    this.status = TaskStatus.RUNNING;
 
     const { item: tokenItemId } = this.requestDetails;
 
@@ -55,7 +61,7 @@ export class UpdateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> 
 
     // shouldn't update file data
     const originalData = await this.appSettingService.getById(this.targetId, handler);
-    if (originalData?.data?.type === this.fileServiceType) {
+    if (originalData?.data?.type === this.fileItemType) {
       throw new CannotUpdateAppSettingFile(originalData);
     }
 
@@ -67,7 +73,7 @@ export class UpdateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> 
 
     if (!appSetting) throw new AppSettingNotFound(this.targetId);
 
-    this.status = 'OK';
+    this.status = TaskStatus.OK;
     this._result = appSetting;
   }
 }

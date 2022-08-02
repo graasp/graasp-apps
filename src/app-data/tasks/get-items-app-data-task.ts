@@ -1,12 +1,16 @@
 import {
   Actor,
+  AuthTokenSubject,
   DatabaseTransactionHandler,
   Item,
   ItemMembershipService,
   ItemService,
-} from 'graasp';
+  PermissionLevel,
+  TaskStatus,
+} from '@graasp/sdk';
 
-import { AuthTokenSubject, ManyItemsGetFilter } from '../../interfaces/request';
+import { AppDataVisibility } from '../../interfaces/app-details';
+import { ManyItemsGetFilter } from '../../interfaces/request';
 import { AppDataNotAccessible } from '../../util/graasp-apps-error';
 import { AppDataService } from '../db-service';
 import { AppData } from '../interfaces/app-data';
@@ -43,7 +47,7 @@ export class GetItemsAppDataTask extends BaseAppDataTask<Actor, readonly AppData
   }
 
   async run(handler: DatabaseTransactionHandler): Promise<void> {
-    this.status = 'RUNNING';
+    this.status = TaskStatus.RUNNING;
 
     const { id: memberId } = this.actor;
     const { permission, filter, parentItem } = this.input;
@@ -55,7 +59,7 @@ export class GetItemsAppDataTask extends BaseAppDataTask<Actor, readonly AppData
     let { visibility: fVisibility, memberId: fMemberId } = filter;
     let appDatas: readonly AppData[];
 
-    if (permission === 'admin') {
+    if (permission === PermissionLevel.Admin) {
       // get items' AppData w/o restrictions
       appDatas = await this.appDataService.getForItems(
         itemIds,
@@ -68,18 +72,18 @@ export class GetItemsAppDataTask extends BaseAppDataTask<Actor, readonly AppData
       let op;
 
       if (!fMemberId) {
-        if (fVisibility !== 'item') {
+        if (fVisibility !== AppDataVisibility.ITEM) {
           fMemberId = memberId; // get member's AppData
           if (!fVisibility) {
             // + any AppData w/ visibility 'item'
-            fVisibility = 'item';
+            fVisibility = AppDataVisibility.ITEM;
             op = 'OR';
           }
         }
       } else if (fMemberId !== memberId) {
-        if (fVisibility !== 'item') {
-          if (fVisibility === 'member') throw new AppDataNotAccessible();
-          fVisibility = 'item'; // force 'item' visibility while fetching others' AppData
+        if (fVisibility !== AppDataVisibility.ITEM) {
+          if (fVisibility === AppDataVisibility.MEMBER) throw new AppDataNotAccessible();
+          fVisibility = AppDataVisibility.ITEM; // force 'item' visibility while fetching others' AppData
         }
       }
 
@@ -91,7 +95,7 @@ export class GetItemsAppDataTask extends BaseAppDataTask<Actor, readonly AppData
       );
     }
 
-    this.status = 'OK';
+    this.status = TaskStatus.OK;
     this._result = appDatas;
   }
 }

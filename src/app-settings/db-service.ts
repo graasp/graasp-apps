@@ -92,11 +92,12 @@ export class AppSettingService {
     { data }: Partial<AppSetting>,
     transactionHandler: TrxHandler,
   ): Promise<AppSetting> {
+    const sqlData = sql.json(data);
     return transactionHandler
       .query<AppSetting>(
         sql`
         UPDATE app_setting
-        SET data = ${sql.json(data)}
+        SET data = ${sqlData}
         WHERE id = ${id}
         RETURNING ${AppSettingService.allColumns}
       `,

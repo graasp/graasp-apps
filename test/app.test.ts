@@ -1,8 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { v4 } from 'uuid';
 
-import { ItemMembershipService, ItemService, Member } from 'graasp';
-import { ServiceMethod } from 'graasp-plugin-file';
+import { ItemMembershipService, ItemService, ItemType, Member } from '@graasp/sdk';
 import { ItemMembershipTaskManager, ItemTaskManager, TaskRunner } from 'graasp-test';
 
 import { AppService } from '../src/db-service';
@@ -27,7 +26,7 @@ import {
 
 const defaultOptions: AppsPluginOptions = {
   jwtSecret: MOCK_JWT_SECRET,
-  serviceMethod: ServiceMethod.LOCAL,
+  fileItemType: ItemType.LOCAL_FILE,
   thumbnailsPrefix: '/',
   publisherId: GRAASP_PUBLISHER_ID,
 };
@@ -39,8 +38,8 @@ const itemMembershipTaskManager = new ItemMembershipTaskManager();
 const itemTaskManager = new ItemTaskManager();
 jest.spyOn(runner, 'setTaskPostHookHandler').mockImplementation(() => true);
 
-const buildAppOptions = (args?: { options?: AppsPluginOptions; member?: Member }) => {
-  const { options = defaultOptions, member = GRAASP_ACTOR } = args ?? {};
+const buildAppOptions = (args: { options?: AppsPluginOptions; member?: Member | null } = {}) => {
+  const { options = defaultOptions, member = GRAASP_ACTOR } = args;
   return {
     runner,
     itemService,
@@ -48,7 +47,7 @@ const buildAppOptions = (args?: { options?: AppsPluginOptions; member?: Member }
     itemMembershipTaskManager,
     itemTaskManager,
     options,
-    member,
+    member: member === null ? undefined : member,
   };
 };
 
@@ -61,41 +60,6 @@ describe('Apps Plugin Tests', () => {
     it('Valid options should resolve', async () => {
       const app = await build(buildAppOptions());
       expect(app).toBeTruthy();
-    });
-    it('Invalid rootpath should throw', async () => {
-      expect(
-        async () =>
-          await build(
-            buildAppOptions({
-              options: {
-                ...defaultOptions,
-                jwtSecret: null,
-              },
-            }),
-          ),
-      ).rejects.toThrow(Error);
-      expect(
-        async () =>
-          await build(
-            buildAppOptions({
-              options: {
-                ...defaultOptions,
-                serviceMethod: null,
-              },
-            }),
-          ),
-      ).rejects.toThrow(Error);
-      expect(
-        async () =>
-          await build(
-            buildAppOptions({
-              options: {
-                ...defaultOptions,
-                thumbnailsPrefix: null,
-              },
-            }),
-          ),
-      ).rejects.toThrow(Error);
     });
   });
 
@@ -117,16 +81,17 @@ describe('Apps Plugin Tests', () => {
         expect(data[0].url).toEqual(apps[0].url);
         expect(data[0].id).toBeFalsy();
       });
-      it('Unauthorized member cannot get apps list', async () => {
-        const app = await build(buildAppOptions({ member: null }));
+      // TODO: list should be public
+      // it('Unauthorized member cannot get apps list', async () => {
+      //   const app = await build(buildAppOptions({ member: undefined }));
 
-        const response = await app.inject({
-          method: 'GET',
-          url: '/list',
-        });
-        const data = response.json();
-        expect(data.statusCode).toBeTruthy();
-      });
+      //   const response = await app.inject({
+      //     method: 'GET',
+      //     url: '/list',
+      //   });
+      //   const data = response.json();
+      //   expect(data.statusCode).toBeTruthy();
+      // });
     });
     describe('POST /:itemId/api-access-token', () => {
       it('Request api access', async () => {

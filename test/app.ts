@@ -1,7 +1,13 @@
 import fastify from 'fastify';
 
-import { Actor, ItemMembershipService, ItemService, ItemTaskManager } from 'graasp';
-import { ItemMembershipTaskManager, TaskRunner } from 'graasp-test';
+import {
+  Actor,
+  ItemMembershipService,
+  ItemMembershipTaskManager,
+  ItemService,
+  ItemTaskManager,
+  TaskRunner,
+} from '@graasp/sdk';
 
 import plugin from '../src/plugin';
 import { AppsPluginOptions } from '../src/types';
@@ -32,9 +38,9 @@ const build = async ({
   itemMembershipTaskManager: iMTM,
   itemMembershipsService: iMS,
   options,
-  member = GRAASP_ACTOR,
+  member,
 }: {
-  runner: TaskRunner;
+  runner: TaskRunner<Actor>;
   itemService: ItemService;
   itemTaskManager: ItemTaskManager;
   itemMembershipsService: ItemMembershipService;
@@ -54,8 +60,7 @@ const build = async ({
     extendExtrasUpdateSchema: jest.fn(),
   });
   app.decorate('itemMemberships', { dbService: iMS, taskManager: iMTM });
-  app.decorate('s3FileItemPluginOptions', MOCK_S3_OPTIONS);
-  app.decorate('fileItemPluginOptions', MOCK_LOCAL_OPTIONS);
+  app.decorate('file', { s3Config: MOCK_S3_OPTIONS, localConfig: MOCK_LOCAL_OPTIONS });
 
   app.decorate('taskRunner', runner);
 

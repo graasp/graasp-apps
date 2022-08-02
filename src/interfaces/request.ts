@@ -1,10 +1,8 @@
-import { AppIdentification, RecordVisibility } from './app-details';
-
-export type AuthTokenSubject = { member: string; item: string; origin: string } & AppIdentification; // from the graasp client/app wrapper // from the app itself
+import { AppDataVisibility } from './app-details';
 
 export interface SingleItemGetFilter {
   memberId?: string;
-  visibility?: RecordVisibility;
+  visibility?: AppDataVisibility;
 }
 
 export interface ManyItemsGetFilter extends SingleItemGetFilter {
