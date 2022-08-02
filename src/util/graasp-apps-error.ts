@@ -4,15 +4,15 @@ import { ErrorFactory } from '@graasp/sdk';
 
 import { PLUGIN_NAME } from './constants';
 
-export const GraaspError = ErrorFactory(PLUGIN_NAME);
+export const GraaspAppsError = ErrorFactory(PLUGIN_NAME);
 
-export class ItemNotFound extends GraaspError {
+export class ItemNotFound extends GraaspAppsError {
   constructor(data?: unknown) {
     super({ code: 'GAERR001', statusCode: StatusCodes.NOT_FOUND, message: 'Item not found' }, data);
   }
 }
 
-export class NotAnAppItem extends GraaspError {
+export class NotAnAppItem extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
@@ -25,7 +25,7 @@ export class NotAnAppItem extends GraaspError {
   }
 }
 
-export class InvalidApplicationOrigin extends GraaspError {
+export class InvalidApplicationOrigin extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
@@ -38,7 +38,7 @@ export class InvalidApplicationOrigin extends GraaspError {
   }
 }
 
-export class MemberCannotReadItem extends GraaspError {
+export class MemberCannotReadItem extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       { code: 'GAERR004', statusCode: StatusCodes.FORBIDDEN, message: 'Member cannot read item' },
@@ -47,7 +47,7 @@ export class MemberCannotReadItem extends GraaspError {
   }
 }
 
-export class TokenItemIdMismatch extends GraaspError {
+export class TokenItemIdMismatch extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
@@ -60,7 +60,7 @@ export class TokenItemIdMismatch extends GraaspError {
   }
 }
 
-export class AppDataNotFound extends GraaspError {
+export class AppDataNotFound extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       { code: 'GAERR006', statusCode: StatusCodes.NOT_FOUND, message: 'App data not found' },
@@ -69,7 +69,7 @@ export class AppDataNotFound extends GraaspError {
   }
 }
 
-export class AppDataNotAccessible extends GraaspError {
+export class AppDataNotAccessible extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
@@ -82,7 +82,7 @@ export class AppDataNotAccessible extends GraaspError {
   }
 }
 
-export class AppActionNotAccessible extends GraaspError {
+export class AppActionNotAccessible extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
@@ -95,7 +95,7 @@ export class AppActionNotAccessible extends GraaspError {
   }
 }
 
-export class AppSettingNotFound extends GraaspError {
+export class AppSettingNotFound extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       { code: 'GAERR009', statusCode: StatusCodes.NOT_FOUND, message: 'App setting not found' },
@@ -104,7 +104,7 @@ export class AppSettingNotFound extends GraaspError {
   }
 }
 
-export class MemberCannotAdminSetting extends GraaspError {
+export class MemberCannotAdminSetting extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
@@ -117,7 +117,7 @@ export class MemberCannotAdminSetting extends GraaspError {
   }
 }
 
-export class CannotUpdateAppDataFile extends GraaspError {
+export class CannotUpdateAppDataFile extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
@@ -130,7 +130,7 @@ export class CannotUpdateAppDataFile extends GraaspError {
   }
 }
 
-export class CannotUpdateAppSettingFile extends GraaspError {
+export class CannotUpdateAppSettingFile extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
@@ -143,7 +143,7 @@ export class CannotUpdateAppSettingFile extends GraaspError {
   }
 }
 
-export class FileServiceNotDefined extends GraaspError {
+export class FileServiceNotDefined extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {

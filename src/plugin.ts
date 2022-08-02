@@ -155,7 +155,7 @@ const plugin: FastifyPluginAsync<AppsPluginOptions> = async (fastify, options) =
 
       // register thumbnail plugin for creation hook
       fastify.register(ThumbnailsPlugin, {
-        fileItemType: fileItemType,
+        fileItemType,
         fileConfigurations: {
           s3: fastify.s3FileItemPluginOptions,
           local: fastify.fileItemPluginOptions,

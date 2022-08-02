@@ -1,8 +1,8 @@
-import { RecordVisibility } from './app-details';
+import { AppDataVisibility } from './app-details';
 
 export interface SingleItemGetFilter {
   memberId?: string;
-  visibility?: RecordVisibility;
+  visibility?: AppDataVisibility;
 }
 
 export interface ManyItemsGetFilter extends SingleItemGetFilter {

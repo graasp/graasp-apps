@@ -9,6 +9,7 @@ import {
   TaskStatus,
 } from '@graasp/sdk';
 
+import { AppDataVisibility } from '../../interfaces/app-details';
 import { ManyItemsGetFilter } from '../../interfaces/request';
 import { AppDataNotAccessible } from '../../util/graasp-apps-error';
 import { AppDataService } from '../db-service';
@@ -71,18 +72,18 @@ export class GetItemsAppDataTask extends BaseAppDataTask<Actor, readonly AppData
       let op;
 
       if (!fMemberId) {
-        if (fVisibility !== 'item') {
+        if (fVisibility !== AppDataVisibility.ITEM) {
           fMemberId = memberId; // get member's AppData
           if (!fVisibility) {
             // + any AppData w/ visibility 'item'
-            fVisibility = 'item';
+            fVisibility = AppDataVisibility.ITEM;
             op = 'OR';
           }
         }
       } else if (fMemberId !== memberId) {
-        if (fVisibility !== 'item') {
-          if (fVisibility === 'member') throw new AppDataNotAccessible();
-          fVisibility = 'item'; // force 'item' visibility while fetching others' AppData
+        if (fVisibility !== AppDataVisibility.ITEM) {
+          if (fVisibility === AppDataVisibility.MEMBER) throw new AppDataNotAccessible();
+          fVisibility = AppDataVisibility.ITEM; // force 'item' visibility while fetching others' AppData
         }
       }
 

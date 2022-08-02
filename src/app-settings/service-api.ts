@@ -46,7 +46,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
       prefix: '/app-settings',
       shouldRedirectOnDownload: false,
       uploadMaxFileNb: 1,
-      fileItemType: fileItemType,
+      fileItemType,
       fileConfigurations: {
         s3: fastify.s3FileItemPluginOptions,
         local: fastify.fileItemPluginOptions,

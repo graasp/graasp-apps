@@ -2,7 +2,7 @@ import { DatabaseTransactionConnection as TrxHandler, sql } from 'slonik';
 
 import { Item, Member } from '@graasp/sdk';
 
-import { RecordVisibility } from '../interfaces/app-details';
+import { AppDataVisibility } from '../interfaces/app-details';
 import { AppData } from './interfaces/app-data';
 
 /**
@@ -72,8 +72,6 @@ export class AppDataService {
     // dynamically build a [{column1, value1}, ...] based on properties present in the Partial obj
     const columnsAndValues = Object.keys(appData).map((key: keyof AppData) => {
       const column = sql.identifier([this.objectPropertiesToDBColumnsMapping(key)]);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore ignore appData[key] type
       const value = key !== 'data' ? sql`${appData[key]}` : sql.json(appData[key]);
       return { column, value };
     });
@@ -105,8 +103,6 @@ export class AppDataService {
     transactionHandler: TrxHandler,
     memberId?: string,
   ): Promise<AppData> {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore ignore data type
     const sqlData = sql.json(data);
     return transactionHandler
       .query<AppData>(
@@ -148,7 +144,7 @@ export class AppDataService {
    */
   async getForItem(
     itemId: string,
-    filter: { memberId?: string; visibility?: RecordVisibility; op?: 'AND' | 'OR' },
+    filter: { memberId?: string; visibility?: AppDataVisibility; op?: 'AND' | 'OR' },
     transactionHandler: TrxHandler,
   ): Promise<readonly AppData[]> {
     const { memberId, visibility, op = 'AND' } = filter;
@@ -186,7 +182,7 @@ export class AppDataService {
   async getForItems(
     itemIds: string[],
     item: Item,
-    filter: { memberId?: string; visibility?: RecordVisibility; op?: 'AND' | 'OR' },
+    filter: { memberId?: string; visibility?: AppDataVisibility; op?: 'AND' | 'OR' },
     transactionHandler: TrxHandler,
   ): Promise<readonly AppData[]> {
     const { memberId, visibility, op = 'AND' } = filter;

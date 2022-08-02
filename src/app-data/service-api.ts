@@ -4,6 +4,7 @@ import { FileItemType, IdParam } from '@graasp/sdk';
 import GraaspFilePlugin, { FileTaskManager } from 'graasp-plugin-file';
 import { ORIGINAL_FILENAME_TRUNCATE_LIMIT } from 'graasp-plugin-file-item';
 
+import { AppDataVisibility } from '../interfaces/app-details';
 import { ManyItemsGetFilter, SingleItemGetFilter } from '../interfaces/request';
 import { APP_DATA_TYPE_FILE } from '../util/constants';
 import { buildFileItemData, buildFilePath } from '../util/utils';
@@ -43,7 +44,7 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
     fastify.addHook('preHandler', fastify.verifyBearerAuth);
 
     fastify.register(GraaspFilePlugin, {
-      fileItemType: fileItemType,
+      fileItemType,
       uploadMaxFileNb: 1,
       shouldRedirectOnDownload: false,
       fileConfigurations: fileOptions,
@@ -51,7 +52,14 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
 
       uploadPreHookTasks: async ({ parentId: itemId }, { token }) => {
         const { member: id } = token;
-        return [taskManager.createGetTask({ id }, itemId, { visibility: 'member' }, token)];
+        return [
+          taskManager.createGetTask(
+            { id },
+            itemId,
+            { visibility: AppDataVisibility.MEMBER },
+            token,
+          ),
+        ];
       },
       uploadPostHookTasks: async (
         { filename, itemId, filepath, size, mimetype },
