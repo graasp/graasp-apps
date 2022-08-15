@@ -1,3 +1,1 @@
-ALTER TABLE app ADD COLUMN key varchar(50);
-
-UPDATE app SET key = md5(random()::text);
+ALTER TABLE app ADD COLUMN key varchar(50) DEFAULT md5(random()::text);

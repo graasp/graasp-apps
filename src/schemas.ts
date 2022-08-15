@@ -31,7 +31,7 @@ const generateToken = {
     type: 'object',
     required: ['app', 'origin'],
     properties: {
-      app: { $ref: 'http://graasp.org/#/definitions/uuid' },
+      app: { type: 'string' },
       origin: { type: 'string', format: 'url' },
     },
     additionalProperties: false,
