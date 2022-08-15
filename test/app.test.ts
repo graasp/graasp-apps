@@ -79,7 +79,8 @@ describe('Apps Plugin Tests', () => {
         const data = response.json();
         expect(data[0].name).toEqual(apps[0].name);
         expect(data[0].url).toEqual(apps[0].url);
-        expect(data[0].id).toBeFalsy();
+        expect(data[0].id).toEqual(apps[0].id);
+        expect(data[0].key).toBeFalsy();
       });
       // TODO: list should be public
       // it('Unauthorized member cannot get apps list', async () => {

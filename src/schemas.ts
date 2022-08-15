@@ -50,15 +50,5 @@ const getContext = {
     200: { $ref: 'http://graasp.org/apps/#/definitions/appContext' },
   },
 };
-const patchSettings = {
-  params: { $ref: 'http://graasp.org/apps/#/definitions/itemIdParam' },
-  body: {
-    type: 'object',
-    additionalProperties: true,
-  },
-  response: {
-    204: {},
-  },
-};
 
-export { generateToken, getContext, patchSettings };
+export { generateToken, getContext };

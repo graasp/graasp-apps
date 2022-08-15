@@ -7,6 +7,7 @@ import { Actor, ItemMembership, ItemType, PermissionLevel } from '@graasp/sdk';
 import { AppData } from '../src/app-data/interfaces/app-data';
 import { AppSetting } from '../src/app-settings/interfaces/app-setting';
 import { AppDataVisibility } from '../src/interfaces/app-details';
+import { App } from '../src/interfaces/app-item';
 
 export const GRAASP_ACTOR: Actor = {
   id: 'actorid',
@@ -54,8 +55,15 @@ export const MOCK_CONTEXT = {
 export const MOCK_SETTINGS = {
   showHeader: true,
 };
-export const MOCK_APPS = [
-  { id: v4(), name: 'some-name', url: 'some-url', description: 'description', extra: {} },
+export const MOCK_APPS: App[] = [
+  {
+    id: v4(),
+    name: 'some-name',
+    url: 'some-url',
+    description: 'description',
+    extra: {},
+    key: 'key',
+  },
 ];
 
 export const buildAppData = ({

@@ -271,7 +271,7 @@ export class AppDataService {
 
   // App and Publisher
   async validAppOrigin(
-    appId: string,
+    appKey: string,
     appOrigin: string,
     transactionHandler: TrxHandler,
   ): Promise<boolean> {
@@ -282,7 +282,7 @@ export class AppDataService {
           FROM app
         INNER JOIN publisher
           ON app.publisher_id = publisher.id
-        WHERE app.id = ${appId}
+        WHERE app.key = ${appKey}
           AND ${appOrigin} = ANY(publisher.origins)
       `,
       )

@@ -16,6 +16,7 @@ export class AppService {
       'extra',
       ['publisher_id', 'publisherId'],
       ['created_at', 'createdAt'],
+      'key',
     ].map((c) =>
       !Array.isArray(c)
         ? sql.identifier([c])

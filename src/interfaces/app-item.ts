@@ -8,8 +8,10 @@ export interface AppItemExtra extends UnknownExtra {
 }
 
 export interface App {
+  id: string;
   name: string;
   url: string;
   description: string;
   extra: Anything;
+  key: string;
 }

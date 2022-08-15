@@ -42,7 +42,7 @@ export class GenerateApiAccessTokenSujectTask extends BaseAppDataTask<Actor, Aut
 
     const {
       item,
-      appDetails: { origin: appOrigin, app: appId },
+      appDetails: { origin: appOrigin, app: appKey },
     } = this.input;
     this.targetId = item.id;
 
@@ -50,14 +50,14 @@ export class GenerateApiAccessTokenSujectTask extends BaseAppDataTask<Actor, Aut
     if (item.type !== ItemType.APP) throw new NotAppItem(this.targetId);
 
     // check if app origin is valid (app belongs to a publisher that can use the given origin)
-    const valid = await this.appDataService.validAppOrigin(appId, appOrigin, handler);
+    const valid = await this.appDataService.validAppOrigin(appKey, appOrigin, handler);
     if (!valid) throw new InvalidApplicationOrigin();
 
     this.status = TaskStatus.OK;
     this._result = {
       member: this.actor.id,
       item: this.targetId,
-      app: appId,
+      app: appKey,
       origin: appOrigin,
     };
   }
