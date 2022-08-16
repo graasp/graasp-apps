@@ -1,24 +1,19 @@
 import { StatusCodes } from 'http-status-codes';
 
 import { ErrorFactory } from '@graasp/sdk';
+import { FAILURE_MESSAGES } from '@graasp/translations';
 
 import { PLUGIN_NAME } from './constants';
 
 export const GraaspAppsError = ErrorFactory(PLUGIN_NAME);
 
-export class ItemNotFound extends GraaspAppsError {
-  constructor(data?: unknown) {
-    super({ code: 'GAERR001', statusCode: StatusCodes.NOT_FOUND, message: 'Item not found' }, data);
-  }
-}
-
-export class NotAnAppItem extends GraaspAppsError {
+export class NotAppItem extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
-        code: 'GAERR002',
+        code: 'GAERR001',
         statusCode: StatusCodes.BAD_REQUEST,
-        message: 'Targeted item is not an application item',
+        message: FAILURE_MESSAGES.NOT_APP_ITEM,
       },
       data,
     );
@@ -29,19 +24,10 @@ export class InvalidApplicationOrigin extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
-        code: 'GAERR003',
+        code: 'GAERR002',
         statusCode: StatusCodes.FORBIDDEN,
-        message: 'Invalid application, origin pair',
+        message: FAILURE_MESSAGES.INVALID_APP_ORIGIN,
       },
-      data,
-    );
-  }
-}
-
-export class MemberCannotReadItem extends GraaspAppsError {
-  constructor(data?: unknown) {
-    super(
-      { code: 'GAERR004', statusCode: StatusCodes.FORBIDDEN, message: 'Member cannot read item' },
       data,
     );
   }
@@ -51,9 +37,9 @@ export class TokenItemIdMismatch extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
-        code: 'GAERR005',
+        code: 'GAERR003',
         statusCode: StatusCodes.UNAUTHORIZED,
-        message: 'Auth token does not match targeted item',
+        message: FAILURE_MESSAGES.TOKEN_ITEM_ID_MISMATCH,
       },
       data,
     );
@@ -63,7 +49,11 @@ export class TokenItemIdMismatch extends GraaspAppsError {
 export class AppDataNotFound extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
-      { code: 'GAERR006', statusCode: StatusCodes.NOT_FOUND, message: 'App data not found' },
+      {
+        code: 'GAERR004',
+        statusCode: StatusCodes.NOT_FOUND,
+        message: FAILURE_MESSAGES.APP_DATA_NOT_FOUND,
+      },
       data,
     );
   }
@@ -73,9 +63,9 @@ export class AppDataNotAccessible extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
-        code: 'GAERR007',
+        code: 'GAERR005',
         statusCode: StatusCodes.FORBIDDEN,
-        message: 'Member cannot request this app data',
+        message: FAILURE_MESSAGES.APP_DATA_NOT_ACCESSIBLE,
       },
       data,
     );
@@ -86,9 +76,9 @@ export class AppActionNotAccessible extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
-        code: 'GAERR008',
+        code: 'GAERR006',
         statusCode: StatusCodes.FORBIDDEN,
-        message: 'Member cannot request this app action',
+        message: FAILURE_MESSAGES.APP_ACTION_NOT_ACCESSIBLE,
       },
       data,
     );
@@ -98,45 +88,36 @@ export class AppActionNotAccessible extends GraaspAppsError {
 export class AppSettingNotFound extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
-      { code: 'GAERR009', statusCode: StatusCodes.NOT_FOUND, message: 'App setting not found' },
-      data,
-    );
-  }
-}
-
-export class MemberCannotAdminSetting extends GraaspAppsError {
-  constructor(data?: unknown) {
-    super(
       {
-        code: 'GAERR010',
-        statusCode: StatusCodes.BAD_REQUEST,
-        message: 'Member cannot admin setting',
+        code: 'GAERR007',
+        statusCode: StatusCodes.NOT_FOUND,
+        message: FAILURE_MESSAGES.APP_SETTING_NOT_FOUND,
       },
       data,
     );
   }
 }
 
-export class CannotUpdateAppDataFile extends GraaspAppsError {
+export class PreventUpdateAppDataFile extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
-        code: 'GAERR0011',
+        code: 'GAERR008',
         statusCode: StatusCodes.FORBIDDEN,
-        message: 'Cannot update file app data',
+        message: FAILURE_MESSAGES.PREVENT_APP_DATA_FILE_UPDATE,
       },
       data,
     );
   }
 }
 
-export class CannotUpdateAppSettingFile extends GraaspAppsError {
+export class PreventUpdateAppSettingFile extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
-        code: 'GAERR0012',
+        code: 'GAERR009',
         statusCode: StatusCodes.FORBIDDEN,
-        message: 'Cannot update file app setting',
+        message: FAILURE_MESSAGES.PREVENT_APP_SETTING_FILE_UPDATE,
       },
       data,
     );
@@ -147,11 +128,27 @@ export class FileServiceNotDefined extends GraaspAppsError {
   constructor(data?: unknown) {
     super(
       {
-        code: 'GAERR0013',
+        code: 'GAERR010',
         statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-        message: 'File service or type is not defined',
+        message: FAILURE_MESSAGES.FILE_SERVICE_NOT_DEFINED,
       },
       data,
     );
+  }
+}
+
+// TODO: these errors can be removed if we reuse the core tasks
+export class MemberCannotReadItem extends GraaspAppsError {
+  constructor(data?: unknown) {
+    super(
+      { code: 'GAERR011', statusCode: StatusCodes.FORBIDDEN, message: 'Member cannot read item' },
+      data,
+    );
+  }
+}
+
+export class ItemNotFound extends GraaspAppsError {
+  constructor(data?: unknown) {
+    super({ code: 'GAERR012', statusCode: StatusCodes.NOT_FOUND, message: 'Item not found' }, data);
   }
 }

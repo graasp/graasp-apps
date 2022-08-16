@@ -8,7 +8,7 @@ import {
   TaskStatus,
 } from '@graasp/sdk';
 
-import { AppSettingNotFound, CannotUpdateAppSettingFile } from '../../util/graasp-apps-error';
+import { AppSettingNotFound, PreventUpdateAppSettingFile } from '../../util/graasp-apps-error';
 import { AppSettingService } from '../db-service';
 import { AppSetting } from '../interfaces/app-setting';
 import { BaseAppSettingTask } from './base-app-setting-task';
@@ -62,7 +62,7 @@ export class UpdateAppSettingTask extends BaseAppSettingTask<Actor, AppSetting> 
     // shouldn't update file data
     const originalData = await this.appSettingService.getById(this.targetId, handler);
     if (originalData?.data?.type === this.fileItemType) {
-      throw new CannotUpdateAppSettingFile(originalData);
+      throw new PreventUpdateAppSettingFile(originalData);
     }
 
     // discard everything except AppSetting's `data`
