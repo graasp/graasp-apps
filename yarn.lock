@@ -483,15 +483,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.12.0":
-  version: 7.17.8
-  resolution: "@babel/runtime@npm:7.17.8"
-  dependencies:
-    regenerator-runtime: ^0.13.4
-  checksum: 68d195c1630bb91ac20e86635d292a17ebab7f361cfe79406b3f5a6cc2e59fa283ae5006568899abf869312c2b35b744bd407aea8ffdb650f1a68d07785d47e9
-  languageName: node
-  linkType: hard
-
 "@babel/runtime@npm:^7.17.2":
   version: 7.18.9
   resolution: "@babel/runtime@npm:7.18.9"
@@ -955,19 +946,10 @@ __metadata:
 
 "@graasp/translations@github:graasp/graasp-translations":
   version: 0.1.0
-  resolution: "@graasp/translations@https://github.com/graasp/graasp-translations.git#commit=315ee917719c683e24149811eab2d562c98b40ce"
-  dependencies:
-    i18next: 21.6.11
-  checksum: 295bf84b1bfbdecff0de476b94da8a0ff5e480ad9c5ba542ee198558e53817a6c1e43eb0af8dc8d2a1c72c14b7f3e8748415ed75d37cce3b16b50950c42e76f1
-  languageName: node
-  linkType: hard
-
-"@graasp/translations@github:graasp/graasp-translations#30-item-zip":
-  version: 0.1.0
-  resolution: "@graasp/translations@https://github.com/graasp/graasp-translations.git#commit=90b54a490680de409e0c4e52e2aab723be91c0b7"
+  resolution: "@graasp/translations@https://github.com/graasp/graasp-translations.git#commit=be598da34ba1dda3a95c2dea737dacfad78b50fd"
   dependencies:
     i18next: 21.8.1
-  checksum: d553c26f43397d090a33a37646c43e7cda2cce0e3a5f023cff0e8eb6fff89d83b23dc5617ebb7d343447c02976ad5ddc04ea1928624f066bc381cfef7fc79a3d
+  checksum: bd2d9012e7abf7c61e406b5540e5719967e3007729d0361ade3cfd9e34c3da6a2545bd763eb259a182ecd99db02932d1e61fe1c40688e9d5b557fc6beec84d86
   languageName: node
   linkType: hard
 
@@ -3605,7 +3587,7 @@ __metadata:
     "@fastify/cors": 7.0.0
     "@fastify/jwt": 5.0.1
     "@graasp/sdk": "github:graasp/graasp-sdk"
-    "@graasp/translations": "github:graasp/graasp-translations#30-item-zip"
+    "@graasp/translations": "github:graasp/graasp-translations"
     "@trivago/prettier-plugin-sort-imports": 3.2.0
     "@types/eslint": 8.4.2
     "@types/jest": 27.5.1
@@ -3873,15 +3855,6 @@ __metadata:
     uuid: ^8.3.2
     uuid-parse: ^1.1.0
   checksum: 311b286c35d2d9b6807e13c47afe151d90586c6a57076b5a69125f1945a953b6ca3afa9bcffa57f19f1afd989181b8ed33cedd1ce25dec1587198d78c1d91ed2
-  languageName: node
-  linkType: hard
-
-"i18next@npm:21.6.11":
-  version: 21.6.11
-  resolution: "i18next@npm:21.6.11"
-  dependencies:
-    "@babel/runtime": ^7.12.0
-  checksum: 42716a7519d6066a8c9400639ab80fba0b568ae02205b1155ec9c4e627704bb2181dd182ff5eb0c91f6c67c8038ddd0754214e1932de5699d488c21ffd617c5e
   languageName: node
   linkType: hard
 
