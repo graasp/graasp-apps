@@ -7,7 +7,7 @@ import {
 import { AuthTokenSubject } from '@graasp/sdk';
 
 import { GRAASP_ACTOR, buildAppSetting } from '../../../test/fixtures';
-import { CannotUpdateAppSettingFile } from '../../util/graasp-apps-error';
+import { PreventUpdateAppSettingFile } from '../../util/graasp-apps-error';
 import { buildFileItemData } from '../../util/utils';
 import { AppSettingService } from '../db-service';
 import { UpdateAppSettingTask } from './update-app-setting-task';
@@ -78,7 +78,7 @@ describe('Update App Setting Task', () => {
     try {
       await updateTask.run(handler);
     } catch (e) {
-      expect(e).toBeInstanceOf(CannotUpdateAppSettingFile);
+      expect(e).toBeInstanceOf(PreventUpdateAppSettingFile);
       expect(appSettingService.update).not.toHaveBeenCalled();
     }
   });

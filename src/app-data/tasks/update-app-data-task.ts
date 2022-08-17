@@ -11,9 +11,9 @@ import {
 
 import {
   AppDataNotFound,
-  CannotUpdateAppDataFile,
   ItemNotFound,
   MemberCannotReadItem,
+  PreventUpdateAppDataFile,
 } from '../../util/graasp-apps-error';
 import { AppDataService } from '../db-service';
 import { AppData } from '../interfaces/app-data';
@@ -80,7 +80,7 @@ export class UpdateAppDataTask extends BaseAppDataTask<Actor, AppData> {
     // shouldn't update file data
     const originalData = await this.appDataService.getById(this.targetId, handler);
     if (originalData?.data?.type === this.fileItemType) {
-      throw new CannotUpdateAppDataFile(originalData);
+      throw new PreventUpdateAppDataFile(originalData);
     }
 
     // update app data

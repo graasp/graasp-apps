@@ -9,7 +9,7 @@ import {
 } from '@graasp/sdk';
 
 import { GRAASP_ACTOR, buildAppData } from '../../../test/fixtures';
-import { CannotUpdateAppDataFile } from '../../util/graasp-apps-error';
+import { PreventUpdateAppDataFile } from '../../util/graasp-apps-error';
 import { buildFileItemData } from '../../util/utils';
 import { AppDataService } from '../db-service';
 import { UpdateAppDataTask } from './update-app-data-task';
@@ -89,7 +89,7 @@ describe('Update App Setting Task', () => {
     try {
       await updateTask.run(handler);
     } catch (e) {
-      expect(e).toBeInstanceOf(CannotUpdateAppDataFile);
+      expect(e).toBeInstanceOf(PreventUpdateAppDataFile);
       expect(appDataService.update).not.toHaveBeenCalled();
     }
   });

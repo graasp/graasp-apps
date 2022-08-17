@@ -9,7 +9,7 @@ import {
   TaskStatus,
 } from '@graasp/sdk';
 
-import { InvalidApplicationOrigin, NotAnAppItem } from '../../util/graasp-apps-error';
+import { InvalidApplicationOrigin, NotAppItem } from '../../util/graasp-apps-error';
 import { AppDataService } from '../db-service';
 import { BaseAppDataTask } from './base-app-data-task';
 
@@ -47,7 +47,7 @@ export class GenerateApiAccessTokenSujectTask extends BaseAppDataTask<Actor, Aut
     this.targetId = item.id;
 
     // item must be an app item
-    if (item.type !== ItemType.APP) throw new NotAnAppItem(this.targetId);
+    if (item.type !== ItemType.APP) throw new NotAppItem(this.targetId);
 
     // check if app origin is valid (app belongs to a publisher that can use the given origin)
     const valid = await this.appDataService.validAppOrigin(appId, appOrigin, handler);
