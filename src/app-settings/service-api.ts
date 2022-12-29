@@ -140,7 +140,10 @@ const plugin: FastifyPluginAsync<PluginOptions> = async (fastify, options) => {
                 mimetype: originalFileExtra.mimetype,
               };
               const fileCopyTask = fTM.createCopyFileTask(actor, fileCopyData);
-              await runner.runSingle(fileCopyTask);
+              // DON'T use task runner for copy file task: this would generate a new transaction
+              // which is useless since the file copy task should not touch the DB at all
+              // TODO: replace when the file plugin has been refactored into a proper file service
+              await fileCopyTask.run(handler, log);
 
               // update new setting with file data
               await aSS.update(newSetting.id, { data: newFileData }, handler);
