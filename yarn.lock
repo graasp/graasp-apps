@@ -953,6 +953,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@graasp/translations@npm:1.2.1":
+  version: 1.2.1
+  resolution: "@graasp/translations@npm:1.2.1"
+  dependencies:
+    i18next: 21.8.1
+  checksum: 24e17531b1023b41773bd97dad93031ee7da914ef712b83cfa1ee20da3a16aa7c4fb5784213398ecc4872b3ef9e79b6696f61876ac6c572cb182e6ea564edfef
+  languageName: node
+  linkType: hard
+
 "@humanwhocodes/config-array@npm:^0.9.2":
   version: 0.9.5
   resolution: "@humanwhocodes/config-array@npm:0.9.5"
@@ -3636,12 +3645,12 @@ __metadata:
 
 "graasp-plugin-file-item@github:graasp/graasp-plugin-file-item":
   version: 0.1.0
-  resolution: "graasp-plugin-file-item@https://github.com/graasp/graasp-plugin-file-item.git#commit=f311ad8ad3b8e2ad85e1e402fad669d0d5bd06a6"
+  resolution: "graasp-plugin-file-item@https://github.com/graasp/graasp-plugin-file-item.git#commit=35f25c5b90438f659f6b6827ca285f4e480d214b"
   dependencies:
     graasp-file-upload-limiter: "github:graasp/graasp-file-upload-limiter"
     graasp-plugin-file: "github:graasp/graasp-plugin-file"
     graasp-plugin-public: "github:graasp/graasp-plugin-public"
-  checksum: 40ecc01d3aee658f2bc1647d69170b6515efbf9efab961a1cb09d7ae0111f5580784d58d934400e3f3ad76601b93f3a1ec6842d8287034ee7a577e8869e30464
+  checksum: aec4d81f57f2e2b54426fda266f524856275a689cb6cc7a7fd328fe59a64766d07fa29ac7d15ddc5a77c80d7432b32f415e6657b63a3ebf4d72907c0c7f411f5
   languageName: node
   linkType: hard
 
@@ -3673,15 +3682,15 @@ __metadata:
 
 "graasp-plugin-thumbnails@github:graasp/graasp-plugin-thumbnails":
   version: 0.1.0
-  resolution: "graasp-plugin-thumbnails@https://github.com/graasp/graasp-plugin-thumbnails.git#commit=0a01cc2b0f3c3c43fd8613024f00b338e8036c07"
+  resolution: "graasp-plugin-thumbnails@https://github.com/graasp/graasp-plugin-thumbnails.git#commit=23acaeab444245be594c89934400888fd259b859"
   dependencies:
-    "@graasp/translations": "github:graasp/graasp-translations"
+    "@graasp/translations": 1.2.1
     fastify: ^3.29.1
     graasp-plugin-file: "github:graasp/graasp-plugin-file"
     graasp-plugin-file-item: "github:graasp/graasp-plugin-file-item"
     graasp-plugin-public: "github:graasp/graasp-plugin-public"
     sharp: 0.30.7
-  checksum: 69a994f0029117925dff1723117445d6261475a57ad1f663760dddd04893a400ccd719a5ef7028d94fe16f3357eaf05125bc06ed2d7a3cda4d82c2039f32bba0
+  checksum: 64beac73f6a41352fe065cb4256375c201e25fb1e9178646fdf271caace8b6999bdbb168912b492504d10ca2c2082caa3caf0765f7e603e8e5af7d7e2e0b8344
   languageName: node
   linkType: hard
 
